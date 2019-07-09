@@ -19,10 +19,11 @@
 % 	detect_saccades_custom_settings = '';
 % end
 
+warning off
 
 %%
-list_successful_only = 2;
-plot_trials = 0 ;
+list_successful_only = 1; % 0 - list all, 1 - only successful, 2 - only not successful
+plot_trials = 0;
 detect_saccades = 0;
 detect_saccades_custom_settings = '';
 runpath = ('Y:\Personal\Peter\Data\IVSK\20190620');
@@ -63,7 +64,7 @@ RT= (NaN(length(trial),2));
     for k = 1:length(trial)
 
 
-        if (list_successful_only && trial(k).success) || ~list_successful_only || (list_successful_only==2 && ~trial(k).success) % entweder alle erfolgreichen oder alle trials
+        if (list_successful_only == 1 && trial(k).success) || ~list_successful_only || (list_successful_only==2 && ~trial(k).success) % entweder alle erfolgreichen oder alle trials
 
             % align time axis to trial start
             trial(k).states_onset = trial(k).states_onset - trial(k).tSample_from_time_start(1); % setze die states_onsets auf "Null"(nicht wirklich, da irgendwie nicht wirklich 0)
@@ -74,8 +75,7 @@ RT= (NaN(length(trial),2));
             if plot_trials,
                 figure(hf);
                 subplot(3,1,1); hold on;
-                title(sprintf('Eye Position, Trial %d',...
-                    k));
+                title(sprintf('Eye Position, Trial %d',k));
 
                 plot(trial(k).tSample_from_time_start,trial(k).state,'k');
                 plot(trial(k).tSample_from_time_start,trial(k).x_eye,'g');
@@ -126,7 +126,8 @@ RT= (NaN(length(trial),2));
                 end
                 clf(hf);
             end
-        end
+            
+        end % if successful...  
 
 
         if trial(k).completed
@@ -335,10 +336,21 @@ Err.cause(strncmpi('HND',cellstr(Err.abort_code),3)) = {'hand_cause'};
 
 %% plots 
 if 1
+
+figure;
+g1 = gramm('x',categorical(RT.success), 'color', RT.trial_type, 'subset', RT.trial_type ~= 'choi_both');
+g1.stat_bin('normalization','probability');
+g1.facet_wrap(RT.effector)
+g1.draw;
+    
+    
+    
+%%    
+    
 figure; %2 reaction time
 g = gramm('x', RT.value, 'color', RT.choice,'subset',logical(RT.success));
-g.stat_density();
-g.facet_wrap(RT.effector);
+g.stat_bin();
+g.facet_grid(RT.effector,RT.target_selected);
 g.set_title({'reaction time, successfull only, N = ' (sum(RT.success))});
 g.draw;
 
@@ -353,13 +365,14 @@ g6.draw;
 
 %%
 
-figure;
+figure; % same like g6, but with RT table
 g2 = gramm('x', RT.abort_code, 'color', RT.trial_type, 'subset', RT.abort_code ~= 'NO ABORT');
 g2.stat_bin('normalization','count');
 g2.facet_grid(RT.cause_abort,RT.effector);
 g2.set_text_options('base_size',8);
 g2.set_title({'Which errors occur for which effector?'});
 g2.draw;
+
 
 
 
