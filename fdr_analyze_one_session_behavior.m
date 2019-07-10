@@ -330,17 +330,6 @@ Err.cause = cell(height(Err),1);
 Err.cause(strncmpi('EYE',cellstr(Err.abort_code),3)) = {'eye_cause'};
 Err.cause(strncmpi('HND',cellstr(Err.abort_code),3)) = {'hand_cause'};
 
-%% Errors clustered by behavior
-
-Err_b= rowfun(@numel,RT,'GroupingVariables',{'abort_code','effector','target_selected','choice'},'InputVariables',{'value'});
-Err_b.prop = Err.GroupCount./(sum(Err.GroupCount)) * 100 ;
-Err.choi = zeros(height(Err),1);
-Err.choi(Err.trial_type == 'choi_both') = +1;
-Err.choi = categorical(Err.choi, [0 1], {'instr' 'choi'});
-
-Err.cause = cell(height(Err),1);
-Err.cause(strncmpi('EYE',cellstr(Err.abort_code),3)) = {'eye_cause'};
-Err.cause(strncmpi('HND',cellstr(Err.abort_code),3)) = {'hand_cause'};
 
 
 %% plots 
