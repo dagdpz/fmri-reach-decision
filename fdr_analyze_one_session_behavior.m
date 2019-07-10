@@ -318,7 +318,7 @@ RT.wrong_target_selected(...
 RT.wrong_target_selected = logical(RT.wrong_target_selected);
 
 
-%% Errors by specific error
+%% Errors clustered by intruction
 
 Err= rowfun(@numel,RT,'GroupingVariables',{'abort_code','effector','trial_type'},'InputVariables',{'value'});
 Err.prop = Err.GroupCount./(sum(Err.GroupCount)) * 100 ;
@@ -330,51 +330,70 @@ Err.cause = cell(height(Err),1);
 Err.cause(strncmpi('EYE',cellstr(Err.abort_code),3)) = {'eye_cause'};
 Err.cause(strncmpi('HND',cellstr(Err.abort_code),3)) = {'hand_cause'};
 
+%% Errors clustered by behavior
 
+Err_b= rowfun(@numel,RT,'GroupingVariables',{'abort_code','effector','target_selected','choice'},'InputVariables',{'value'});
+Err_b.prop = Err.GroupCount./(sum(Err.GroupCount)) * 100 ;
+Err.choi = zeros(height(Err),1);
+Err.choi(Err.trial_type == 'choi_both') = +1;
+Err.choi = categorical(Err.choi, [0 1], {'instr' 'choi'});
 
+Err.cause = cell(height(Err),1);
+Err.cause(strncmpi('EYE',cellstr(Err.abort_code),3)) = {'eye_cause'};
+Err.cause(strncmpi('HND',cellstr(Err.abort_code),3)) = {'hand_cause'};
 
 
 %% plots 
 if 1
+%%
+figure; % Succes Rate
+g5(1,1) = gramm('x',categorical(RT.success), 'color', RT.choice,'column',RT.effector);
+g5(1,1).stat_bin('normalization','probability');
+%g5(1,1).facet_wrap(RT.effector);
+g5(1,1).set_names('x','','y','proportion in %','Color','','row','','column','');
 
-figure;
-g1 = gramm('x',categorical(RT.success), 'color', RT.trial_type, 'subset', RT.trial_type ~= 'choi_both');
-g1.stat_bin('normalization','probability');
-g1.facet_wrap(RT.effector)
-g1.draw;
-    
-    
-    
-%%    
-    
-figure; %2 reaction time
-g = gramm('x', RT.value, 'color', RT.choice,'subset',logical(RT.success));
-g.stat_bin();
-g.facet_grid(RT.effector,RT.target_selected);
+g5(2,1) = gramm('x',categorical(RT.success),'color', RT.trial_type,'column',RT.effector,'subset', RT.trial_type ~= 'choi_both');
+g5(2,1).stat_bin('normalization','probability');
+g5(2,1).set_color_options('map','brewer2');
+g5(2,1).set_names('x','','y','proportion in %','Color','','row','','column','');
+
+g5.set_title({'success rate clustered by instruction'});
+g5.draw;
+
+% g5(2,1) = gramm('x', Err.trial_type,'color', Err.trial_type,'column',Err.effector,'subset', Err.abort_code ~= {'NO ABORT'} & Err.trial_type ~= 'choi_both');
+% g5(2,1).stat_bin('geom','bar');
+% g5(2,1).set_color_options('map','brewer2');
+% g5(2,1).set_names('x','','y','proportion in %','Color','','row','','column','');
+% g5(2,1).set_title({'instructed left vs. right'});
+% 
+% g5.set_title({'Proportion of Errors clustered by instruction'});
+% g5.draw;
+
+%%
+figure; %2 reaction times 
+g(1,1) = gramm('x', RT.value, 'color', RT.choice,'linestyle', RT.target_selected,'column',RT.effector,'subset',logical(RT.success));
+g(1,1).stat_density();
+g(1,1).set_names('x','RT / s','Color','','row','','column','','linestyle','target selected');
+
+
+g(2,1) = gramm('x', RT.target_selected, 'y', RT.value,'column',RT.effector,'color', RT.choice,'subset',logical(RT.success));
+g(2,1).geom_jitter('dodge', 0.8);
+g(2,1).set_names('x','target selected','y','RT/s','Color','','row','','column','');
+
 g.set_title({'reaction time, successfull only, N = ' (sum(RT.success))});
 g.draw;
 
-figure; %7 What Errors
+
+
+%%
+figure; %7 Which Errors
 g6 = gramm('x', Err.abort_code,'y', Err.prop,'color',Err.trial_type, 'subset', Err.abort_code ~= 'NO ABORT');
 g6.stat_summary('geom','bar');
 g6.facet_grid(Err.cause,Err.effector);
 g6.set_text_options('base_size',8);
-g6.set_names('x','','y','proportion in %','Color','','row','','column','');
-g6.set_title({'Which errors occur for which effector?'});
+g6.set_names('x','','y','proportion in %','Color','instruction','row','cause of error','column','');
+g6.set_title({'Which errors occur for which effector? Clustered by instruction'});
 g6.draw;
-
-%%
-
-figure; % same like g6, but with RT table
-g2 = gramm('x', RT.abort_code, 'color', RT.trial_type, 'subset', RT.abort_code ~= 'NO ABORT');
-g2.stat_bin('normalization','count');
-g2.facet_grid(RT.cause_abort,RT.effector);
-g2.set_text_options('base_size',8);
-g2.set_title({'Which errors occur for which effector?'});
-g2.draw;
-
-
-
 
 
 %%
@@ -386,7 +405,7 @@ g3(1,1).facet_wrap(RT.effector,'ncols',2);
 g3(1,1).set_names('x','','y','proportion in %','Color','','row','','column','');
 g3(1,1).set_title({'relative amount of left/right answers in choice trials'});
 
-g3(1,2) = gramm('x',RT.target_selected, 'color', RT.choice, 'subset', RT.target_selected ~= 'none' & RT.success);
+g3(1,2) = gramm('x',categorical(RT.target_selected), 'color', RT.choice, 'subset', RT.target_selected ~= 'none' & RT.success);
 g3(1,2).stat_bin('geom','bar','normalization','count');
 g3(1,2).facet_wrap(RT.effector,'ncols',2);
 g3(1,2).set_names('x','','y','count','Color','','row','','column','');
@@ -400,34 +419,7 @@ g3(2,2).set_title({'How many trials in choice vs. instructed?'});
 g3.set_title({'Choice Bias for successful trials'})
 g3.draw;
 
-%%
-figure; %5
-g4 = gramm('x', RT.choice, 'color', RT.correct_target,'subset',RT.correct_target ~= 'unclear');
-g4.stat_bin();
-g4.facet_wrap(RT.effector,'ncols',1);
-g4.draw;
-%%
-
-figure; %6 Amount of Errors 
-g5(1,1) = gramm('x', Err.choi, 'color', Err.choi, 'subset', Err.abort_code ~= {'NO ABORT'});
-g5(1,1).stat_bin('geom','bar');
-g5(1,1).facet_wrap(Err.effector);
-g5(1,1).set_names('x','','y','absolute amount of erros','Color','','row','','column','');
-g5(1,1).set_title({'choice vs. instructed'});
-
-g5(2,1) = gramm('x', Err.trial_type,'color', Err.trial_type, 'subset', Err.abort_code ~= {'NO ABORT'} & Err.trial_type ~= 'choi_both');
-g5(2,1).stat_bin('geom','bar');
-g5(2,1).facet_wrap(Err.effector);
-g5(2,1).set_color_options('map','brewer2');
-g5(2,1).set_names('x','','y','proportion in %','Color','','row','','column','');
-g5(2,1).set_title({'instructed left vs. right'});
-
-g5.set_title({'Proportion of Errors'});
-g5.draw;
-
-%%
 
 
 end
 
-%[table,chi2,p,labels] = crosstab(RT.choice,RT.success,RT.effector)
