@@ -1,32 +1,35 @@
-% function fdr_analyze_one_session_behavior(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings)
-% % pass in runpath the location where the matfiles are
-% 
-% analyze_reach_decision('Y:\Personal\Peter\Data\IVSK\20190618')
-% 
-% if nargin < 2,
-% 	list_successful_only = 0;
-% end
-% 
-% if nargin < 3,
-% 	plot_trials = 0;
-% end
-% 
-% if nargin < 4,
-% 	detect_saccades = 0;
-% end
-% 
-% if nargin < 5,
-% 	detect_saccades_custom_settings = '';
-% end
+function fdr_analyze_one_session_behavior(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings)
+% pass in runpath the location where the matfiles are
+
+if nargin < 2,
+	list_successful_only = 0;
+end
+
+if nargin < 3,
+	plot_trials = 0;
+end
+
+if nargin < 4,
+	detect_saccades = 0;
+end
+
+if nargin < 5,
+	detect_saccades_custom_settings = '';
+end
+
+% TODO:
+% figure size
+% title with subj/session
+% export to pdf
 
 warning off
 
 %%
-list_successful_only = 1; % 0 - list all, 1 - only successful, 2 - only not successful
-plot_trials = 0;
-detect_saccades = 0;
-detect_saccades_custom_settings = '';
-runpath = ('Y:\Personal\Peter\Data\IVSK\20190620');
+% list_successful_only = 1; % 0 - list all, 1 - only successful, 2 - only not successful
+% plot_trials = 0;
+% detect_saccades = 0;
+% detect_saccades_custom_settings = '';
+% runpath = ('Y:\Personal\Peter\Data\IVSK\20190620');
 
 %% concentate matfiles
 % with additional info of run, files, and location
