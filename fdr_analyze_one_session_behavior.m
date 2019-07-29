@@ -22,7 +22,7 @@ end
 % title with subj/session
 % export to pdf
 
-warning off
+%warning off
 
 %%
 % list_successful_only = 1; % 0 - list all, 1 - only successful, 2 - only not successful
@@ -191,26 +191,26 @@ valueset  = {
     };
 
 names = {
-    'EYE_FIX_ACQ_STATE'
-    'HND_FIX_ACQ_STATE'
+    'EYE_FIX_ACQ'
+    'HND_FIX_ACQ'
     
-    'EYE_FIX_HOLD_STATE'
-    'HND_FIX_HOLD_STATE'
+    'EYE_FIX_HOLD'
+    'HND_FIX_HOLD'
     
     'EYE_CUE_ON'
     'HND_CUE_ON'
     
-    'EYE_TAR_ACQ_STATE' % wenn dya.time_spent_in_state < 0.2
-    'HND_TAR_ACQ_STATE' % ???
+    'EYE_TAR_ACQ' % wenn dya.time_spent_in_state < 0.2
+    'HND_TAR_ACQ' % ???
     
-    'EYE_MEM_PER_STATE'
-    'HND_MEM_PER_STATE'
+    'EYE_MEM_PER'
+    'HND_MEM_PER'
     
-    'EYE_TAR_ACQ_INV_STATE'
-    'HND_TAR_ACQ_INV_STATE'
+    'EYE_TAR_ACQ_INV'
+    'HND_TAR_ACQ_INV'
     
-    'EYE_TAR_HOLD_INV_STATE'
-    'HND_TAR_HOLD_INV_STATE'
+    'EYE_TAR_HOLD_INV'
+    'HND_TAR_HOLD_INV'
     
     'WRONG_TARGET_SELECTED'
     'NO ABORT'
@@ -351,7 +351,7 @@ g5(2,1).set_names('x','','y','proportion in %','Color','','row','','column','');
 
 g5.set_title({'success rate clustered by instruction'});
 g5.draw;
-
+%g5.export('file_name',['SuccessRate_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
 % g5(2,1) = gramm('x', Err.trial_type,'color', Err.trial_type,'column',Err.effector,'subset', Err.abort_code ~= {'NO ABORT'} & Err.trial_type ~= 'choi_both');
 % g5(2,1).stat_bin('geom','bar');
 % g5(2,1).set_color_options('map','brewer2');
@@ -374,7 +374,7 @@ g(2,1).set_names('x','target selected','y','RT/s','Color','','row','','column','
 
 g.set_title({'reaction time, successfull only, N = ' (sum(RT.success))});
 g.draw;
-
+%g.export('file_name',['RTs_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
 
 
 %%
@@ -385,8 +385,9 @@ g6.facet_grid(Err.cause,Err.effector);
 g6.set_text_options('base_size',8);
 g6.set_names('x','','y','proportion in %','Color','instruction','row','cause of error','column','');
 g6.set_title({'Which errors occur for which effector? Clustered by instruction'});
-g6.draw;
 
+g6.draw;
+%g6.export('file_name',['Errors_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
 
 %%
 
@@ -409,8 +410,9 @@ g3(2,2).set_names('x','','y','count','Color','','row','','column','');
 g3(2,2).set_title({'How many trials in choice vs. instructed?'});
 
 g3.set_title({'Choice Bias for successful trials'})
-g3.draw;
 
+g3.draw;
+%g3.export('file_name',['ChoiceBias_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59),'width',56,'height',33,'units','centimeters');
 
 
 end
