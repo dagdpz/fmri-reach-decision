@@ -2,7 +2,7 @@ function frd_analyze_one_session_behavior(runpath, list_successful_only, plot_tr
 % pass in runpath the location where the matfiles are
 
 if nargin < 2,
-    list_successful_only = 0;
+    list_successful_only = 0; 
 end
 
 if nargin < 3,
@@ -259,6 +259,7 @@ RT.wrong_target_selected(...
 RT.wrong_target_selected = logical(RT.wrong_target_selected);
 
 %%
+
 if plot_trials,
     hf = figure('Name','Plot trial','CurrentChar',' ');
 end
@@ -266,7 +267,7 @@ end
 for k = 1:length(trial)
     
     if (list_successful_only == 1 && trial(k).success) || ~list_successful_only || (list_successful_only==2 && ~trial(k).success) % entweder alle erfolgreichen oder alle trials
-        
+
         % align time axis to trial start
         trial(k).states_onset = trial(k).states_onset - trial(k).tSample_from_time_start(1); % setze die states_onsets auf "Null"(nicht wirklich, da irgendwie nicht wirklich 0)
         trial(k).tSample_from_time_start = trial(k).tSample_from_time_start - trial(k).tSample_from_time_start(1); % setze den Beginn des Trials auf 0
@@ -317,7 +318,7 @@ for k = 1:length(trial)
             end
             clf(hf);
         end
-        
+    
     end % if successful..
     
 end % for each trial
