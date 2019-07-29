@@ -91,7 +91,7 @@ end % for each trial
 RT = array2table(RT);
 RT.Properties.VariableNames  = {'value' 'choice'};
 %RT.choice = categorical(RT.choice);
-RT.choice = categorical(RT.choice, [0 1], {'instr' 'choi'});
+RT.choice = categorical(RT.choice, [0 1], {'instructed' 'choice'});
 RT.completed = logical([trial.completed]');
 RT.success = logical([trial.success]');
 RT.effector = [trial.effector]';
