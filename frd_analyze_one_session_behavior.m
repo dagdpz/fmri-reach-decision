@@ -34,7 +34,7 @@ end
 % do_summary = 1;
 % detect_saccades = 0;
 % detect_saccades_custom_settings = '';
-% runpath = ('Y:\Personal\Peter\Data\IVSK\20190620');
+% runpath = ('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\LEHU\all_runs');
 
 %% concentate matfiles
 % with additional info of run, files, and location
@@ -101,6 +101,7 @@ RT.run = categorical([trial.run]');
 RT.cause_abort = cell(height(RT),1);
 RT.cause_abort(strncmpi('ABORT_EYE',{trial.abort_code}',9)) = {'eye_cause'};
 RT.cause_abort(strncmpi('ABORT_HND',{trial.abort_code}',9)) = {'hand_cause'};
+RT.cause_abort = categorical(RT.cause_abort);
 
 valueset  = {
     'ABORT_EYE_FIX_ACQ_STATE'
@@ -258,6 +259,8 @@ RT.wrong_target_selected(...
     ) = 1;
 RT.wrong_target_selected = logical(RT.wrong_target_selected);
 
+RT.aborted_state_duration = [trial.aborted_state_duration]';
+
 %%
 
 if plot_trials,
@@ -336,6 +339,10 @@ Err.choi = categorical(Err.choi, [0 1], {'instr' 'choi'});
 Err.cause = cell(height(Err),1);
 Err.cause(strncmpi('EYE',cellstr(Err.abort_code),3)) = {'eye_cause'};
 Err.cause(strncmpi('HND',cellstr(Err.abort_code),3)) = {'hand_cause'};
+
+%%
+
+
 
 
 
@@ -418,6 +425,21 @@ if 1
     g3.draw;
     %g3.export('file_name',['ChoiceBias_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59),'width',56,'height',33,'units','centimeters');
     
+    figure; % 5 aborted_state_duration
+    g2 = gramm('x',RT.aborted_state_duration,'row',RT.abort_code,'subset',or(RT.abort_code == 'HND FIX HOLD', RT.abort_code == 'EYE FIX HOLD'));
+    g2.stat_bin('nbins',200);
+    g2.axe_property('XLim',[0 2]);
+    g2.set_names('x','time in s','y','count','Color','','row','');
+    g2.set_title({'Fixation Hold Errors for first 2 seconds'})
+    g2.draw;
     
+    figure;    
+    g4 = gramm('x',RT.aborted_state_duration,'color',RT.abort_code,'subset',or(RT.abort_code == 'HND FIX HOLD', RT.abort_code == 'EYE FIX HOLD'));
+    g4.stat_bin('nbins',200);
+    g4.axe_property('XLim',[0 2]);
+    g4.facet_wrap(double(RT.run));
+    g4.set_names('x','time in s','y','count','Color','','row','');
+    g4.set_title({'Fixation Hold Errors for first 2 seconds by run'})
+    g4.draw;
 end
 
