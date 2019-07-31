@@ -35,7 +35,7 @@ end
 % detect_saccades = 0;
 % detect_saccades_custom_settings = '';
 % runpath = ('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\LEHU\all_runs');
-
+% % load('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\LEHU\all_runs\LEHU_2019-07-24_02.mat');
 %% concentate matfiles
 % with additional info of run, files, and location
 
@@ -101,7 +101,6 @@ RT.run = categorical([trial.run]');
 RT.cause_abort = cell(height(RT),1);
 RT.cause_abort(strncmpi('ABORT_EYE',{trial.abort_code}',9)) = {'eye_cause'};
 RT.cause_abort(strncmpi('ABORT_HND',{trial.abort_code}',9)) = {'hand_cause'};
-RT.cause_abort = categorical(RT.cause_abort);
 
 valueset  = {
     'ABORT_EYE_FIX_ACQ_STATE'
@@ -272,7 +271,7 @@ for k = 1:length(trial)
     if (list_successful_only == 1 && trial(k).success) || ~list_successful_only || (list_successful_only==2 && ~trial(k).success) % entweder alle erfolgreichen oder alle trials
 
         % align time axis to trial start
-        trial(k).states_onset = trial(k).states_onset - trial(k).tSample_from_time_start(1); % setze die states_onsets auf "Null"(nicht wirklich, da irgendwie nicht wirklich 0)
+        trial(k).states_onset            = trial(k).states_onset            - trial(k).tSample_from_time_start(1); % setze die states_onsets auf "Null"(nicht wirklich, da irgendwie nicht wirklich 0)
         trial(k).tSample_from_time_start = trial(k).tSample_from_time_start - trial(k).tSample_from_time_start(1); % setze den Beginn des Trials auf 0
         
         % WARUM FÄNGT DER STATE IMMER VOR 0 an?
@@ -280,15 +279,53 @@ for k = 1:length(trial)
         if plot_trials,
             figure(hf);
             subplot(2,1,1); hold on;
-            title([sprintf('Eye/Hand Position, Trial %d',k),cellstr(RT.effector(k)),cellstr(RT.choice(k)),cellstr(RT.target_selected(k)),cellstr(RT.abort_code(k))]);
+            title([sprintf('Eye/Hand Position, Trial %d',k),...
+                cellstr(RT.effector(k)),...
+                cellstr(RT.choice(k)),...
+                cellstr(RT.target_selected(k)),...
+                cellstr(RT.abort_code(k)),...
+                {RT.aborted_state_duration(k)}]);
             
-            plot(trial(k).tSample_from_time_start,trial(k).state,'k');
+
+            % plot eye and hand trajectories
             plot(trial(k).tSample_from_time_start,trial(k).x_eye,'g');
             plot(trial(k).tSample_from_time_start,trial(k).y_eye,'m');
             plot(trial(k).tSample_from_time_start,trial(k).x_hnd,'g','Color',[0.2314    0.4431    0.3373],'LineWidth',2);
             plot(trial(k).tSample_from_time_start,trial(k).y_hnd,'m','Color',[0.5137    0.3804    0.4824],'LineWidth',2);
-            ig_add_multiple_vertical_lines(trial(k).states_onset,'Color','k');
-            ylabel('Eye position, states');
+            
+            xlim = get(gca,'Xlim');
+            
+            % horizontal lines for fixation radius eye + hnd
+            line([0 xlim(2)],[trial(k).task.eye.fix.radius    trial(k).task.eye.fix.radius],   'Color','r','LineStyle',':');
+            line([0 xlim(2)],[trial(k).task.eye.fix.radius*-1 trial(k).task.eye.fix.radius*-1],'Color','r','LineStyle',':');
+            line([0 xlim(2)],[trial(k).task.hnd.fix.radius    trial(k).task.hnd.fix.radius],   'Color','r','LineStyle',':');
+            line([0 xlim(2)],[trial(k).task.hnd.fix.radius*-1 trial(k).task.hnd.fix.radius*-1],'Color','r','LineStyle',':');
+ 
+            if trial(k).effector == 3
+                    lower_1 = trial(k).task.eye.tar(1).x - trial(k).task.eye.tar(1).radius;
+                    upper_1 = trial(k).task.eye.tar(1).x + trial(k).task.eye.tar(1).radius;
+                    lower_2 = trial(k).task.eye.tar(2).x - trial(k).task.eye.tar(2).radius;
+                    upper_2 = trial(k).task.eye.tar(2).x + trial(k).task.eye.tar(2).radius;                    
+
+            elseif trial(k).effector == 4
+                    lower_1 = trial(k).task.hnd.tar(1).x - trial(k).task.hnd.tar(1).radius;
+                    upper_1 = trial(k).task.hnd.tar(1).x + trial(k).task.hnd.tar(1).radius;                
+                    lower_2 = trial(k).task.hnd.tar(2).x - trial(k).task.hnd.tar(2).radius;
+                    upper_2 = trial(k).task.hnd.tar(2).x + trial(k).task.hnd.tar(2).radius;                    
+            end
+            
+            % horizontal lines for targets for respective effector 
+            line([0 xlim(2)], [lower_1 lower_1], 'Color','k','LineStyle',':');
+            line([0 xlim(2)], [upper_1 upper_1], 'Color','k','LineStyle',':');
+            line([0 xlim(2)], [lower_2 lower_2], 'Color','k','LineStyle',':');
+            line([0 xlim(2)], [upper_2 upper_2], 'Color','k','LineStyle',':'); 
+            
+            % vertical lines for state_onsets
+            plot(trial(k).tSample_from_time_start,trial(k).state,'k');
+            ylim([-14 14])
+            ig_add_multiple_vertical_lines(trial(k).states_onset,'Color','k');            
+            
+            ylabel('Eye/Hand position, states');
             
             
             if detect_saccades,
@@ -315,8 +352,8 @@ for k = 1:length(trial)
             ig_set_all_axes('Xlim',[trial(k).tSample_from_time_start(1) trial(k).tSample_from_time_start(end)]);
             drawnow; pause;
             
-            if get(gcf,'CurrentChar')=='q',
-                % close;
+            if get(gcf,'CurrentChar')=='q', 
+                close;
                 break;
             end
             clf(hf);
