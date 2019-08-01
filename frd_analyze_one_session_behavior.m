@@ -66,6 +66,16 @@ else % one run
     load(runpath);
     [trial.run] = deal(1); % add run number
 end
+%% Define new and correct states and states_onset
+
+for k = 1:length(trial)
+    
+    trial(k).states = unique(trial(k).state,'stable')';
+    
+    indi = logical([1 (diff(trial(k).state) ~= 0)']);
+    trial(k).states_onset = trial(k).tSample_from_time_start(indi)';
+    
+end
 
 %% create reaction time and such
 
@@ -74,7 +84,7 @@ RT= (NaN(length(trial),2));
 for k = 1:length(trial)
     
     if trial(k).completed
-        RT(k,1)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9);
+        RT(k,1)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
     end
     
     
@@ -348,6 +358,7 @@ for k = 1:length(trial)
         
         
         if plot_trials,
+            
             figure(hf);
             ig_set_all_axes('Xlim',[trial(k).tSample_from_time_start(1) trial(k).tSample_from_time_start(end)]);
             drawnow; pause;
@@ -440,7 +451,7 @@ if 1
     %%
     
     figure; %4 choice bias
-    g3(1,1) = gramm('x', RT.target_selected, 'subset', RT.target_selected ~= 'none' & RT.choice == 'choi' & RT.success);
+    g3(1,1) = gramm('x', RT.target_selected, 'subset', RT.target_selected ~= 'none' & RT.choice == 'choice' & RT.success);
     g3(1,1).stat_bin('geom','bar','normalization','probability');
     g3(1,1).facet_wrap(RT.effector,'ncols',2);
     g3(1,1).set_names('x','','y','proportion in %','Color','','row','','column','');
