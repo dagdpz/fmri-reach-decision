@@ -1,5 +1,21 @@
 function frd_analyze_one_session_behavior(runpath, list_successful_only, plot_trials, do_summary, detect_saccades,detect_saccades_custom_settings)
-% pass in runpath the location where the matfiles are
+% What to put in:
+
+% runpath: A) specific matfile, B) session folder
+% list_successful_only: 0) all trials 1) successful only 2) failed only
+% plot_trials: 0) no plotting of single trials 1) plots every single trial
+% do_summary: 0) no summary plots 1) summary plots
+% detect saccades: idk
+% detect_saccades_custom_settings: idk
+
+
+% TODO:
+% figure size
+% title with subj/session
+% export to pdf properly
+% subject wise analysis + whole experiment analysis
+
+
 
 if nargin < 2,
     list_successful_only = 0; 
@@ -21,10 +37,6 @@ if nargin < 6,
     detect_saccades_custom_settings = '';
 end
 
-% TODO:
-% figure size
-% title with subj/session
-% export to pdf
 
 %warning off
 
@@ -36,7 +48,7 @@ end
 % detect_saccades_custom_settings = '';
 % runpath = ('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\LEHU\all_runs');
 % % load('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\LEHU\all_runs\LEHU_2019-07-24_02.mat');
-%% concentate matfiles
+%% concatenate matfiles
 % with additional info of run, files, and location
 
 if isempty(strfind(runpath,'.mat')), % folder
@@ -270,9 +282,9 @@ RT.wrong_target_selected = logical(RT.wrong_target_selected);
 
 RT.aborted_state_duration = [trial.aborted_state_duration]';
 
-%%
+%% Plotting every single trial in 1 D
 
-if plot_trials,
+if plot_trials == 1,
     hf = figure('Name','Plot trial','CurrentChar',' ');
 end
 
@@ -286,7 +298,7 @@ for k = 1:length(trial)
         
         % WARUM FÄNGT DER STATE IMMER VOR 0 an?
         
-        if plot_trials,
+        if plot_trials == 1,
             figure(hf);
             subplot(2,1,1); hold on;
             title([sprintf('Eye/Hand Position, Trial %d',k),...
@@ -357,7 +369,7 @@ for k = 1:length(trial)
         end
         
         
-        if plot_trials,
+        if plot_trials == 1,
             
             figure(hf);
             ig_set_all_axes('Xlim',[trial(k).tSample_from_time_start(1) trial(k).tSample_from_time_start(end)]);
@@ -374,7 +386,92 @@ for k = 1:length(trial)
     
 end % for each trial
 
-if ~do_summary; return; end
+%% Plotting every single trial in 2 D
+
+if plot_trials == 2,
+    hf = figure('Name','Plot trial','CurrentChar',' ');
+end
+
+for k = 1:length(trial)
+    
+    if list_successful_only ~= 1 && plot_trials == 2
+        disp('Can only list succesfull trials. Completed but not succesfull trials (WRONG TARGET SELECTED) are ignored so far.')
+        break;
+        
+    elseif (list_successful_only == 1 && trial(k).success)
+
+        % align time axis to trial start
+        trial(k).states_onset            = trial(k).states_onset            - trial(k).tSample_from_time_start(1); % setze die states_onsets auf "Null"(nicht wirklich, da irgendwie nicht wirklich 0)
+        trial(k).tSample_from_time_start = trial(k).tSample_from_time_start - trial(k).tSample_from_time_start(1); % setze den Beginn des Trials auf 0
+        
+        % WARUM FÄNGT DER STATE IMMER VOR 0 an?
+        
+        if plot_trials == 2,
+            figure(hf);
+            hold on;
+            title([sprintf('Eye/Hand Position, Trial %d',k),...
+                cellstr(RT.effector(k)),...
+                cellstr(RT.choice(k)),...
+                cellstr(RT.target_selected(k)),...
+                cellstr(RT.abort_code(k)),...
+                {RT.aborted_state_duration(k)}]);
+            
+            % filter for only target acquisition + hold phase
+            fil = trial(k).state == 9 | trial(k).state == 10;
+            
+            % plot eye or hand trajectories
+      
+            plot(trial(k).x_eye(fil),trial(k).y_eye(fil),'r');
+            plot(trial(k).x_hnd(fil),trial(k).y_hnd(fil),'g');
+                
+
+            
+            % plot rectangles
+            if trial(k).effector ==3
+                x_left_lower_corner_sq_1 = trial(k).task.eye.tar(1).x - (trial(k).task.eye.tar(1).radius); 
+                x_left_lower_corner_sq_2 = trial(k).task.eye.tar(2).x - (trial(k).task.eye.tar(2).radius); 
+                y_left_lower_corner_sq_both = -(trial(k).task.eye.tar(2).radius);
+                width_sq = trial(k).task.eye.tar(1).radius * 2;
+                
+                x_left_lower_corner_sq_1_size = trial(k).task.eye.tar(1).x - (trial(k).task.eye.tar(1).size); 
+                x_left_lower_corner_sq_2_size = trial(k).task.eye.tar(2).x - (trial(k).task.eye.tar(2).size); 
+                y_left_lower_corner_sq_both_size = -(trial(k).task.eye.tar(2).size);
+                width_sq_size = trial(k).task.eye.tar(1).size * 2;
+               
+                rectangle('Position',[x_left_lower_corner_sq_1_size, y_left_lower_corner_sq_both_size, width_sq_size, width_sq_size],'LineStyle','-.');
+                rectangle('Position',[x_left_lower_corner_sq_2_size, y_left_lower_corner_sq_both_size, width_sq_size, width_sq_size],'LineStyle','-.');
+                
+            elseif trial(k).effector == 4
+                x_left_lower_corner_sq_1 = trial(k).task.hnd.tar(1).x - (trial(k).task.hnd.tar(1).radius); 
+                x_left_lower_corner_sq_2 = trial(k).task.hnd.tar(2).x - (trial(k).task.hnd.tar(2).radius); 
+                y_left_lower_corner_sq_both = -(trial(k).task.hnd.tar(2).radius);
+                width_sq = trial(k).task.hnd.tar(1).radius * 2;
+            end
+            
+            rectangle('Position',[x_left_lower_corner_sq_1, y_left_lower_corner_sq_both, width_sq, width_sq],'LineStyle',':');
+            rectangle('Position',[x_left_lower_corner_sq_2, y_left_lower_corner_sq_both, width_sq, width_sq],'LineStyle',':');
+            
+            circle(trial(k).task.eye.fix.x, trial(k).task.eye.fix.y, trial(k).task.eye.fix.radius);
+            circle(trial(k).task.hnd.fix.x, trial(k).task.hnd.fix.y, trial(k).task.hnd.fix.radius);
+            
+             figure(hf);
+             ig_set_all_axes('Xlim',[-15 15]);
+             ig_set_all_axes('Ylim',[-9 9]);
+             drawnow; pause;
+
+            if get(gcf,'CurrentChar')=='q', 
+                close;
+                break;
+            end
+            clf(hf);
+        end
+    
+    end % if successful..
+    
+end % for each trial
+
+
+
 
 %% Errors clustered by intruction
 
@@ -389,16 +486,157 @@ Err.cause(strncmpi('EYE',cellstr(Err.abort_code),3)) = {'eye_cause'};
 Err.cause(strncmpi('HND',cellstr(Err.abort_code),3)) = {'hand_cause'};
 
 %%
+if 0
+    %% Trajectories Hand, Reach Trials only 
+
+    xf = figure;
+    for k = 1:length(trial)
+       figure(xf)
+       hold on;
+
+       if trial(k).effector == 4
+
+       fil = trial(k).state == 9 | trial(k).state == 10;
+       plot(trial(k).x_hnd(fil),trial(k).y_hnd(fil),'g')
+
+       ig_set_all_axes('Xlim',[-15 15]);
+       ig_set_all_axes('Ylim',[-9 9]);
+
+                   % plot rectangles
+                if trial(k).effector ==3
+                    x_left_lower_corner_sq_1 = trial(k).task.eye.tar(1).x - (trial(k).task.eye.tar(1).radius); 
+                    x_left_lower_corner_sq_2 = trial(k).task.eye.tar(2).x - (trial(k).task.eye.tar(2).radius); 
+                    y_left_lower_corner_sq_both = -(trial(k).task.eye.tar(2).radius);
+                    width_sq = trial(k).task.eye.tar(1).radius * 2;
+
+                    x_left_lower_corner_sq_1_size = trial(k).task.eye.tar(1).x - (trial(k).task.eye.tar(1).size); 
+                    x_left_lower_corner_sq_2_size = trial(k).task.eye.tar(2).x - (trial(k).task.eye.tar(2).size); 
+                    y_left_lower_corner_sq_both_size = -(trial(k).task.eye.tar(2).size);
+                    width_sq_size = trial(k).task.eye.tar(1).size * 2;
+
+                    rectangle('Position',[x_left_lower_corner_sq_1_size, y_left_lower_corner_sq_both_size, width_sq_size, width_sq_size],'LineStyle','-.');
+                    rectangle('Position',[x_left_lower_corner_sq_2_size, y_left_lower_corner_sq_both_size, width_sq_size, width_sq_size],'LineStyle','-.');
+
+                elseif trial(k).effector == 4
+                    x_left_lower_corner_sq_1 = trial(k).task.hnd.tar(1).x - (trial(k).task.hnd.tar(1).radius); 
+                    x_left_lower_corner_sq_2 = trial(k).task.hnd.tar(2).x - (trial(k).task.hnd.tar(2).radius); 
+                    y_left_lower_corner_sq_both = -(trial(k).task.hnd.tar(2).radius);
+                    width_sq = trial(k).task.hnd.tar(1).radius * 2;
+                end
+
+                rectangle('Position',[x_left_lower_corner_sq_1, y_left_lower_corner_sq_both, width_sq, width_sq],'LineStyle',':');
+                rectangle('Position',[x_left_lower_corner_sq_2, y_left_lower_corner_sq_both, width_sq, width_sq],'LineStyle',':');
+
+                circle(trial(k).task.eye.fix.x, trial(k).task.eye.fix.y, trial(k).task.eye.fix.radius);
+                circle(trial(k).task.hnd.fix.x, trial(k).task.hnd.fix.y, trial(k).task.hnd.fix.radius);
+       end
+    end
+
+    %% Trajectories Eye, Saccade Trials only
+
+    xf = figure;
+    for k = 1:length(trial)
+       figure(xf)
+       hold on;
+
+       if trial(k).effector == 3
+
+       fil = trial(k).state == 9 | trial(k).state == 10;
+       plot(trial(k).x_eye(fil),trial(k).y_eye(fil),'r')
+
+       ig_set_all_axes('Xlim',[-15 15]);
+       ig_set_all_axes('Ylim',[-9 9]);
 
 
+                      % plot rectangles
+                if trial(k).effector ==3
+                    x_left_lower_corner_sq_1 = trial(k).task.eye.tar(1).x - (trial(k).task.eye.tar(1).radius); 
+                    x_left_lower_corner_sq_2 = trial(k).task.eye.tar(2).x - (trial(k).task.eye.tar(2).radius); 
+                    y_left_lower_corner_sq_both = -(trial(k).task.eye.tar(2).radius);
+                    width_sq = trial(k).task.eye.tar(1).radius * 2;
 
+                    x_left_lower_corner_sq_1_size = trial(k).task.eye.tar(1).x - (trial(k).task.eye.tar(1).size); 
+                    x_left_lower_corner_sq_2_size = trial(k).task.eye.tar(2).x - (trial(k).task.eye.tar(2).size); 
+                    y_left_lower_corner_sq_both_size = -(trial(k).task.eye.tar(2).size);
+                    width_sq_size = trial(k).task.eye.tar(1).size * 2;
 
+                    rectangle('Position',[x_left_lower_corner_sq_1_size, y_left_lower_corner_sq_both_size, width_sq_size, width_sq_size],'LineStyle','-.');
+                    rectangle('Position',[x_left_lower_corner_sq_2_size, y_left_lower_corner_sq_both_size, width_sq_size, width_sq_size],'LineStyle','-.');
+
+                elseif trial(k).effector == 4
+                    x_left_lower_corner_sq_1 = trial(k).task.hnd.tar(1).x - (trial(k).task.hnd.tar(1).radius); 
+                    x_left_lower_corner_sq_2 = trial(k).task.hnd.tar(2).x - (trial(k).task.hnd.tar(2).radius); 
+                    y_left_lower_corner_sq_both = -(trial(k).task.hnd.tar(2).radius);
+                    width_sq = trial(k).task.hnd.tar(1).radius * 2;
+                end
+
+                rectangle('Position',[x_left_lower_corner_sq_1, y_left_lower_corner_sq_both, width_sq, width_sq],'LineStyle',':');
+                rectangle('Position',[x_left_lower_corner_sq_2, y_left_lower_corner_sq_both, width_sq, width_sq],'LineStyle',':');
+
+                circle(trial(k).task.eye.fix.x, trial(k).task.eye.fix.y, trial(k).task.eye.fix.radius);
+                circle(trial(k).task.hnd.fix.x, trial(k).task.hnd.fix.y, trial(k).task.hnd.fix.radius);
+       end
+    end
+
+    %%
+end
+%% Trajectories using gramm
+A = arrayfun(@(a)   {a.x_eye(a.state == 9 | a.state == 10)},trial);
+B = arrayfun(@(a)   {a.y_eye(a.state == 9 | a.state == 10)},trial);
+A_abs = arrayfun(@(a)   {abs(a.x_eye(a.state == 9 | a.state == 10))},trial);
+
+C = arrayfun(@(a)   {a.x_hnd(a.state == 9 | a.state == 10)},trial);
+D = arrayfun(@(a)   {a.y_hnd(a.state == 9 | a.state == 10)},trial);
+C_abs = arrayfun(@(a)   {abs(a.x_hnd(a.state == 9 | a.state == 10))},trial);
+
+%% PLots
+if ~do_summary; return; end
+
+%% Saccades normal 
+figure('Name','saccade trajectories, for target acquisiton + hold phase');
+    g1 = gramm('x',A,'y',B,'group',categorical([1:length(trial)]),'color',RT.choice, 'subset',RT.effector == 'saccade' & RT.success);
+    g1.geom_line();
+    g1.axe_property('Xlim',[-15 15],'Ylim',[-9 9]);
+    g1.set_line_options('base_size',0.1);
+    g1.set_title('saccade trajectories, for target acquisiton + hold phase');
+    g1.set_names('x','x_trajcetories','y','y_trajectories','Color','','row','','column',''); 
+    g1.draw;
+
+%% Reaches normal
+figure('Name','reach trajectories, for target acquisiton + hold phase');
+    g2 = gramm('x',C,'y',D,'group',categorical([1:length(trial)]),'color',RT.choice, 'subset',RT.effector == 'reach' & RT.success);
+    g2.geom_line('alpha',0);
+    g2.axe_property('Xlim',[-15 15],'Ylim',[-9 9]);
+    g2.set_line_options('base_size',0.1);
+    g2.set_title('reach trajectories, for target acquisiton + hold phase');
+    g2.set_names('x','x_trajcetories','y','y_trajectories','Color','','row','','column',''); 
+    g2.draw;
+    
+
+%% AUGEN folded left to right
+figure('Name','left movements mirrored onto the right, for target acquisiton + hold phase');
+    g0(1,1) = gramm('x',A_abs,'y',B,'group',categorical([1:length(trial)]),'color',RT.target_selected, 'subset',RT.effector == 'saccade' & RT.success);
+    g0(1,1).geom_point();
+    g0(1,1).axe_property('Xlim',[0 15],'Ylim',[-4 4]);
+    g0(1,1).set_names('x','abs(x_trajcetories)','y','y_trajectories','Color','','row','','column','');   
+    g0(1,1).set_title('saccades');
+    
+    g0(2,1) = gramm('x',C_abs,'y',D,'group',categorical([1:length(trial)]),'color',RT.target_selected, 'subset',RT.effector == 'reach' & RT.success);
+    g0(2,1).geom_point('alpha',0);
+    g0(2,1).axe_property('Xlim',[0 15],'Ylim',[-4 4]);
+    g0(2,1).set_title('reaches');
+    
+    g0.set_names('x','abs(x_trajcetories)','y','y_trajectories','Color','','row','','column','');   
+    g0.set_title('left movements mirrored onto the right, for target acquisiton + hold phase');
+    g0.set_color_options('map','brewer2');
+    g0.set_point_options('base_size',2);
+    g0.draw;
 
 %% plots
-if 1
+
     %%
     figure; % Succes Rate
-    g5(1,1) = gramm('x',categorical(RT.success), 'color', RT.choice,'column',RT.effector);
+    g5(1,1) = gramm('x',categorical(RT.success), 'color', RT.choice,'column',RT.effector);%,'subset',RT.success == 1); %'x',categorical(RT.success
     g5(1,1).stat_bin('normalization','probability');
     %g5(1,1).facet_wrap(RT.effector);
     g5(1,1).set_names('x','','y','proportion in %','Color','','row','','column','');
@@ -443,7 +681,7 @@ if 1
     g6.facet_grid(Err.cause,Err.effector);
     g6.set_text_options('base_size',8);
     g6.set_names('x','','y','proportion in %','Color','instruction','row','cause of error','column','');
-    g6.set_title({'Which errors occur for which effector? Clustered by instruction'});
+    g6.set_title({'Which errors occur for which effector? Clustered by instruction. proportion of errors: ' (sum(~RT.success))/length(RT.success)  });
     
     g6.draw;
     %g6.export('file_name',['Errors_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
@@ -472,22 +710,35 @@ if 1
     
     g3.draw;
     %g3.export('file_name',['ChoiceBias_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59),'width',56,'height',33,'units','centimeters');
-    
-    figure; % 5 aborted_state_duration
-    g2 = gramm('x',RT.aborted_state_duration,'row',RT.abort_code,'subset',or(RT.abort_code == 'HND FIX HOLD', RT.abort_code == 'EYE FIX HOLD'));
-    g2.stat_bin('nbins',200);
-    g2.axe_property('XLim',[0 2]);
-    g2.set_names('x','time in s','y','count','Color','','row','');
-    g2.set_title({'Fixation Hold Errors for first 2 seconds'})
-    g2.draw;
-    
-    figure;    
-    g4 = gramm('x',RT.aborted_state_duration,'color',RT.abort_code,'subset',or(RT.abort_code == 'HND FIX HOLD', RT.abort_code == 'EYE FIX HOLD'));
-    g4.stat_bin('nbins',200);
-    g4.axe_property('XLim',[0 2]);
-    g4.facet_wrap(double(RT.run));
-    g4.set_names('x','time in s','y','count','Color','','row','');
-    g4.set_title({'Fixation Hold Errors for first 2 seconds by run'})
-    g4.draw;
-end
+
+    %%
+
+%%    
+%     figure; % 5 aborted_state_duration
+%     g2 = gramm('x',RT.aborted_state_duration,'row',RT.abort_code,'subset',or(RT.abort_code == 'HND FIX HOLD', RT.abort_code == 'EYE FIX HOLD'));
+%     g2.stat_bin('nbins',200);
+%    % g2.axe_property('XLim',[0 2]);
+%     g2.set_names('x','time in s','y','count','Color','','row','');
+%     g2.set_title({'Fixation Hold Errors for first 2 seconds'})
+%     g2.draw;
+%     
+%     figure;    
+%     g4 = gramm('x',RT.aborted_state_duration,'color',RT.abort_code,'subset',or(RT.abort_code == 'HND FIX HOLD', RT.abort_code == 'EYE FIX HOLD'));
+%     g4.stat_bin('nbins',200);
+%     %g4.axe_property('XLim',[0 2]);
+%     g4.facet_wrap(double(RT.run));
+%     g4.set_names('x','time in s','y','count','Color','','row','');
+%     g4.set_title({'Fixation Hold Errors for first 2 seconds by run'})
+%     g4.draw;
+
+
+function circle(x,y,r)
+%x and y are the coordinates of the center of the circle
+%r is the radius of the circle
+%0.01 is the angle step, bigger values will draw the circle faster but
+%you might notice imperfections (not very smooth)
+ang=0:0.01:2*pi; 
+xp=r*cos(ang);
+yp=r*sin(ang);
+plot(x+xp,y+yp,'LineStyle',':','Color','k');
 
