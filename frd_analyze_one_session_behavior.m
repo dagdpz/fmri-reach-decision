@@ -1,11 +1,11 @@
 function frd_analyze_one_session_behavior(runpath, list_successful_only, plot_trials, do_summary, detect_saccades,detect_saccades_custom_settings)
 % What to put in:
 
-% runpath: A) specific matfile, B) session folder
-% list_successful_only: 0) all trials 1) successful only 2) failed only
-% plot_trials: 0) no plotting of single trials 1) plots every single trial
-% do_summary: 0) no summary plots 1) summary plots
-% detect saccades: idk
+% runpath:              A) specific matfile,    B) session folder   C) subject folder    D) experiment folder
+% list_successful_only: 0) all trials           1) successful only  2) failed only
+% plot_trials:          0) no plots of single trials                1) plots every single trial
+% do_summary:           0) no summary plots     1) summary plots
+% detect saccades:      idk
 % detect_saccades_custom_settings: idk
 
 
@@ -14,7 +14,6 @@ function frd_analyze_one_session_behavior(runpath, list_successful_only, plot_tr
 % title with subj/session
 % export to pdf properly
 % subject wise analysis + whole experiment analysis
-
 
 
 if nargin < 2,
@@ -48,36 +47,145 @@ end
 % detect_saccades_custom_settings = '';
 % runpath = ('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\LEHU\all_runs');
 % % load('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\LEHU\all_runs\LEHU_2019-07-24_02.mat');
-%% concatenate matfiles
-% with additional info of run, files, and location
 
-if isempty(strfind(runpath,'.mat')), % folder
+
+%% concatenate matfiles
+
+endout=regexp(runpath,filesep,'split');
+
+% run
+if length(endout{end}) == 22 % Y:\Personal\Peter\Data\pilot_test\PENE\20190606\PENE_2019-06-06_16.mat
+    analysis_level = 'run';
+    su.name = endout{end-2};
+    se.name = endout{end-1};
+    fi.name = endout{end};
     
-    fi  = dir([runpath filesep '*.mat']); % How many mat files are there
-    temp = load([runpath filesep fi(1).name]); % load first file
-    [temp.trial(:).run] = deal(1); % add run number
-    [temp.trial(:).fileinfo] = deal(fi(1)); % add fileinfo
-    [temp.trial(:).path] = deal([runpath filesep fi(1).name]); % add path
-    tempges = temp.trial; % take only variable trial and save it
-    
-    for i = 2:length(fi)
-        
-        temp =  load([runpath filesep fi(i).name]);
-        [temp.trial(:).run] = deal(i);
-        [temp.trial(:).fileinfo] = deal(fi(i));
-        [temp.trial(:).path] = deal([runpath filesep fi(i).name]);
-        
-        tempges = [tempges temp.trial];
-        
-    end
-    
-    trial = tempges;
-    clear ('temp','tempges');
-    
-else % one run
-    load(runpath);
-    [trial.run] = deal(1); % add run number
+% session
+elseif length(endout{end}) == 8 || length(endout{end}) == 10 %Y:\Personal\Peter\Data\pilot_test\PENE\20190606
+    analysis_level = 'session'; 
+    su.name = endout{end-1};
+    se.name = endout{end};
+
+% subject
+elseif length(endout{end}) == 4 % Y:\Personal\Peter\Data\pilot_test\PENE
+    analysis_level = 'subject';
+    su.name = endout{end};
+
+% whole experiment
+elseif strcmp('pilot', endout{end}) % Y:\Personal\Peter\Data\pilot_test
+    analysis_level = 'experiment';
 end
+
+    
+%%
+
+
+
+if strcmp('experiment',analysis_level)
+    su = dir(runpath);
+    su = su(~ismember({su.name},{'.' '..'}));
+end
+    
+    for u = 1:length(su) % loop over subjects
+        
+        if strcmp('experiment',analysis_level) %analysis_level == 'experiment'
+            runpath_su = [runpath filesep su(u).name];
+        else 
+            runpath_su = runpath;
+        end
+        
+        if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level)
+            se = dir(runpath_su);
+            se = se(~ismember({se.name},{'.' '..'}));
+        end
+        
+        for s = 1:length(se) % loop over sessions
+            
+            if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level)
+                runpath_se = [runpath_su filesep se(s).name];
+            else
+                runpath_se=runpath_su;
+            end
+            
+            %How many files are there?
+            if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level) || strcmp('session',analysis_level)
+                fi  = dir([runpath_se filesep '*.mat']);
+                fi = fi(~ismember({fi.name},{'.' '..'}));
+            end
+                
+            for i = 1:length(fi) % loop over files
+                
+                %here it loads each file into the temp variable, adds the
+                %respective RUN number, SESSION number, SUBJECT name (also path and
+                %file name) and attaches it to tempges
+                
+                if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level) || strcmp('session',analysis_level)
+                    runpath_fi = [runpath_se filesep fi(i).name];
+                else
+                    runpath_fi = runpath_se;
+                end
+                
+                temp = load(runpath_fi);     % load first file
+                
+                [temp.trial(:).run] = deal(i);                    % add RUN number
+                [temp.trial(:).session] = deal(s);                % add SESSION number
+                [temp.trial(:).subj] = deal(fi(i).name(1:4));     % add SUBJECT name
+                [temp.trial(:).file_name] = deal(fi(i).name);     % add file name
+                [temp.trial(:).path] = deal(runpath_fi); %add path name
+                
+                if i == 1 && s == 1 && u == 1
+                    trial = temp.trial;
+                else
+                    trial = [trial temp.trial];
+                end
+                
+            end % loop over files
+        end %loop sessions
+    end % loop subjects
+    
+ 
+    clear ('temp','runpath_fi','runpath_se','runpath_su');
+    
+    
+
+%%
+% if isempty(strfind(runpath,'.mat')), % folder
+%     
+%     
+%     
+%     
+%     fi  = dir([runpath filesep '*.mat']);       % How many mat files are there?
+%     fi = fi(~ismember({fi.name},{'.' '..'}));   % delete the dots in fi
+%     
+%     for i = 1:length(fi) % loop over files 
+%         
+%         temp = load([runpath filesep fi(i).name]);  % load first file
+%         
+%         [temp.trial(:).run] = deal(i);                    % add run number
+%         [temp.trial(:).subj] = deal(fi(i).name(1:4));     % add subject name
+%         [temp.trial(:).file_name] = deal(fi(i).name);     % add file name
+%         [temp.trial(:).path] = deal([runpath filesep fi(i).name]); %add path name
+%         
+%         if i == 1
+%             tempges = temp.trial;
+%         else
+%             tempges = [tempges temp.trial];
+%         end
+%     end % loop over files
+%     
+%     trial = tempges;
+%     clear ('temp','tempges');
+%     
+%     
+%     
+%     
+%     
+% else % single run wise
+%     load(runpath);
+%     [trial.run] = deal(1); % add run number
+% end
+
+
 %% Define new and correct states and states_onset
 
 for k = 1:length(trial)
@@ -590,7 +698,9 @@ D = arrayfun(@(a)   {a.y_hnd(a.state == 9 | a.state == 10)},trial);
 C_abs = arrayfun(@(a)   {abs(a.x_hnd(a.state == 9 | a.state == 10))},trial);
 
 %% PLots
-if ~do_summary; return; end
+if ~do_summary 
+    return
+end
 
 %% Saccades normal 
 figure('Name','saccade trajectories, for target acquisiton + hold phase');
