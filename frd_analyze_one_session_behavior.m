@@ -25,7 +25,7 @@ if nargin < 3,
 end
 
 if nargin < 4,
-    do_summary = 1;
+    do_summary = 0;
 end
 
 if nargin < 5,
@@ -54,25 +54,25 @@ end
 endout=regexp(runpath,filesep,'split');
 
 % run
-if length(endout{end}) == 22 % Y:\Personal\Peter\Data\pilot_test\PENE\20190606\PENE_2019-06-06_16.mat
+if length(endout{end}) == 22 % Y:\Personal\Peter\Data\pilot\PENE\20190606\PENE_2019-06-06_16.mat
     analysis_level = 'run';
     su.name = endout{end-2};
     se.name = endout{end-1};
     fi.name = endout{end};
     
 % session
-elseif length(endout{end}) == 8 || length(endout{end}) == 10 %Y:\Personal\Peter\Data\pilot_test\PENE\20190606
+elseif length(endout{end}) == 8 || length(endout{end}) == 10 %Y:\Personal\Peter\Data\pilot\PENE\20190606
     analysis_level = 'session'; 
     su.name = endout{end-1};
     se.name = endout{end};
 
 % subject
-elseif length(endout{end}) == 4 % Y:\Personal\Peter\Data\pilot_test\PENE
+elseif length(endout{end}) == 4 % Y:\Personal\Peter\Data\pilot\PENE
     analysis_level = 'subject';
     su.name = endout{end};
 
 % whole experiment
-elseif strcmp('pilot', endout{end}) % Y:\Personal\Peter\Data\pilot_test
+elseif strcmp('pilot', endout{end}) % Y:\Personal\Peter\Data\pilot
     analysis_level = 'experiment';
 end
 
@@ -133,9 +133,19 @@ end
                 [temp.trial(:).file_name] = deal(fi(i).name);     % add file name
                 [temp.trial(:).path] = deal(runpath_fi); %add path name
                 
+                i
+                s
+                fi(i).name(1:4)
+                deal(fi(i).name)
+                runpath_fi
+                
                 if i == 1 && s == 1 && u == 1
                     trial = temp.trial;
                 else
+%                     if strcmp('LEHU',{trial.subj})
+%                         trial.condition = trial.CueAuditiv;
+%                         trial = rmfield(trial.CueAuditiv);
+%                     end
                     trial = [trial temp.trial];
                 end
                 
