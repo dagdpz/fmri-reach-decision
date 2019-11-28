@@ -162,11 +162,45 @@ while ~all(condis.done)
 end         
   
 %% enjoy eggs
+figure;
+test = gramm('x',categorical(present.delay),'color',categorical(present.number));
+test.stat_bin;
+test.set_order_options('x',[3 4 5 1 2],'color',[1 12 14 15 16 17 18 19 20 2 3 4 5 6 7 8 9 10 11 13]);
+test.set_names('x','Delays','color','artificial blocks');
+test.set_title('Every delay occurs equally often in every artifical block.');
+%test.facet_wrap(present.number);
+test.draw;
 
-% test = gramm('x',categorical(present.delay),'color',categorical(present.number));
-% test.stat_bin;
-% %test.facet_wrap(present.number);
-% test.draw;
+figure;
+test2 = gramm('x',categorical(present.comb),'color',categorical(present.number));
+test2.stat_bin;
+test2.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 12 14 15 16 17 18 19 20 2 3 4 5 6 7 8 9 10 11 13]);
+test2.set_names('x','Delays','color','artificial blocks');
+test2.set_title('Every choice/instructed condition occurs equally often in every artifical block.');
+%test.facet_wrap(present.number);
+test2.draw;
+
+figure;
+test3 = gramm('x',categorical(present.delay),'color',present.comb);
+test3.stat_bin;
+test3.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8]);
+test3.set_names('x','Delays','color','conditions');
+test3.set_title('Within all 400 trials, each choice/instructed condition occurs equally often for each delay');
+%test3.facet_wrap(present.choice);
+test3.draw;
+
+figure;
+test4 = gramm('x',categorical(present.delay),'color',present.comb);
+test4.stat_bin;
+test4.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8],'column',[1 12 14 15 16 17 18 19 20 2 3 4 5 6 7 8 9 10 11 13]);
+test4.set_names('x','Delays','color','conditions','column','');
+test4.facet_wrap(categorical(present.number));
+test4.set_title('Each condition-delay combination CANNOT occur equally often in one artifical block');
+test4.draw;
+
+
+
+
 
 
 
