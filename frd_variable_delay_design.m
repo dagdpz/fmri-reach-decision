@@ -2,14 +2,14 @@
 
 %% variable delay design
 
-Performance = 0.9;
+Performance = 1;
 
 Delays = [3:3:15];
 % Delays = [3:2:15];
 
 nDelays = length(Delays);
 
-Freq = ones(size(Delays))*1/nDelays; % uniform frequency
+% Freq = ones(size(Delays))*1/nDelays; % uniform frequency
 Freq = [0.075 0.15 0.25 0.275 0.25]; % ramping up
 sumFreq = sum(Freq)
 
@@ -35,6 +35,7 @@ nTrialsConditionInstr = floor(Performance*0.4*nRuns*maxTrialsRun/4)
 
 %% fixed delay + Catch trials
 
+if 0
 Performance = 0.9;
 
 % real trials
@@ -75,3 +76,4 @@ hold off
 % trials (not catch trials) is being calculated
 nTrialsConditionChoice_realTrials = floor(Performance* 0.6*(nRuns*maxTrialsRun - length(example_lengths_cTrials_pExp))/4) 
 nTrialsConditionInstr_realTrials = floor(Performance*0.4*(nRuns*maxTrialsRun - length(example_lengths_cTrials_pExp))/4)
+end
