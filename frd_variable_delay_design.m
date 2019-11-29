@@ -10,7 +10,7 @@ Delays = [3:3:15];
 nDelays = length(Delays);
 
 % Freq = ones(size(Delays))*1/nDelays; % uniform frequency
-Freq = [0.075 0.15 0.25 0.275 0.25]; % ramping up
+Freq = [0.05 0.15 0.25 0.30 0.25]; % ramping up
 sumFreq = sum(Freq)
 
 meanDelay = sum(Delays.*Freq)
@@ -25,7 +25,7 @@ totalTrialDur = FixAcq + FixCue + TarAcq + meanDelay + TarHold + ITI
 
 runDur = 12*60; % s
 
-maxTrialsRun = floor(runDur/totalTrialDur)
+maxTrialsRun = ceil(runDur/totalTrialDur)
 nDelaysRun = Freq*maxTrialsRun
 
 nRuns = 15;
