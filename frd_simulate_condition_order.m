@@ -2,16 +2,17 @@
 
 clear all;
 
-% Conditions which have to be met:
-% - A) all Conditions equally often presented (best: within a session)
-%       --> generate Pool of Conditions for one session (= 5 runs)
+% Following conditions have to be met:
+% - A) all Conditions equally often presented
+%       --> 20 "conditions", so can be in blocks of
+        
 
 % - B) all Conditions have equally distributed Delays
 %       --> not possible: within a session
 %       --> necessary: within all sessions (15 runs)
 
 % - C) Delays occur nicely in a run (a few short ones at least)
-%       --> define a finite number of trials "per run" (40 trials?)
+%       --> define a finite number of trials "per run" (20 trials?)
 
 del = [3 6 9 12 15];
 %del_Freq = [0.075 0.15 0.25 0.275 0.25]; % probability for 1 trial
@@ -159,9 +160,32 @@ while ~all(condis.done)
         present = [present; art_block];
         
     end % loop delays
-end         
-  
-%% enjoy eggs
+end
+
+
+%%
+real_block = [];
+
+for i = 1:(height(present))/25
+    a = ones(25,1)*i;
+    real_block = [real_block; a];
+end
+
+present.real_block = real_block;
+%%
+real_session = [repmat(1,125,1);...
+                repmat(2,125,1);...
+                repmat(3,125,1);...
+                repmat(4,25,1)
+                ];
+            
+present.real_session = real_session;
+
+
+if 0
+%% enjoy eggs - plots with ATRIFICAL blocks
+
+
 figure;
 test = gramm('x',categorical(present.delay),'color',categorical(present.number));
 test.stat_bin;
@@ -198,14 +222,87 @@ test4.facet_wrap(categorical(present.number));
 test4.set_title('Each condition-delay combination CANNOT occur equally often in one artifical block');
 test4.draw;
 
+%% enjoy real eggs - plots with REAL blocks
+
+figure;
+test = gramm('x',categorical(present.delay),'color',categorical(present.real_block));
+test.stat_bin;
+test.set_order_options('x',[3 4 5 1 2],'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+test.set_names('x','Delays','color','artificial blocks');
+test.set_title('Distribution of Delays in real blocks of N = 25 ');
+%test.facet_wrap(present.number);
+test.draw;
+
+figure;
+test2 = gramm('x',categorical(present.comb),'color',categorical(present.real_block));
+test2.stat_bin;
+test2.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+test2.set_names('x','Delays','color','artificial blocks');
+test2.set_title('Distribution of Conditions in real blocks of N = 25 ');
+%test.facet_wrap(present.number);
+test2.draw;
+
+figure;
+test4 = gramm('x',categorical(present.delay))%,'color',present.comb);
+test4.stat_bin;
+test4.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8],'column',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+test4.set_names('x','Delays','color','conditions','column','');
+test4.facet_wrap(categorical(present.real_block));
+test4.set_title('Distribution of Delays in real blocks of N = 25');
+test4.draw;
+
+figure;
+test4 = gramm('x',categorical(present.comb),'color',categorical(present.choice));
+test4.stat_bin;
+test4.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 2 5 6 3 4 7 8],'column',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+test4.set_names('x','conditions','color','','column','');
+test4.facet_wrap(categorical(present.real_block));
+test4.set_title('Distributino of Conditions in real blocks of N = 25');
+test4.draw;
 
 
 
 
+%% plots with REAL sessions
 
+figure;
+test = gramm('x',categorical(present.delay),'color',categorical(present.real_session));
+test.stat_bin;
+test.set_order_options('x',[3 4 5 1 2]);%;,'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+test.set_names('x','Delays','color','artificial blocks');
+test.set_title('Distribution of Delays in real blocks of N = 125 (block 4: N = 25)');
+%test.facet_wrap(present.number);
+test.draw;
 
+figure;
+test2 = gramm('x',categorical(present.comb),'color',categorical(present.real_session));
+test2.stat_bin;
+test2.set_order_options('x',[1 2 5 6 3 4 7 8]);
+test2.set_names('x','Delays','color','artificial blocks');
+test2.set_title('Distribution of Conditions in real sessions of N = 125 (block 4: N = 25) ');
+%test.facet_wrap(present.number);
+test2.draw;
 
+figure;
+test4 = gramm('x',categorical(present.delay))%,'color',present.comb);
+test4.stat_bin;
+test4.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8]);
+test4.set_names('x','Delays','color','conditions','column','');
+test4.facet_wrap(categorical(present.real_session));
+test4.set_title('Distribution of Delays in real sessions of N = 125 (block 4: N = 25)');
+test4.draw;
 
+figure;
+test4 = gramm('x',categorical(present.comb),'color',categorical(present.choice));
+test4.stat_bin;
+test4.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 2 5 6 3 4 7 8]);
+test4.set_names('x','conditions','color','','column','');
+test4.facet_wrap(categorical(present.real_session));
+test4.set_title('Distribution of Conditions in real blocks of N = 125 (block 4: N = 25)');
+test4.draw;
+
+%%
+end
 %             % get successive CONDITION from cond_block filter in condis
 %             
 %             
