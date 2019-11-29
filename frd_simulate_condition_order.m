@@ -1,37 +1,135 @@
 %% Generation of Conditions for Subjects
 
-clear all;
-
-% Following conditions have to be met:
-% - A) all Conditions equally often presented
-%       --> 20 "conditions", so can be in blocks of
-        
-
-% - B) all Conditions have equally distributed Delays
-%       --> not possible: within a session
-%       --> necessary: within all sessions (15 runs)
-
-% - C) Delays occur nicely in a run (a few short ones at least)
-%       --> define a finite number of trials "per run" (20 trials?)
+clear all
 
 del = [3 6 9 12 15];
-%del_Freq = [0.075 0.15 0.25 0.275 0.25]; % probability for 1 trial
 del_Freq_v2 = [0.05 0.15 0.25 0.30 0.25]; % n = 20 --> 1     3     5     6     5
 del_occ = [1 3 5 6 5];
 
 n_cond = (2+3)*2*2; % in order of occurence: instructed, choice, left/right, eye/hand
 n_all = n_cond*20;
 
-% to make it fit into absolute numbers, there need to be 20 trials, for the
-% freqs specified above. That results in 20 necessary trials * 20 condition
-% trials. That means, it would be nice, if 400 trials fit within all sessions.
+%% Constraints
 
-% idea: two independet generators:
-% A: for conditions, consecutively in blocks of 40 (fullfills A)
-% B: for delays, given the freqs in blocks of 20 (fullfills C)
+% I want the following constraints for when and how conditions and delays
+% are presented:
 
-% Test at the end: Does it fullfill the requirements (meaning: does it
-% fullfill B) --> take from N = 400 Pool?)
+% - A) All Conditions should be presented approx equally often within a
+%       run, so you avoid a single condition to be repeated 10 times in a row
+
+% - B) Also for delays, you want to avoid for example a 12 sec delay to be
+%       repeated 10 times in a row. That means, you would need a relativle small
+%       number of total amount of delays (e.g. 20?)
+
+% - C) Each Condition shall be presented equally often within a respective
+%       delay
+
+
+% For the constraints A and B to be true, one must randomize not over all
+% trials of all sessions, but distribute the trials "locally" within for
+% example 20 or 30 or whatever trials. 
+% For the conditions, since you need at least 20 trials to
+% get a ratio of 60/40 of the 4 choice and the 4 instructed conditions,
+% "locally randomzing" in blocks of 20 is suitable. 
+
+% Now, how many delays should there be at least, in order to be able to
+% discriminate the respective frequencies? For example, for 5 different
+% delays, if you allow only 5 trials in total (denominator = 5), it is not possible to have
+% differently distributed trial frequencies, the frequs would be 0.20 for
+% each delay
+% If you allow 100 trials (denominator = 100), then the respective frequencies could
+% theoretically be very specific, so a high denominator seems best at first glance.
+% BUT, in order to fullfill constrain C), you would need 20 conditions times
+% 100 delays, so 2000 trials, in order to really make sure, that each
+% condition occurs equally often within a specific delay. 
+% That means, you would have to aim for a small denominator for delays.
+
+% I chose 20 trials to distribute to the 5 delays to get respective delay
+% frequencies, because it fitted nicely to 20 conditions and made my life
+% easier. Given the resulting mean delay, a perfect subject would do almost
+% 400 trials in 15 runs, so constrain C) is satisfactorily fullfilled. 
+
+
+%% idea 1: two independet generators:
+
+% Now, lets look at our block of 20 conditions and a block of 20 delays. 
+% One could just go ahead, draw a random condition and a random delay out of each block, put 
+% them together in a table and mark them as done in the big table of 20*20
+% = 400 trials (you need that in order to check for constrain C). 
+% But this approach does not work, because it might happen, that e.g. condition
+% eye_instr_left would only need a 3 sec- delay, but all
+% 3 sec delays are used for other conditions already. 
+
+% In a simpler example, this issue would look like this. Lets say, we have
+% conditions a, b and c, as well as delays 10, 10 and 20.
+% Now, in order to meet constrain C, you would need at least 3*3 trials:
+% a10, a10, a20; b10, b10, b20; and c10, c10, and c20.
+
+% In order to meet constrain A, lets have 3 blocks of 3 trials each, so
+% each condition can occur once within a block. The blocks would be: 
+% abc, abc ,abc. 
+% Now, one would randomly assign delays. Here, we do not have a block of 20
+% delays, but of 3 in order to get the respective ratios (10, 10, and 20). 
+
+% The way it was implemented before, was, that you would shuffle the
+% indices of delays. (delays: 10 10 20; indices: 1 2 3)
+
+% shuffled indices: 2 1 3
+% So condition a gets a delay number 2, b gets delay number 1 and c gets
+% number 3:
+
+% a2   a    a
+% b1   b    b
+% c3   c    c
+
+% Now you take away conditions we have used already from the big matrix: 
+% a10,    , a20; 
+%    , b10, b20; 
+% c10, c10 ,   .
+
+% For the second block you shuffle again the delay indices: 1 2 3
+% a2   a1    a
+% b1   b2    b
+% c3   c3    c
+
+% Now you take away conditions we have used already from the big matrix: 
+%    ,    , a20; 
+%    ,    , b20; 
+% c10, c10 ,???????.
+
+% Now you see, there is no condition c20 left, to mark as done. That means,
+% constrain C is violated.
+% Translated to the example above, condition c would here be eye_instr_left
+% and delay 20 is the 3-sec delay.
+
+% That shows, that the randomization has to be somehow limited. You can see, that
+% delay number 3 came up in both shuffles at last number: [2 1 3] and [1 2
+% 3]. This caused the error and the violation of constrain C).
+
+%% Idea 2: more elaborate shuffle
+% That meams, we need a shuffle, where each delay number is repeated only
+% once per position. In each row (block) and each column (condition), each
+% delay index occurs only once. In that way, one can make sure to
+% distribute all conditions to all delays within the limited scope of 9
+% trials.
+
+% 1 2 3
+% 2 3 1
+% 3 1 2
+
+% This thing is called circular matrix, and can be increased in size, which
+% in matlab you do like this for 20 delays: 
+% delays_ordered = gallery('circul', 1:20); 
+
+% Now you can shuffle the rows and the columns of that matrix seperately to keep the
+% relative relationship of delay numbers (columns) over blocks (rows). Then you take an
+% ordered block of 20 conditions, asign row 1 of that matrix,
+% shuffle those conditions now with delays attached, put them in the big
+% presentation table, and continue with another ordered block of
+% conditions, and assign row 2 the of the matrix and continue. 
+
+
+
 
 %% Getting all possible combinations
 
