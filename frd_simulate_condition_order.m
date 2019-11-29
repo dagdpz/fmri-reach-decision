@@ -368,7 +368,7 @@ test = gramm('x',categorical(present.delay),'color',categorical(present.real_ses
 test.stat_bin;
 test.set_order_options('x',[3 4 5 1 2]);%;,'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
 test.set_names('x','Delays','color','artificial blocks');
-test.set_title('Distribution of Delays in real blocks of N = 125 (block 4: N = 25)');
+test.set_title('Distribution of Delays in real sessions of N = 125 (block 4: N = 25)');
 %test.facet_wrap(present.number);
 test.draw;
 
@@ -396,7 +396,7 @@ test4.stat_bin;
 test4.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 2 5 6 3 4 7 8]);
 test4.set_names('x','conditions','color','','column','');
 test4.facet_wrap(categorical(present.real_session));
-test4.set_title('Distribution of Conditions in real blocks of N = 125 (block 4: N = 25)');
+test4.set_title('Distribution of Conditions in real sessions of N = 125 (block 4: N = 25)');
 test4.draw;
 
 %%
