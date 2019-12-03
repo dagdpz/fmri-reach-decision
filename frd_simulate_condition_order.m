@@ -280,9 +280,9 @@ real_session = [repmat(1,125,1);...
 present.real_session = real_session;
 
 
-if 0
-%% enjoy eggs - plots with ATRIFICAL blocks
+if 1 % Plotting
 
+%% enjoy eggs - plots with ATRIFICAL blocks
 
 figure;
 test = gramm('x',categorical(present.delay),'color',categorical(present.number));
@@ -341,7 +341,7 @@ test2.set_title('Distribution of Conditions in real blocks of N = 25 ');
 test2.draw;
 
 figure;
-test4 = gramm('x',categorical(present.delay))%,'color',present.comb);
+test4 = gramm('x',categorical(present.delay)); %,'color',present.comb);
 test4.stat_bin;
 test4.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8],'column',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
 test4.set_names('x','Delays','color','conditions','column','');
@@ -382,7 +382,7 @@ test2.set_title('Distribution of Conditions in real sessions of N = 125 (block 4
 test2.draw;
 
 figure;
-test4 = gramm('x',categorical(present.delay))%,'color',present.comb);
+test4 = gramm('x',categorical(present.delay)); %,'color',present.comb);
 test4.stat_bin;
 test4.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8]);
 test4.set_names('x','Delays','color','conditions','column','');
@@ -399,8 +399,9 @@ test4.facet_wrap(categorical(present.real_session));
 test4.set_title('Distribution of Conditions in real sessions of N = 125 (block 4: N = 25)');
 test4.draw;
 
-%%
 end
+
+%%
 %             % get successive CONDITION from cond_block filter in condis
 %             
 %             
