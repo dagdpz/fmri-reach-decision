@@ -286,8 +286,8 @@ present.real_session = real_session;
 tabulate(present.choice);
 tabulate(present.comb);
 
-%% enjoy eggs - plots with ATRIFICAL block lengths 
-%(they exist, because of randomization process)
+%% plots with ATRIFICAL block lengths 
+%(atrificial blocks of 20 trials exist, because of the randomization logic)
 
 % use these plots for sanity check, if randomization worked
 
@@ -334,12 +334,13 @@ ggART4.facet_wrap(categorical(present.number));
 ggART4.set_title('Each condition-delay combination CANNOT occur equally often in one artifical block');
 ggART4.draw;
 
-%% enjoy real eggs - plots with REAL block lengths
+%% plots with REAL block lengths
 
 % these plots prove, that the way the trials are randomized (in artifical
-% blocks) also works, if you redistribute them in blocks of expected length
+% blocks) also works, if you redistribute them in blocks of expected
+% length. In that way, the constraints from above are sufficiently met
 
-% no errors are taken into acccount here
+% no errors, subjects can make are taken into acccount here
 
 % delays
 figure;
@@ -384,9 +385,8 @@ ggREALb4.draw;
 
 %% plots with REAL sessions
 
-% these plots prove, that the way the trials are randomized (in artifical
-% blocks) also works, if you redistribute them in blocks of expected length
-% they are now clustered in sessions
+% these plots show the same data as in ggREALb, but now they are clustered
+% in sessions
 
 % no errors are taken into acccount here
 
@@ -431,6 +431,15 @@ ggREALs4.draw;
 end
 
 %% Simulate expected distribution of conditions given performance
+% The error handling works in the following way.
+% If there is an error (no success), the trial is being added to the error
+% memory list, and a countdown is being set. The countdown runs down after
+% consecutive trials and if it reaches 0, not the next trial from the big
+% list, but the error is being presented. If there is another error
+% occuring up before the first one was being presented, it lines up and
+% also a second countdown lines up in the countdown array. That second
+% countdown starts counting down, when the first one was 0. 
+
 
 % define
 performance = 0.9;
@@ -440,30 +449,34 @@ run_dur = 12*60; % secs per run
 choice_bias_eye = 0.6;  % proportion of right choices (between 0 and 1)
 choice_bias_hnd = 0.4;  % proportion of right choices (between 0 and 1)
 
-% preallocate
+%%
 
+% preallocate
 sim_blocks = table();
 errors = table();
 time = 0;
 run = 1;
 t = 1;
 i = 1;
-countdown = -1;
+countdown = [];
 
 
 while run < 16
     
-    countdown = countdown - 1;
+    if ~isempty(errors)
+        countdown(1,1) = countdown(1,1) - 1; 
+    end
     
-    % choose, which trial is on (in error or present-list)
-    if countdown == 0
+    % 1.) choose, which trial is on (in error or present-list)
+    if ~isempty(countdown) && countdown(1,1) == 0
+            countdown(1) = [];
         
-        curr_trial = errors(1,:);
-        errors(1,:) = [];
+            curr_trial = errors(1,:);
+            errors(1,:) = [];
         
-        % was it a previous error?
-        curr_trial.prev_error = true;
-        
+            % was it a previous error?
+            curr_trial.prev_error = true;
+       
     else
         curr_trial = present(i,:);
         i = i + 1;
@@ -473,7 +486,7 @@ while run < 16
     end
     
     
-    % check, if successful and set time
+    % 2.) check, if successful and set time
     success = rand(1) > (1 - performance);
     
     if success
@@ -502,11 +515,12 @@ while run < 16
         errors = [errors; curr_trial];
         
         % set countdown
-        countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+        curr_countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+        countdown = [countdown; curr_countdown];
     end
     
     
-    %check if run is over with that time
+    % 3.) check if run is over with that time
     if time > run_dur % run is over
         
         curr_trial.aborted = true;
@@ -517,9 +531,12 @@ while run < 16
             % add to error list
             errors = [errors; curr_trial];
             % set countdown
-            countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+            curr_countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+            countdown = [countdown; curr_countdown];
         end
         
+        % mark the trial as a failure of sufficient time left in the run
+        % (to discriminate that abort from behavioral abort)
         curr_trial.run_over = true;
         
         time = 0;
@@ -533,7 +550,7 @@ while run < 16
         
     end
     
-    % choice bias
+    % 4.) include choice bias for choice trials
     
     % instructed
     if strcmp('instr',curr_trial.choice) % all instructed are correctly chosen
@@ -570,7 +587,7 @@ while run < 16
 
 
 
-% write it down in any case
+% 5.) write it down in any case
 sim_blocks(t,:) = curr_trial;
 sim_blocks.run(t) = run;
 t = t + 1;
