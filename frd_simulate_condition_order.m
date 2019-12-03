@@ -280,11 +280,19 @@ real_session = [repmat(1,125,1);...
 present.real_session = real_session;
 
 
-if 0
+%% 
+% Stats:
+
+tabulate(present.choice);
+tabulate(present.comb);
+
 %% enjoy eggs - plots with ATRIFICAL block lengths 
 %(they exist, because of randomization process)
 
-% use this plots for sanity check, if randomization worked
+% use these plots for sanity check, if randomization worked
+
+if 0 % Plotting
+%%
 
 % delays
 figure;
@@ -408,6 +416,7 @@ ggREALs3.set_names('x','Delays','color','conditions','column','');
 ggREALs3.facet_wrap(categorical(present.real_session));
 ggREALs3.set_title('Distribution of Delays in real sessions of N = 125 (session 4: N = 25)');
 ggREALs3.draw;
+
 
 figure;
 ggREALs4 = gramm('x',categorical(present.comb),'color',categorical(present.choice));
@@ -573,6 +582,7 @@ end
 %% plots for simulated experiment
 % now, errors are taken into account
 
+if 0 % Plotting
 %% same plot logic as above, for comparison, only successful trials
 
 % these plots show, that there are still enough delays and conditions in
@@ -663,8 +673,5 @@ ggSIMb1(1,1).set_color_options('map','brewer2');
 
 ggSIMb1(1,1).draw;
 
-%%
-
-
-
+end
 
