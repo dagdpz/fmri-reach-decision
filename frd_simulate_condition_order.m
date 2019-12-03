@@ -280,6 +280,11 @@ real_session = [repmat(1,125,1);...
 present.real_session = real_session;
 
 
+% Stats:
+
+tabulate(present.choice);
+tabulate(present.comb);
+
 if 1 % Plotting
 
 %% enjoy eggs - plots with ATRIFICAL blocks
