@@ -281,215 +281,390 @@ present.real_session = real_session;
 
 
 if 0
-%% enjoy eggs - plots with ATRIFICAL blocks
+%% enjoy eggs - plots with ATRIFICAL block lengths 
+%(they exist, because of randomization process)
 
+% use this plots for sanity check, if randomization worked
 
+% delays
 figure;
-test = gramm('x',categorical(present.delay),'color',categorical(present.number));
-test.stat_bin;
-test.set_order_options('x',[3 4 5 1 2],'color',[1 12 14 15 16 17 18 19 20 2 3 4 5 6 7 8 9 10 11 13]);
-test.set_names('x','Delays','color','artificial blocks');
-test.set_title('Every delay occurs equally often in every artifical block.');
-%test.facet_wrap(present.number);
-test.draw;
+ggART = gramm('x',categorical(present.delay),'color',categorical(present.number));
+ggART.stat_bin;
+ggART.set_order_options('x',[3 4 5 1 2],'color',[1 12 14 15 16 17 18 19 20 2 3 4 5 6 7 8 9 10 11 13]);
+ggART.set_names('x','Delays','color','artificial blocks');
+ggART.set_title('Every delay occurs equally often in every artifical block.');
+%ggART.facet_wrap(present.number);
+ggART.draw;
 
+% conditions
 figure;
-test2 = gramm('x',categorical(present.comb),'color',categorical(present.number));
-test2.stat_bin;
-test2.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 12 14 15 16 17 18 19 20 2 3 4 5 6 7 8 9 10 11 13]);
-test2.set_names('x','Delays','color','artificial blocks');
-test2.set_title('Every choice/instructed condition occurs equally often in every artifical block.');
-%test.facet_wrap(present.number);
-test2.draw;
+ggART2 = gramm('x',categorical(present.comb),'color',categorical(present.number));
+ggART2.stat_bin;
+ggART2.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 12 14 15 16 17 18 19 20 2 3 4 5 6 7 8 9 10 11 13]);
+ggART2.set_names('x','Delays','color','artificial blocks');
+ggART2.set_title('Every choice/instructed condition occurs equally often in every artifical block.');
+%ggART.facet_wrap(present.number);
+ggART2.draw;
 
+% delays + conditions
 figure;
-test3 = gramm('x',categorical(present.delay),'color',present.comb);
-test3.stat_bin;
-test3.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8]);
-test3.set_names('x','Delays','color','conditions');
-test3.set_title('Within all 400 trials, each choice/instructed condition occurs equally often for each delay');
-%test3.facet_wrap(present.choice);
-test3.draw;
+ggART3 = gramm('x',categorical(present.delay),'color',present.comb);
+ggART3.stat_bin;
+ggART3.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8]);
+ggART3.set_names('x','Delays','color','conditions');
+ggART3.set_title('Within all 400 trials, each choice/instructed condition occurs equally often for each delay');
+%ggART3.facet_wrap(present.choice);
+ggART3.draw;
 
+% delays + conditions scattered in blocks
 figure;
-test4 = gramm('x',categorical(present.delay),'color',present.comb);
-test4.stat_bin;
-test4.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8],'column',[1 12 14 15 16 17 18 19 20 2 3 4 5 6 7 8 9 10 11 13]);
-test4.set_names('x','Delays','color','conditions','column','');
-test4.facet_wrap(categorical(present.number));
-test4.set_title('Each condition-delay combination CANNOT occur equally often in one artifical block');
-test4.draw;
+ggART4 = gramm('x',categorical(present.delay),'color',present.comb);
+ggART4.stat_bin;
+ggART4.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8],'column',[1 12 14 15 16 17 18 19 20 2 3 4 5 6 7 8 9 10 11 13]);
+ggART4.set_names('x','Delays','color','conditions','column','');
+ggART4.facet_wrap(categorical(present.number));
+ggART4.set_title('Each condition-delay combination CANNOT occur equally often in one artifical block');
+ggART4.draw;
 
-%% enjoy real eggs - plots with REAL blocks
+%% enjoy real eggs - plots with REAL block lengths
 
+% these plots prove, that the way the trials are randomized (in artifical
+% blocks) also works, if you redistribute them in blocks of expected length
+
+% no errors are taken into acccount here
+
+% delays
 figure;
-test = gramm('x',categorical(present.delay),'color',categorical(present.real_block));
-test.stat_bin;
-test.set_order_options('x',[3 4 5 1 2],'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
-test.set_names('x','Delays','color','artificial blocks');
-test.set_title('Distribution of Delays in real blocks of N = 25 ');
-%test.facet_wrap(present.number);
-test.draw;
+ggREALb = gramm('x',categorical(present.delay),'color',categorical(present.real_block));
+ggREALb.stat_bin;
+ggREALb.set_order_options('x',[3 4 5 1 2],'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+ggREALb.set_names('x','Delays','color','real blocks');
+ggREALb.set_title('Distribution of Delays in real blocks of N = 25 ');
+%ggREALb.facet_wrap(present.number);
+ggREALb.draw;
 
+% conditions
 figure;
-test2 = gramm('x',categorical(present.comb),'color',categorical(present.real_block));
-test2.stat_bin;
-test2.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
-test2.set_names('x','Delays','color','artificial blocks');
-test2.set_title('Distribution of Conditions in real blocks of N = 25 ');
-%test.facet_wrap(present.number);
-test2.draw;
+ggREALb2 = gramm('x',categorical(present.comb),'color',categorical(present.real_block));
+ggREALb2.stat_bin;
+ggREALb2.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+ggREALb2.set_names('x','Delays','color','real blocks');
+ggREALb2.set_title('Distribution of Conditions in real blocks of N = 25 ');
+%ggREALb.facet_wrap(present.number);
+ggREALb2.draw;
 
+% delays scattered in blocks
 figure;
-test4 = gramm('x',categorical(present.delay))%,'color',present.comb);
-test4.stat_bin;
-test4.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8],'column',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
-test4.set_names('x','Delays','color','conditions','column','');
-test4.facet_wrap(categorical(present.real_block));
-test4.set_title('Distribution of Delays in real blocks of N = 25');
-test4.draw;
+ggREALb3 = gramm('x',categorical(present.delay))%,'color',present.comb);
+ggREALb3.stat_bin;
+ggREALb3.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8],'column',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+ggREALb3.set_names('x','Delays','color','conditions','column','');
+ggREALb3.facet_wrap(categorical(present.real_block));
+ggREALb3.set_title('Distribution of Delays in real blocks of N = 25');
+ggREALb3.draw;
 
+% conditions scattered in blocks
 figure;
-test4 = gramm('x',categorical(present.comb),'color',categorical(present.choice));
-test4.stat_bin;
-test4.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 2 5 6 3 4 7 8],'column',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
-test4.set_names('x','conditions','color','','column','');
-test4.facet_wrap(categorical(present.real_block));
-test4.set_title('Distributino of Conditions in real blocks of N = 25');
-test4.draw;
-
-
+ggREALb4 = gramm('x',categorical(present.comb),'color',categorical(present.choice));
+ggREALb4.stat_bin;
+ggREALb4.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 2 5 6 3 4 7 8],'column',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+ggREALb4.set_names('x','conditions','color','','column','');
+ggREALb4.facet_wrap(categorical(present.real_block));
+ggREALb4.set_title('Distributino of Conditions in real blocks of N = 25');
+ggREALb4.draw;
 
 
 %% plots with REAL sessions
 
-figure;
-test = gramm('x',categorical(present.delay),'color',categorical(present.real_session));
-test.stat_bin;
-test.set_order_options('x',[3 4 5 1 2]);%;,'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
-test.set_names('x','Delays','color','artificial blocks');
-test.set_title('Distribution of Delays in real sessions of N = 125 (block 4: N = 25)');
-%test.facet_wrap(present.number);
-test.draw;
+% these plots prove, that the way the trials are randomized (in artifical
+% blocks) also works, if you redistribute them in blocks of expected length
+% they are now clustered in sessions
+
+% no errors are taken into acccount here
 
 figure;
-test2 = gramm('x',categorical(present.comb),'color',categorical(present.real_session));
-test2.stat_bin;
-test2.set_order_options('x',[1 2 5 6 3 4 7 8]);
-test2.set_names('x','Delays','color','artificial blocks');
-test2.set_title('Distribution of Conditions in real sessions of N = 125 (block 4: N = 25) ');
-%test.facet_wrap(present.number);
-test2.draw;
+ggREALs = gramm('x',categorical(present.delay),'color',categorical(present.real_session));
+ggREALs.stat_bin;
+ggREALs.set_order_options('x',[3 4 5 1 2]);%;,'color',[1 9 10 11 12 13 14 15 16 2 3 4 5 6 7 8]);
+ggREALs.set_names('x','Delays','color','real sessions');
+ggREALs.set_title('Distribution of Delays in real sessions of N = 125 (session 4: N = 25)');
+%ggREALs.facet_wrap(present.number);
+ggREALs.draw;
 
 figure;
-test4 = gramm('x',categorical(present.delay))%,'color',present.comb);
-test4.stat_bin;
-test4.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8]);
-test4.set_names('x','Delays','color','conditions','column','');
-test4.facet_wrap(categorical(present.real_session));
-test4.set_title('Distribution of Delays in real sessions of N = 125 (block 4: N = 25)');
-test4.draw;
+ggREALs2 = gramm('x',categorical(present.comb),'color',categorical(present.real_session));
+ggREALs2.stat_bin;
+ggREALs2.set_order_options('x',[1 2 5 6 3 4 7 8]);
+ggREALs2.set_names('x','Delays','color','real sessions');
+ggREALs2.set_title('Distribution of Conditions in real sessions of N = 125 (session 4: N = 25) ');
+%ggREALs.facet_wrap(present.number);
+ggREALs2.draw;
 
 figure;
-test4 = gramm('x',categorical(present.comb),'color',categorical(present.choice));
-test4.stat_bin;
-test4.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 2 5 6 3 4 7 8]);
-test4.set_names('x','conditions','color','','column','');
-test4.facet_wrap(categorical(present.real_session));
-test4.set_title('Distribution of Conditions in real sessions of N = 125 (block 4: N = 25)');
-test4.draw;
+ggREALs3 = gramm('x',categorical(present.delay))%,'color',present.comb);
+ggREALs3.stat_bin;
+ggREALs3.set_order_options('x',[3 4 5 1 2],'color',[1 2 5 6 3 4 7 8]);
+ggREALs3.set_names('x','Delays','color','conditions','column','');
+ggREALs3.facet_wrap(categorical(present.real_session));
+ggREALs3.set_title('Distribution of Delays in real sessions of N = 125 (session 4: N = 25)');
+ggREALs3.draw;
+
+figure;
+ggREALs4 = gramm('x',categorical(present.comb),'color',categorical(present.choice));
+ggREALs4.stat_bin;
+ggREALs4.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 2 5 6 3 4 7 8]);
+ggREALs4.set_names('x','conditions','color','','column','');
+ggREALs4.facet_wrap(categorical(present.real_session));
+ggREALs4.set_title('Distribution of Conditions in real sessions of N = 125 (session 4: N = 25)');
+ggREALs4.draw;
 
 %%
 end
-%             % get successive CONDITION from cond_block filter in condis
-%             
-%             
-%             % preallocate
-%             which_cond_delay = 0;
-%             p = 0;
-%             
-%             % scramble eggs at the beginning of each artifical block
-%             if i == 1
-%                 delays = delays_ordered(randperm(length(delays_ordered)),randperm(length(delays_ordered)));
-%             end
-%             
-%             
-%             % WRONG run through randomOrder_delay and find one, where there still is
-%             % a possible match with current condition
-%             todo_delay = find(~done_delay);
-%             randomOrder_delay = randperm(numel(todo_delay));
-%             %
-%             while sum(which_cond_delay) < 1 % if it is empty still
-%                 
-%                 % go one step further in randomOrder_delay
-%                 p = p + 1;
-%                 
-%                 % get random delay out ouf randomOrder at place p
-%                 which_delay = delay_all(todo_delay(randomOrder_delay(p)));
-%                 
-%                 % select that delay in condis
-%                 select_delay = which_delay == condis.delay;
-%                 
-%                 % filter out all posibilities from condis with respective
-%                 % cond and delay, if they are not done yet
-%                 which_cond_delay = select_cond & select_delay & ~condis.done; %logical
-%             end
-%         end
-%         % which of the del_block conditions is done? mark it in done_delay
-%         done_delay(todo_delay(randomOrder_delay(p))) = 1;
-%         
-%         delay_all(done_delay)
-%         
-%         % select a single condi specifyed by which_cond_delay
-%         todo_condis = find(which_cond_delay); % get indices of selected conditions
-%         which_condi = todo_condis(1);
-%         
-%         % which of the condi is done? mark is in condis
-%         condis.done(which_condi) = 1;
-%         
-%         % put selected condi in presentation condis
-%         art_block = [art_block; condis(which_condi,:)];
-%     end
-%     
-% 
-%   
-%     
-% end
-% 
-% 
-% % % draw one trial which has not been successfully executed
-% % todo = find(~done); % indices of what trials are left over (--> find gives you those indicies where the variable is not zero)
-% % randomOrder = randperm(numel(todo));
-% % do = todo(randomOrder(1));
-% % 
-% % 
-% % % execute trial with 80% success
-% % success = rand(1)>0.2;
-% % done(do) = success;
-% % 
-% % % report trial
-% % 
-% % fprintf('trialnumber: %i\ttrial presented: %i\tsuccess: %i\n',t, do, success)
-% % 
-% % 
-% % end
-% 
-% % How to continue best:
-% % in einem ersten schritt:
-% % vektor mit 20 delays nehmen --> 20 zufällige bedingungen mit genau den delays aus der großen liste auswählen
-% % die aus der liste streichen,
-% % wiederholen
-% %
-% % danach einbauen --> irgendwie bedingungen balancen
-% %
-% 
-% 
-% % 2 laufende Prozesse im Hintergrund:
-% % Delays im 20er block abarbeiten
-% % conditions im 40er block abarbeiten
+
+%% Simulate expected distribution of conditions given performance
+
+% define
+performance = 0.9;
+dur_trial = 18; % in secs, WITHOUT DELAY
+put_back = [2 4]; % Put back errors after how many trials [min max]?
+run_dur = 12*60; % secs per run
+choice_bias_eye = 0.6;  % proportion of right choices (between 0 and 1)
+choice_bias_hnd = 0.4;  % proportion of right choices (between 0 and 1)
+
+% preallocate
+
+sim_blocks = table();
+errors = table();
+time = 0;
+run = 1;
+t = 1;
+i = 1;
+countdown = -1;
+
+
+while run < 16
+    
+    countdown = countdown - 1;
+    
+    % choose, which trial is on (in error or present-list)
+    if countdown == 0
+        
+        curr_trial = errors(1,:);
+        errors(1,:) = [];
+        
+        % was it a previous error?
+        curr_trial.prev_error = true;
+        
+    else
+        curr_trial = present(i,:);
+        i = i + 1;
+        
+        % was it a previous error?
+        curr_trial.prev_error = false;
+    end
+    
+    
+    % check, if successful and set time
+    success = rand(1) > (1 - performance);
+    
+    if success
+        % add time
+        curr_trial.length = dur_trial + curr_trial.delay;
+        time = time +  curr_trial.length;
+        
+        % add run number
+        curr_trial.run = run;
+        
+        % if aborted
+        curr_trial.aborted = false;
+        
+    else
+        % add random time
+        curr_trial.length = randperm((dur_trial + curr_trial.delay -2),1) + 2; %two seconds ITI are always there ;
+        time = time +  curr_trial.length;
+        
+        % add run number
+        curr_trial.run = run;
+        
+        % if aborted
+        curr_trial.aborted = true;
+        
+        % add to error list
+        errors = [errors; curr_trial];
+        
+        % set countdown
+        countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+    end
+    
+    
+    %check if run is over with that time
+    if time > run_dur % run is over
+        
+        curr_trial.aborted = true;
+        curr_trial.length = run_dur - (time - curr_trial.length); % trial gets aborted, when run_dur is reached.
+        
+        
+        if success % if it is a success trial, it has not been put in errors yet
+            % add to error list
+            errors = [errors; curr_trial];
+            % set countdown
+            countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+        end
+        
+        curr_trial.run_over = true;
+        
+        time = 0;
+        run = run + 1;
+        
+        if run == 16
+            break;
+        end
+    else
+        curr_trial.run_over = false;
+        
+    end
+    
+    % choice bias
+    
+    % instructed
+    if strcmp('instr',curr_trial.choice) % all instructed are correctly chosen
+        curr_trial.target_chosen = curr_trial.side;
+        
+    % choice hand
+    elseif strcmp('choi',curr_trial.choice) && strcmp('hnd',curr_trial.eff)
+        
+        target_chosen_choice_hnd = rand(1) < choice_bias_hnd; % 1 if right, 0 if left
+        
+        if  target_chosen_choice_hnd
+            curr_trial.target_chosen = {'right'};
+        else
+            curr_trial.target_chosen = {'left'};
+        end
+        
+        
+    % choice eye
+    elseif strcmp('choi',curr_trial.choice) && strcmp('eye',curr_trial.eff)
+        
+        target_chosen_choice_eye = rand(1) < choice_bias_eye; % 1 if right, 0 if left
+        
+        if  target_chosen_choice_eye
+            curr_trial.target_chosen = {'right'};
+        else
+            curr_trial.target_chosen = {'left'};
+        end
+        
+    end
+    
+    
+    
+    
 
 
 
-% 
-% 
-% 
+% write it down in any case
+sim_blocks(t,:) = curr_trial;
+sim_blocks.run(t) = run;
+t = t + 1;
+
+    
+
+end
+
+%% plots for simulated experiment
+% now, errors are taken into account
+
+%% same plot logic as above, for comparison, only successful trials
+
+% these plots show, that there are still enough delays and conditions in
+% each block, even when taken performance into consideration
+
+
+% delays of only successful trials
+figure;
+ggSIMb = gramm('x',categorical(sim_blocks.delay),'color',categorical(sim_blocks.run),'subset',~sim_blocks.aborted);
+ggSIMb.stat_bin;
+ggSIMb.set_order_options('x',[3 4 5 1 2],'color',[1 8 9 10 11 12 13 14 15 2 3 4 5 6 7]);
+ggSIMb.set_names('x','Delays','color','simulated blocks');
+ggSIMb.set_title(['Delays in simulated blocks; onyl successful trials; performance = ' num2str(performance) '; error back after ' ...
+    num2str(put_back(1)) ' to ' num2str(put_back(2)) ' trials']);
+%ggSIMb.facet_wrap(present.number);
+ggSIMb.draw;
+
+% conditions of only successful trials
+figure;
+ggSIMb2 = gramm('x',categorical(sim_blocks.comb),'color',categorical(sim_blocks.run),'subset',~sim_blocks.aborted);
+ggSIMb2.stat_bin;
+ggSIMb2.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 8 9 10 11 12 13 14 15 2 3 4 5 6 7]);
+ggSIMb2.set_names('x','Conditions','color','simulated blocks');
+ggSIMb2.set_title(['Conditions in simulated blocks; only successful trials; performance = ' num2str(performance) '; error back after ' ...
+    num2str(put_back(1)) ' to ' num2str(put_back(2)) ' trials']);
+%ggSIMb.facet_wrap(present.number);
+ggSIMb2.draw;
+
+
+% delays scattered in blocks, only successfull trials
+figure;
+ggSIMb3 = gramm('x',categorical(sim_blocks.delay));%,'color',present.comb);
+ggSIMb3.stat_bin;
+ggSIMb3.set_order_options('x',[3 4 5 1 2],'column',[1 8 9 10 11 12 13 14 15 2 3 4 5 6 7]);
+ggSIMb3.set_names('x','Delays','color','conditions','column','');
+ggSIMb3.facet_wrap(categorical(sim_blocks.run));
+ggSIMb3.set_title(['Delays in simulated blocks; only successful trials; performance = ' num2str(performance) '; error back after ' ...
+    num2str(put_back(1)) ' to ' num2str(put_back(2)) ' trials']);
+ggSIMb3.draw;
+
+% conditions scattered in blocks, only successfull trials
+figure;
+ggSIMb4 = gramm('x',categorical(sim_blocks.comb),'color',categorical(sim_blocks.choice));
+ggSIMb4.stat_bin;
+ggSIMb4.set_order_options('x',[1 2 5 6 3 4 7 8],'color',[1 2 5 6 3 4 7 8],'column',[1 8 9 10 11 12 13 14 15 2 3 4 5 6 7]);
+ggSIMb4.set_names('x','conditions','color','','column','');
+ggSIMb4.facet_wrap(categorical(sim_blocks.run));
+ggSIMb4.set_title(['Conditions in simulated blocks; only successful trials; performance = ' num2str(performance) '; error back after ' ...
+    num2str(put_back(1)) ' to ' num2str(put_back(2)) ' trials']);
+ggSIMb4.draw;
+
+
+%% what are the errors
+figure;
+ggSIMb5(1,1) = gramm('x', categorical(sim_blocks.eff), 'subset', sim_blocks.aborted & strcmp('choi',sim_blocks.choice));
+ggSIMb5(1,1).stat_bin;
+%ggSIMb5(1,1).set_order_options('color',[1 2 5 6 3 4 7 8]);
+ggSIMb5(1,1).set_names('x','effector','color','');
+ggSIMb5(1,1).set_title('choice aborted');
+
+ggSIMb5(1,2) = gramm('x', categorical(sim_blocks.eff), 'color', categorical(sim_blocks.side), 'subset', sim_blocks.aborted & strcmp('instr',sim_blocks.choice));
+ggSIMb5(1,2).stat_bin;
+%ggSIMb5(1,2).set_order_options('color',[1 2 5 6 3 4 7 8]);
+ggSIMb5(1,2).set_names('x','effector','color','');
+ggSIMb5(1,2).set_title('instructed aborted');
+ggSIMb5(1,2).set_color_options('map','brewer2');
+
+ggSIMb5.axe_property('YLim', [0 20]);
+ggSIMb5.set_title(['aborted trals in simulated blocks; performance = ' num2str(performance) '; error back after ' ...
+    num2str(put_back(1)) ' to ' num2str(put_back(2)) ' trials']);
+ggSIMb5.draw;
+
+
+
+%% 
+% these plots show, that even considering choice bias and errors, there are
+% still enough trials in each condition with the randomization method used.
+
+figure;
+ggSIMb1(1,1) = gramm('x',categorical(sim_blocks.eff),'color',categorical(sim_blocks.target_chosen),'subset',~sim_blocks.aborted);
+ggSIMb1(1,1).stat_bin;
+ggSIMb1(1,1).set_order_options();
+ggSIMb1(1,1).facet_wrap(sim_blocks.choice);
+ggSIMb1(1,1).set_names('x','effector','color','','column','');
+ggSIMb1(1,1).set_title(['Targets chosen; successful only; performance = ' num2str(performance) '; error back after ' ...
+    num2str(put_back(1)) ' to ' num2str(put_back(2)) ' trials; choice bias: eye ' num2str(choice_bias_eye) ', hnd ' num2str(choice_bias_hnd)]);
+ggSIMb1(1,1).set_color_options('map','brewer2');
+
+ggSIMb1(1,1).draw;
+
+%%
+
+
+
+
