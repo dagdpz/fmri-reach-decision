@@ -657,7 +657,7 @@ ggSIMb5.draw;
 
 
 
-%% 
+%% How many trials in each condition
 % these plots show, that even considering choice bias and errors, there are
 % still enough trials in each condition with the randomization method used.
 
@@ -674,4 +674,7 @@ ggSIMb1(1,1).set_color_options('map','brewer2');
 ggSIMb1(1,1).draw;
 
 end
+%%
+
+
 
