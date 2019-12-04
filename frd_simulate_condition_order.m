@@ -557,7 +557,7 @@ while run < 16
     if strcmp('instr',curr_trial.choice) % all instructed are correctly chosen
         curr_trial.target_chosen = curr_trial.side;
         
-        % choice hand
+    % choice hand
     elseif strcmp('choi',curr_trial.choice) && strcmp('hnd',curr_trial.eff)
         
         target_chosen_choice_hnd = rand(1) < choice_bias_hnd; % 1 if right, 0 if left
