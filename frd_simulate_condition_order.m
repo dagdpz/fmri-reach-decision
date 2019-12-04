@@ -286,8 +286,8 @@ present.real_session = real_session;
 tabulate(present.choice);
 tabulate(present.comb);
 
-%% enjoy eggs - plots with ATRIFICAL block lengths 
-%(they exist, because of randomization process)
+%% plots with ATRIFICAL block lengths 
+%(atrificial blocks of 20 trials exist, because of the randomization logic)
 
 % use these plots for sanity check, if randomization worked
 
@@ -334,12 +334,13 @@ ggART4.facet_wrap(categorical(present.number));
 ggART4.set_title('Each condition-delay combination CANNOT occur equally often in one artifical block');
 ggART4.draw;
 
-%% enjoy real eggs - plots with REAL block lengths
+%% plots with REAL block lengths
 
 % these plots prove, that the way the trials are randomized (in artifical
-% blocks) also works, if you redistribute them in blocks of expected length
+% blocks) also works, if you redistribute them in blocks of expected
+% length. In that way, the constraints from above are sufficiently met
 
-% no errors are taken into acccount here
+% no errors, subjects can make are taken into acccount here
 
 % delays
 figure;
@@ -384,9 +385,8 @@ ggREALb4.draw;
 
 %% plots with REAL sessions
 
-% these plots prove, that the way the trials are randomized (in artifical
-% blocks) also works, if you redistribute them in blocks of expected length
-% they are now clustered in sessions
+% these plots show the same data as in ggREALb, but now they are clustered
+% in sessions
 
 % no errors are taken into acccount here
 
@@ -440,23 +440,31 @@ run_dur = 12*60; % secs per run
 choice_bias_eye = 0.6;  % proportion of right choices (between 0 and 1)
 choice_bias_hnd = 0.4;  % proportion of right choices (between 0 and 1)
 
-% preallocate
+%%
+% The simulation works in the following way: Error trials are being put
+% back into the chain, after in that case 2 to 4 consecutive trials after
+% the error has been done. If there is a second error lining up in the
+% error-queue, the first one is being put into the chain as described, and
+% the second one is being put into the chain 2 to 4 seconds
 
+
+% preallocate
 sim_blocks = table();
 errors = table();
 time = 0;
 run = 1;
 t = 1;
 i = 1;
-countdown = -1;
+countdown.c = table();
 
 
 while run < 16
     
-    countdown = countdown - 1;
+    countdown.c(1) = countdown.c(1) - 1;
     
     % choose, which trial is on (in error or present-list)
-    if countdown == 0
+    if countdown.c(1) == 0
+        countdown.c(1) = [];
         
         curr_trial = errors(1,:);
         errors(1,:) = [];
@@ -502,7 +510,8 @@ while run < 16
         errors = [errors; curr_trial];
         
         % set countdown
-        countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+        curr_countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+        countdown.c = [countdown.c; curr_countdown];
     end
     
     
@@ -517,7 +526,8 @@ while run < 16
             % add to error list
             errors = [errors; curr_trial];
             % set countdown
-            countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+            curr_countdown = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+            countdown.c = [countdown.c; curr_countdown];
         end
         
         curr_trial.run_over = true;
