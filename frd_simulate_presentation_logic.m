@@ -43,7 +43,7 @@ else
     time = time +  curr_trial.length;
     
     % put error trial back into present
-    err_back = randperm(length(put_back(1):put_back(2)),1) - 1 + put_back(1)
+    err_back = randperm(length(put_back(1):put_back(2)),1) - 1 + put_back(1);
     present = [present(1:(counter + err_back - 1),:); ...
                present(counter,:); ...
                present((counter + err_back):end,:)];
