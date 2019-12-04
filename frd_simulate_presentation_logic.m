@@ -6,7 +6,7 @@ clear all
 
 % define
 put_back = [2 5]; % Put back errors after how many trials [min max]?
-performance = 0.9;
+performance = 0.95;
 run_dur = 12*60; % secs per run
 dur_trial = 18; % in secs, WITHOUT DELAY
 
@@ -43,7 +43,7 @@ else
     time = time +  curr_trial.length;
     
     % put error trial back into present
-    err_back = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+    err_back = randperm(length(put_back(1):put_back(2)),1) - 1 + put_back(1)
     present = [present(1:(counter + err_back - 1),:); ...
                present(counter,:); ...
                present((counter + err_back):end,:)];
@@ -57,7 +57,7 @@ if time > run_dur
     curr_trial.length =  run_dur - (time - curr_trial.length); % last trial lasts exactly until end of run duration (12*60s)
     
     if success % if it was a sucessful trial, it was not put back into present yet
-        err_back = randperm((put_back(2) - put_back(1)),1) + put_back(1);
+        err_back = randperm(length(put_back(1):put_back(2)),1) - 1 + put_back(1);
         present = [present(1:(counter + err_back - 1),:); ...
                    present(counter,:); ...
                    present((counter + err_back):end,:)];     
@@ -74,9 +74,6 @@ counter = counter +1;
 
 save('Y:\MRI\Human\fMRI-reach-decision\Simulation\shuffled_conditions_S01_changed.mat','present','counter','sim_blocks');
 
-if run == 16
-    break;
-end
 
 end
 
