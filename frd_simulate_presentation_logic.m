@@ -161,13 +161,13 @@ if 0 % Plotting
     % still enough trials in each condition with the randomization method used.
     
     figure;
-    ggSIMb1(1,1) = gramm('x',categorical(sim_blocks.eff),'color',categorical(sim_blocks.target_chosen),'subset',~sim_blocks.aborted);
+    ggSIMb1(1,1) = gramm('x',categorical(sim_blocks.eff),'color',categorical(sim_blocks.side),'subset',~sim_blocks.aborted);
     ggSIMb1(1,1).stat_bin;
     ggSIMb1(1,1).set_order_options();
     ggSIMb1(1,1).facet_wrap(sim_blocks.choice);
     ggSIMb1(1,1).set_names('x','effector','color','','column','');
     ggSIMb1(1,1).set_title(['Targets chosen; successful only; performance = ' num2str(performance) '; error back after ' ...
-        num2str(put_back(1)) ' to ' num2str(put_back(2)) ' trials; choice bias: eye ' num2str(choice_bias_eye) ', hnd ' num2str(choice_bias_hnd)]);
+        num2str(put_back(1)) ' to ' num2str(put_back(2)) ' trials']);
     ggSIMb1(1,1).set_color_options('map','brewer2');
     
     ggSIMb1(1,1).draw;
