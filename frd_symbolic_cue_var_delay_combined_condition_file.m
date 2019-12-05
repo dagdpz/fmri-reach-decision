@@ -73,7 +73,7 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                 SETTINGS.TextFeedback               = 1;
                 
                 force_conditions                    = 2; %1 
-                N_repetitions                       = 2;
+                N_repetitions                       = 400;
                 
                 fix_eye_y                           = 0.375; % -2
                 fix_hnd_y                           = -0.375; % -6
@@ -86,7 +86,7 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                 All.reach_hand_con                  = 2; %2
                 All.type_con                        = 3;
                 All.effector_con                    = [4];  %0 eye %1 free gaze reach %2 joint movement eye and hand  %3 dissociated saccade %4 dissociated reach %6 free gaze reach with initial eye fixation
-                All.timing_con                      = [29];%[31 31 31 31 31 32]; % [31 31 31 31 31 31 31 31 31 32]; % 29 playground, 31 Master Thesis, 32 Master Thesis CATCH TRIALS 40  Carstens Paper 
+                All.timing_con                      = [31];%[31 31 31 31 31 32]; % [31 31 31 31 31 31 31 31 31 32]; % 29 playground, 31 Master Thesis, 32 Master Thesis CATCH TRIALS 40  Carstens Paper 
                 All.size_con                        = 9; %symbolic cue
                 All.correct_choice_target           = [1 1 2 2 2]; %1 only first target correct %2 both are correct, %[1 2] % [1 1 2 2 2];
                 All.instructed_choice_con           = 1;
@@ -101,7 +101,7 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                 put_back                            = [2 4]; % min max how many trials later error is being put back
                 
                 % new part about pre-saved trial sequence
-                load([pathname filesep monkey_name filesep monkey_name filesep 'shuffled_conditions_S01.mat']);
+                load([pathname filesep monkey filesep monkey_name filesep 'shuffled_conditions_S01.mat']);
                 
                 if exist('dyn','var') && dyn.trialNumber > 1,
                     
@@ -110,15 +110,12 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                         % put error trial back into present
                         err_back = randperm(length(put_back(1):put_back(2)),1) - 1 + put_back(1);
                         
-                        present = [present(1:(counter + err_back - 1),:); ...
-                            present(counter,:); ...
-                            present((counter + err_back):end,:)];
+                        present = [present(1:(shuffled_conditions_counter + err_back - 1),:); ...
+                            present(shuffled_conditions_counter,:); ...
+                            present((shuffled_conditions_counter + err_back):end,:)];
                         
                     end
                     
-                    % save updated _shuffled_conditions_S01
-                    shuffled_conditions_counter = shuffled_conditions_counter + 1;
-                    save([pathname filesep monkey filesep monkey_name filesep 'shuffled_conditions_S01.mat'],'present','shuffled_conditions_counter');
                     
                 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
@@ -139,44 +136,7 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
         ordered_sequence_indexes_exp{n_exp} = 1:N_total_conditions*N_repetitions;
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % choice
-    if strcmp('Symbolic_cue_sac_reach',esperimentazione)
-        
-        % choice
-        if strcmp('choi',present.choice(shuffled_conditions_counter - 1))
-     
-            Current_con.correct_choice_target = [1 2];
-            
-        elseif strcmp('instr',present.choice(shuffled_conditions_counter - 1))
-            
-            Current_con.correct_choice_target  = 1;
-        end
-        
-        % effector
-        if strcmp('hnd',present.eff(shuffled_conditions_counter - 1))
-            
-            Current_con.effector_con = 4;
-            
-        elseif strcmp('eye',present.eff(shuffled_conditions_counter - 1))
-        
-            Current_con.effector_con = 3;
-            
-        end
-        
-        % side  
-        if strcmp('left',present.side(shuffled_conditions_counter - 1))
-            
-            Current_con.exact_excentricity_con_x = [-9.5];
-            
-        elseif strcmp('eye',present.side(shuffled_conditions_counter - 1))
-        
-            Current_con.exact_excentricity_con_x = [9.5];
-            
-        end
-    
-     end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+   
 
     
     sequence_matrix          = [sequence_matrix_exp{:}];
@@ -236,6 +196,47 @@ for field_index=1:numel(all_fieldnames)
     dyn.trial_classifier(field_index) = abs(round(Current_con.(all_fieldnames{field_index})));
 end
 
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+    % choice
+    if strcmp('Symbolic_cue_sac_reach',esperimentazione)
+        
+        % choice
+        if strcmp('choi',present.choice(shuffled_conditions_counter))
+     
+            Current_con.correct_choice_target = 2;
+            
+        elseif strcmp('instr',present.choice(shuffled_conditions_counter))
+            
+            Current_con.correct_choice_target = 1;
+        end
+        
+        % effector
+        if strcmp('hnd',present.eff(shuffled_conditions_counter))
+            
+            Current_con.effector_con = 4;
+            
+        elseif strcmp('eye',present.eff(shuffled_conditions_counter))
+        
+            Current_con.effector_con = 3;
+            
+        end
+        
+        % side  
+        if strcmp('left',present.side(shuffled_conditions_counter))
+            
+            Current_con.exact_excentricity_con_x = [-9.5];
+            
+        elseif strcmp('right',present.side(shuffled_conditions_counter))
+        
+            Current_con.exact_excentricity_con_x = [9.5];
+            
+        end
+    
+    end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
 
 %% Fixation offset
 fix_eye_x             = Current_con.offset_con;
@@ -370,7 +371,7 @@ switch Current_con.timing_con
         task.timing.cue_time_hold               = 0.200; % 0.200
         task.timing.cue_time_hold_var           = 0; % 0
         
-        task.timing.mem_time_hold               = present.delay(shuffled_conditions_counter - 1);%2;
+        task.timing.mem_time_hold               = present.delay(shuffled_conditions_counter);%2;
         task.timing.mem_time_hold_var           = 0;
         
         task.timing.tar_inv_time_to_acquire_eye = 1; %3 % 0.5
@@ -754,4 +755,9 @@ switch Current_con.effector_con
 %         task.hnd.tar(2).shape ='square';
 end
 
-
+if strcmp('Symbolic_cue_sac_reach',esperimentazione)
+% save updated _shuffled_conditions_S01
+                    shuffled_conditions_counter = shuffled_conditions_counter + 1;
+                    save([pathname filesep monkey filesep monkey_name filesep 'shuffled_conditions_S01.mat'],'present','shuffled_conditions_counter');
+end
+                    
