@@ -13,7 +13,7 @@ global SETTINGS
         
 if ~exist('dyn','var') || dyn.trialNumber == 1
     
-  % esperimentazione        = {'calibration'};
+ %  esperimentazione        = {'calibration'};
    esperimentazione      = {'Symbolic_cue_sac_reach'};
     
    
@@ -72,6 +72,9 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                 SETTINGS.Radius_square              = 1;
                 SETTINGS.TextFeedback               = 1;
                 
+                force_conditions                    = 2; %1 
+                N_repetitions                       = 2;
+                
                 fix_eye_y                           = 0.375; % -2
                 fix_hnd_y                           = -0.375; % -6
                 
@@ -82,11 +85,11 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                 All.offset_con                      = 0;
                 All.reach_hand_con                  = 2; %2
                 All.type_con                        = 3;
-                All.effector_con                    = [3 4];  %0 eye %1 free gaze reach %2 joint movement eye and hand  %3 dissociated saccade %4 dissociated reach %6 free gaze reach with initial eye fixation
-                All.timing_con                      = 31; % 29 playground, 31 Master Thesis, 33  Carstens Paper 
+                All.effector_con                    = [4];  %0 eye %1 free gaze reach %2 joint movement eye and hand  %3 dissociated saccade %4 dissociated reach %6 free gaze reach with initial eye fixation
+                All.timing_con                      = [29];%[31 31 31 31 31 32]; % [31 31 31 31 31 31 31 31 31 32]; % 29 playground, 31 Master Thesis, 32 Master Thesis CATCH TRIALS 40  Carstens Paper 
                 All.size_con                        = 9; %symbolic cue
                 All.correct_choice_target           = [1 1 2 2 2]; %1 only first target correct %2 both are correct, %[1 2] % [1 1 2 2 2];
-                All.instructed_choice_con           = 1; % special for instructed-choice task, where both targets are visible but there is an instruction
+                All.instructed_choice_con           = 1;
                 All.var_x                           = 0;
                 All.var_y                           = 0;
                 
@@ -119,10 +122,7 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                     
                 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
-                
-                
-                
-                
+  
         end
         
         all_fieldnames=fieldnames(All);
@@ -138,8 +138,8 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
         sequence_matrix_exp{n_exp}          = sequence_matrix_exp_temp;
         ordered_sequence_indexes_exp{n_exp} = 1:N_total_conditions*N_repetitions;
     end
-    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % choice
     if strcmp('Symbolic_cue_sac_reach',esperimentazione)
         
@@ -154,31 +154,30 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
         end
         
         % effector
-        if strcmp('hnd',present.choice(shuffled_conditions_counter - 1))
+        if strcmp('hnd',present.eff(shuffled_conditions_counter - 1))
             
             Current_con.effector_con = 4;
             
-        elseif strcmp('eye',present.choice(shuffled_conditions_counter - 1))
+        elseif strcmp('eye',present.eff(shuffled_conditions_counter - 1))
         
             Current_con.effector_con = 3;
             
         end
         
         % side  
-        if strcmp('left',present.choice(shuffled_conditions_counter - 1))
+        if strcmp('left',present.side(shuffled_conditions_counter - 1))
             
             Current_con.exact_excentricity_con_x = [-9.5];
             
-        elseif strcmp('eye',present.choice(shuffled_conditions_counter - 1))
+        elseif strcmp('eye',present.side(shuffled_conditions_counter - 1))
         
             Current_con.exact_excentricity_con_x = [9.5];
             
         end
     
      end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    %%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+
     
     sequence_matrix          = [sequence_matrix_exp{:}];
     idx_exact_x=ismember(all_fieldnames,'exact_excentricity_con_x');
@@ -242,8 +241,6 @@ end
 fix_eye_x             = Current_con.offset_con;
 fix_hnd_x             = fix_eye_x;
 
-
-
 %% CHOICE\INSTRUCTED
 task.choice                 = Current_con.instructed_choice_con;
 
@@ -255,6 +252,16 @@ task.effector               = Current_con.effector_con;
 
 %% REACH hand
 task.reach_hand             = Current_con.reach_hand_con;
+
+% %% STIMULATION timing
+% switch Current_con.stim_con
+%     case 0
+%         task.microstim.stim_on      = 0;
+%         task.microstim.state        = [STATE.TAR_ACQ];
+%         task.microstim.start{1}     = [0] ;
+%         task.microstim.end{1}       = [0];
+%
+% end
 
 %% TIMING
 switch Current_con.timing_con
@@ -309,7 +316,7 @@ switch Current_con.timing_con
         task.timing.fix_time_to_acquire_hnd     = 2; %1.5;
         
         % 3 FIXATION
-        task.timing.fix_time_hold               = 2; % 5 
+        task.timing.fix_time_hold               = 1; % 5 
         task.timing.fix_time_hold_var           = 0; 
         
         % 6 CUE
@@ -317,15 +324,15 @@ switch Current_con.timing_con
         task.timing.cue_time_hold_var           = 0; 
         
         % 7 MEMORY
-        task.timing.mem_time_hold               = 2;%2;
-        task.timing.mem_time_hold_var           = 0;
+        task.timing.mem_time_hold               = 3;%2;
+        task.timing.mem_time_hold_var           = 7;
         
         % 9 GO
-        task.timing.tar_inv_time_to_acquire_eye = 5; 
-        task.timing.tar_inv_time_to_acquire_hnd = 2;
+        task.timing.tar_inv_time_to_acquire_eye = 0.5; 
+        task.timing.tar_inv_time_to_acquire_hnd = 0.5;
         
         % 10 HOLD
-        task.timing.tar_inv_time_hold           = 3;%1
+        task.timing.tar_inv_time_hold           = 1;%1
         task.timing.tar_inv_time_hold_var       = 0;
         
         % 4 OLD ACQ (does not add up to overall hold, since targets already reached)
@@ -345,14 +352,14 @@ switch Current_con.timing_con
         task.rest_sensors_ini_time              = 0.5; % s, time to hold sensor(s) in initialize_trial before trial starts
         task.timing.wait_for_reward             = 0.3;
         
-        task.timing.grace_time_eye              = 0.7; % time allowed for blinking
+        task.timing.grace_time_eye              = 0.4; % time allowed for blinking
         task.timing.grace_time_hand             = 0.2;
         
-        task.timing.ITI_success                 = 5;%3; % 3 inter trial interval after success
+        task.timing.ITI_success                 = 2;%3; % 3 inter trial interval after success
         task.timing.ITI_success_var             = 0;
-        task.timing.ITI_fail                    = 5;%3; % 3 inter trial interval after error
+        task.timing.ITI_fail                    = 2;%3; % 3 inter trial interval after error
         task.timing.ITI_fail_var                = 0;
-        task.timing.ITI_incorrect_completed     = 5;
+        task.timing.ITI_incorrect_completed     = 2;
         
         task.timing.fix_time_to_acquire_eye     = 3; % 0.5
         task.timing.fix_time_to_acquire_hnd     = 3;
@@ -363,11 +370,11 @@ switch Current_con.timing_con
         task.timing.cue_time_hold               = 0.200; % 0.200
         task.timing.cue_time_hold_var           = 0; % 0
         
-        task.timing.mem_time_hold               = present.delay(shuffled_conditions_counter -1);
+        task.timing.mem_time_hold               = present.delay(shuffled_conditions_counter - 1);%2;
         task.timing.mem_time_hold_var           = 0;
         
         task.timing.tar_inv_time_to_acquire_eye = 1; %3 % 0.5
-        task.timing.tar_inv_time_to_acquire_hnd = 2;
+        task.timing.tar_inv_time_to_acquire_hnd = 1;
         
         task.timing.tar_inv_time_hold           = 1;%0.2;
         task.timing.tar_inv_time_hold_var       = 0;
@@ -380,10 +387,49 @@ switch Current_con.timing_con
         
         
         task.timing.text_feedback               = 2;
-   
+
+     case 32 % CATCH TRIALS Peter's master saccade-reach project 
+        
+        task.rest_sensors_ini_time              = 0.5; % s, time to hold sensor(s) in initialize_trial before trial starts
+        task.timing.wait_for_reward             = 0.3;
+        
+        task.timing.grace_time_eye              = 0.4; % time allowed for blinking
+        task.timing.grace_time_hand             = 0.2;
+        
+        task.timing.ITI_success                 = 2;%3; % 3 inter trial interval after success
+        task.timing.ITI_success_var             = 0;
+        task.timing.ITI_fail                    = 2;%3; % 3 inter trial interval after error
+        task.timing.ITI_fail_var                = 0;
+        task.timing.ITI_incorrect_completed     = 2;
+        
+        task.timing.fix_time_to_acquire_eye     = 3; % 0.5
+        task.timing.fix_time_to_acquire_hnd     = 3;
+        
+        task.timing.fix_time_hold               = 11.8;   % 0.5; % 5
+        task.timing.fix_time_hold_var           = 0;      % 0
+        
+        task.timing.cue_time_hold               = 0.200; % 0.200
+        task.timing.cue_time_hold_var           = 0; % 0
+        
+        task.timing.mem_time_hold               = 3;% ONLY CHANGED HERE FOR CATCH TRIALS
+        task.timing.mem_time_hold_var           = 7;
+        
+        task.timing.tar_inv_time_to_acquire_eye = 1; %3 % 0.5
+        task.timing.tar_inv_time_to_acquire_hnd = 1;
+        
+        task.timing.tar_inv_time_hold           = 1;%0.2;
+        task.timing.tar_inv_time_hold_var       = 0;
+        
+        task.timing.tar_time_to_acquire_eye     = 0; %0.5
+        task.timing.tar_time_to_acquire_hnd     = 0; % 1 % 0.7
+        
+        task.timing.tar_time_hold               = 0; %2 %when targets with color, they light up in that phase
+        task.timing.tar_time_hold_var           = 0;
         
         
-    case 32 %Carsten paper
+        task.timing.text_feedback               = 2;
+        
+    case 40 %Carsten paper
         
         task.rest_sensors_ini_time              = 0.5; % s, time to hold sensor(s) in initialize_trial before trial starts
         task.timing.wait_for_reward             = 0.3;
@@ -459,9 +505,9 @@ switch Current_con.size_con
     case 9 % symbolic cue
         
         task.eye.fix.size       = 0.25;
-        task.eye.fix.radius     = 4.5;
+        task.eye.fix.radius     = 4;
         task.eye.tar(1).size    = 3.4;
-        task.eye.tar(1).radius  = 4; %3.4
+        task.eye.tar(1).radius  = 4.25; %3.4
         
         task.hnd.fix.size       = 0.75; %4
         task.hnd.fix.radius     = 0.75; %4
@@ -571,8 +617,8 @@ task.hnd_right.color_bright_fix  =  [0 180 0]; % color of hand fix before fixate
 
 
 %% CUE assignment (Positions and colors !)
-task.eye.cue                                        = task.eye.tar; %%% ???????????
-task.hnd.cue                                        = task.hnd.tar; %%% ???????????
+task.eye.cue                                        = task.eye.tar;
+task.hnd.cue                                        = task.hnd.tar;
 
 task.eye.tar(1).color_dim       = [0 0 0]; % saccades: Color of selected target quickly before phase 5 (TAR_HOLD) - not influencibale in length in timing structure
 task.eye.tar(1).color_bright    = [0 0 0]; % saccades: Color of selected target during phase 5 (TAR_HOLD) 
@@ -709,6 +755,3 @@ switch Current_con.effector_con
 end
 
 
-
-    
-    
