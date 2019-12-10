@@ -1,12 +1,12 @@
 %% fdr_simulate_presentation_logic
 
 % it needs the mat file from frd_create_condition order
-
+if 1
 clear all
 
 % define
-put_back = [2 5]; % Put back errors after how many trials [min max]?
-performance = 0.95;
+put_back = [3 5]; % Put back errors after how many trials [min max]?
+performance = 0.90;
 run_dur = 12*60; % secs per run
 dur_trial = 18; % in secs, WITHOUT DELAY
 
@@ -15,7 +15,10 @@ sim_blocks = table();
 x = 1;
 time = 0;
 run = 1;
+
 load('Y:\MRI\Human\fMRI-reach-decision\Simulation\shuffled_conditions_S01.mat');
+present.err_back = zeros(height(present),1);
+present.order = [1:height(present)]';
 save('Y:\MRI\Human\fMRI-reach-decision\Simulation\shuffled_conditions_S01_changed.mat');
 %%
 
@@ -47,21 +50,30 @@ else
     present = [present(1:(counter + err_back - 1),:); ...
                present(counter,:); ...
                present((counter + err_back):end,:)];
+           
+    present.err_back(counter + err_back) = err_back;       
 end
 
 
 
 if time > run_dur
     
-    curr_trial.aborted = false;
+    curr_trial.aborted = true;
     curr_trial.length =  run_dur - (time - curr_trial.length); % last trial lasts exactly until end of run duration (12*60s)
-    
-    if success % if it was a sucessful trial, it was not put back into present yet
-        err_back = randperm(length(put_back(1):put_back(2)),1) - 1 + put_back(1);
-        present = [present(1:(counter + err_back - 1),:); ...
-                   present(counter,:); ...
-                   present((counter + err_back):end,:)];     
-    end
+
+% this part is commented, because in monkeypsych, errors caused because the
+% run is over are not being put back. The reason is, that monkeypsych only
+% knows, if the PREVIOUS trial was aborted, so in terms of putting errors
+% back it can pnly act on the previous trial. This is not possible, if
+% there did not start a next trial after the run is already finished. 
+%     if success % if it was a sucessful trial, it was not put back into present yet
+%         err_back = randperm(length(put_back(1):put_back(2)),1) - 1 + put_back(1);
+%         present = [present(1:(counter + err_back - 1),:); ...
+%                    present(counter,:); ...
+%                    present((counter + err_back):end,:)];     
+%                
+%         present.err_back(counter + err_back) = err_back;    
+%     end
     
     time = 0;
     run = run + 1;
@@ -76,6 +88,41 @@ save('Y:\MRI\Human\fMRI-reach-decision\Simulation\shuffled_conditions_S01_change
 
 
 end
+end
+%% how did putting errors back go - are they replaced further than intended by put_back?
+
+take = sim_blocks.order(1);
+order = sim_blocks.order;
+err = struct();
+k = 1;
+where = [];
+
+for i = 2:length(order) % starting from 2 because first trial could not have been a previous error
+    
+%     if sim_blocks.aborted(i) == 1 && sim_blocks.err_back(i) == 0
+%         err(k).real_place = 0;
+%         err(k).norm_place = 0;
+%         k = k + 1 ;
+%     end
+%   
+    % add next trial
+    take = [take; order(i)];
+    % see, if that trial has been there already
+    where = find(take == order(i));
+    
+    if length(where) > 1
+        err(k).real_place = where(end) - where(end-1);
+        err(k).norm_place = sim_blocks.err_back(i);
+        err(k).ind_sim_blocks = i;
+        k = k + 1 ;
+    end
+end
+
+err = struct2table(err);
+
+% this tells you, which error trials are being put back further than with
+% put_back intended, and by how many trials
+[err.ind_sim_blocks(err.real_place > err.norm_place) (err.real_place(err.real_place > err.norm_place)-err.norm_place(err.real_place > err.norm_place))]
 
 
 %% plots for simulated experiment
@@ -172,4 +219,23 @@ if 0 % Plotting
     
     ggSIMb1(1,1).draw;
     
+%%
+err_table = struct2table(err);
+ggERR1 = gramm('x', categorical(err_table.norm_place),'color',categorical(err_table.real_place));
+ggERR1.stat_bin;
+ggERR1.draw;
+
+
+
+
+
+
+
+
 end
+
+
+
+
+
+
