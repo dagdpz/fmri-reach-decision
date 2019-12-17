@@ -713,8 +713,10 @@ D = arrayfun(@(a)   {a.y_hnd(a.state == 9 | a.state == 10)},trial);
 C_abs = arrayfun(@(a)   {abs(a.x_hnd(a.state == 9 | a.state == 10))},trial);
 
 %% PLots
+if 0
 if ~do_summary 
     return
+end
 end
 
 %% Saccades normal 
@@ -866,7 +868,7 @@ figure('Name','left movements mirrored onto the right, for target acquisiton + h
 
 
 %% Are trial durations as long as they are supposed to be? - Calculation
-if 0
+if 1
 periods = struct();
 ITI_v1 = [];
 for k = 1:length(trial)

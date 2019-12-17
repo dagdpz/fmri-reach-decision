@@ -1,22 +1,22 @@
 %% Initiate conditions
 global SETTINGS
-% 
+%
 % %% these 2??
 %         SETTINGS.useParallel                = 0;
 %         SETTINGS.useSerial                  = 0;
-% 
-% 
+%
+%
 %         SETTINGS.UseMouseAsTouch = 1; % use mouse instead of touchscreen
 %         SETTINGS.useSound                   = 0;
 %         SETTINGS.useMouse                   = 0;         % 0: use mouse instead of eye position
 %         SETTINGS.useVPacq                   = 1;         % 1: allow ViewPoint toolbox
-        
+
 if ~exist('dyn','var') || dyn.trialNumber == 1
     
- %  esperimentazione        = {'calibration'};
-   esperimentazione      = {'Symbolic_cue_sac_reach'};
+    %  esperimentazione        = {'calibration'};
+    esperimentazione      = {'Symbolic_cue_sac_reach'};
     
-   
+    
     for n_exp = 1:numel(esperimentazione)
         experiment=esperimentazione{n_exp};
         shuffle_conditions                  = 1;
@@ -27,7 +27,7 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
         task.rest_hand                      = [0 0];
         multiple_targets_per_trial          = 0;
         
-     
+        
         
         %% Order of fields here defines the order of parameters to be sent to TDT as the trial_classifiers
         All = struct('angle_cases',0,'instructed_choice_con',0,'type_con',0,'effector_con',0,'reach_hand_con',0,'excentricities',0,'stim_con',0,'timing_con',0,'size_con',0,...
@@ -72,7 +72,7 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                 SETTINGS.Radius_square              = 1;
                 SETTINGS.TextFeedback               = 1;
                 
-                force_conditions                    = 2; %1 
+                force_conditions                    = 2; %1
                 N_repetitions                       = 400;
                 
                 fix_eye_y                           = 0.375; % -2
@@ -86,7 +86,7 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                 All.reach_hand_con                  = 2; %2
                 All.type_con                        = 3;
                 All.effector_con                    = [4];  %0 eye %1 free gaze reach %2 joint movement eye and hand  %3 dissociated saccade %4 dissociated reach %6 free gaze reach with initial eye fixation
-                All.timing_con                      = [31];%[31 31 31 31 31 32]; % [31 31 31 31 31 31 31 31 31 32]; % 29 playground, 31 Master Thesis, 32 Master Thesis CATCH TRIALS 40  Carstens Paper 
+                All.timing_con                      = [31];%[31 31 31 31 31 32]; % [31 31 31 31 31 31 31 31 31 32]; % 29 playground, 31 Master Thesis, 32 Master Thesis CATCH TRIALS 40  Carstens Paper
                 All.size_con                        = 9; %symbolic cue
                 All.correct_choice_target           = [1 1 2 2 2]; %1 only first target correct %2 both are correct, %[1 2] % [1 1 2 2 2];
                 All.instructed_choice_con           = 1;
@@ -97,17 +97,16 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                 All.exact_excentricity_con_y    = [0 0];
                 
                 
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 put_back                            = [2 4]; % min max how many trials later error is being put back
                 
                 % new part about pre-saved trial sequence
                 load([pathname filesep monkey filesep monkey_name filesep 'shuffled_conditions_S01.mat']);
                 
-                if dyn.trialNumber > 1
-                    shuffled_conditions_counter = shuffled_conditions_counter + 1;
-                end
                 
                 if exist('dyn','var') && dyn.trialNumber > 1,
+                    
+                    shuffled_conditions_counter = shuffled_conditions_counter + 1;
                     
                     if trial(end-1).success==0 % previous trial was failure, put it back
                         
@@ -122,8 +121,8 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                     
                     
                 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
-  
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                
         end
         
         all_fieldnames=fieldnames(All);
@@ -139,9 +138,9 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
         sequence_matrix_exp{n_exp}          = sequence_matrix_exp_temp;
         ordered_sequence_indexes_exp{n_exp} = 1:N_total_conditions*N_repetitions;
     end
-
-   
-
+    
+    
+    
     
     sequence_matrix          = [sequence_matrix_exp{:}];
     idx_exact_x=ismember(all_fieldnames,'exact_excentricity_con_x');
@@ -201,46 +200,46 @@ for field_index=1:numel(all_fieldnames)
 end
 
 
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % choice
-    if strcmp('Symbolic_cue_sac_reach',esperimentazione)
-        
-        % choice
-        if strcmp('choi',present.choice(shuffled_conditions_counter))
-     
-            Current_con.correct_choice_target = 2;
-            
-        elseif strcmp('instr',present.choice(shuffled_conditions_counter))
-            
-            Current_con.correct_choice_target = 1;
-        end
-        
-        % effector
-        if strcmp('hnd',present.eff(shuffled_conditions_counter))
-            
-            Current_con.effector_con = 4;
-            
-        elseif strcmp('eye',present.eff(shuffled_conditions_counter))
-        
-            Current_con.effector_con = 3;
-            
-        end
-        
-        % side  
-        if strcmp('left',present.side(shuffled_conditions_counter))
-            
-            Current_con.exact_excentricity_con_x = [-9.5];
-            
-        elseif strcmp('right',present.side(shuffled_conditions_counter))
-        
-            Current_con.exact_excentricity_con_x = [9.5];
-            
-        end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% choice
+if strcmp('Symbolic_cue_sac_reach',esperimentazione)
     
+    % choice
+    if strcmp('choi',present.choice(shuffled_conditions_counter))
+        
+        Current_con.correct_choice_target = 2;
+        
+    elseif strcmp('instr',present.choice(shuffled_conditions_counter))
+        
+        Current_con.correct_choice_target = 1;
     end
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % effector
+    if strcmp('hnd',present.eff(shuffled_conditions_counter))
+        
+        Current_con.effector_con = 4;
+        
+    elseif strcmp('eye',present.eff(shuffled_conditions_counter))
+        
+        Current_con.effector_con = 3;
+        
+    end
     
+    % side
+    if strcmp('left',present.side(shuffled_conditions_counter))
+        
+        Current_con.exact_excentricity_con_x = [-9.5];
+        
+    elseif strcmp('right',present.side(shuffled_conditions_counter))
+        
+        Current_con.exact_excentricity_con_x = [9.5];
+        
+    end
+    
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %% Fixation offset
 fix_eye_x             = Current_con.offset_con;
@@ -309,31 +308,31 @@ switch Current_con.timing_con
         task.timing.grace_time_eye              = 0.5; % time allowed for blinking
         task.timing.grace_time_hand             = 0.2;
         
-        % 21 ? 
+        % 21 ?
         task.timing.ITI_success                 = 1;%3; % 3 inter trial interval after success
         task.timing.ITI_success_var             = 0;
         task.timing.ITI_fail                    = 1;%3; % 3 inter trial interval after error
         task.timing.ITI_fail_var                = 0;
         task.timing.ITI_incorrect_completed     = 1;
         
-        % 2 
+        % 2
         task.timing.fix_time_to_acquire_eye     = 2; %0.5;
         task.timing.fix_time_to_acquire_hnd     = 2; %1.5;
         
         % 3 FIXATION
-        task.timing.fix_time_hold               = 1; % 5 
-        task.timing.fix_time_hold_var           = 0; 
+        task.timing.fix_time_hold               = 1; % 5
+        task.timing.fix_time_hold_var           = 0;
         
         % 6 CUE
-        task.timing.cue_time_hold               = 0.2; % .700; 
-        task.timing.cue_time_hold_var           = 0; 
+        task.timing.cue_time_hold               = 0.2; % .700;
+        task.timing.cue_time_hold_var           = 0;
         
         % 7 MEMORY
         task.timing.mem_time_hold               = 3;%2;
         task.timing.mem_time_hold_var           = 7;
         
         % 9 GO
-        task.timing.tar_inv_time_to_acquire_eye = 0.5; 
+        task.timing.tar_inv_time_to_acquire_eye = 0.5;
         task.timing.tar_inv_time_to_acquire_hnd = 0.5;
         
         % 10 HOLD
@@ -392,8 +391,8 @@ switch Current_con.timing_con
         
         
         task.timing.text_feedback               = 2;
-
-     case 32 % CATCH TRIALS Peter's master saccade-reach project 
+        
+    case 32 % CATCH TRIALS Peter's master saccade-reach project
         
         task.rest_sensors_ini_time              = 0.5; % s, time to hold sensor(s) in initialize_trial before trial starts
         task.timing.wait_for_reward             = 0.3;
@@ -577,7 +576,7 @@ end
 if task.effector==3
     
     % target position relative to fixation
-    task.eye.tar(1).x = fix_eye_x  + tar_dis_1x; 
+    task.eye.tar(1).x = fix_eye_x  + tar_dis_1x;
     task.eye.tar(1).y = fix_eye_y  + tar_dis_1y - 0.375;%-1
     task.eye.tar(2).x = fix_eye_x  + tar_dis_2x;
     task.eye.tar(2).y = fix_eye_y  + tar_dis_2y - 0.375;%-1
@@ -588,7 +587,7 @@ if task.effector==3
     task.hnd.tar(2).x = fix_hnd_x;
     task.hnd.tar(2).y = fix_hnd_y;
     
-elseif task.effector==4 || task.effector==6    
+elseif task.effector==4 || task.effector==6
     
     task.eye.tar(1).x = fix_eye_x;
     task.eye.tar(1).y = fix_eye_y;
@@ -600,7 +599,7 @@ elseif task.effector==4 || task.effector==6
     task.hnd.tar(1).y = fix_hnd_y  + tar_dis_1y + 0.375; % target position on y axis in relation to hand fixation point
     task.hnd.tar(2).x = fix_hnd_x  + tar_dis_2x;
     task.hnd.tar(2).y = fix_hnd_y  + tar_dis_2y + 0.375; % target position on y axis in relation to hand fixation point
-else    
+else
     
     task.eye.tar(1).x = fix_eye_x  + tar_dis_1x;
     task.eye.tar(1).y = fix_eye_y  + tar_dis_1y;
@@ -626,9 +625,9 @@ task.eye.cue                                        = task.eye.tar;
 task.hnd.cue                                        = task.hnd.tar;
 
 task.eye.tar(1).color_dim       = [0 0 0]; % saccades: Color of selected target quickly before phase 5 (TAR_HOLD) - not influencibale in length in timing structure
-task.eye.tar(1).color_bright    = [0 0 0]; % saccades: Color of selected target during phase 5 (TAR_HOLD) 
+task.eye.tar(1).color_bright    = [0 0 0]; % saccades: Color of selected target during phase 5 (TAR_HOLD)
 
-task.eye.tar(2).color_dim       = [0 0 0]; % these don't seem to have an influence on anything  
+task.eye.tar(2).color_dim       = [0 0 0]; % these don't seem to have an influence on anything
 task.eye.tar(2).color_bright    = [0 0 0]; % these don't seem to have an influence on anything
 
 task.hnd_right.color_dim        = [0 0 0]; % reaches: Color of selected target quickly before phase 5 (TAR_HOLD) - not influencibale in length in timing structure
@@ -649,9 +648,9 @@ task.hnd_right.color_cue        = [0 180 0]; %%%%%%%%%%%% COLOR OF THE HAND CUE
 % first target is always correct, but the position of target one varies
 % dependent on position parameters
 
-switch Current_con.correct_choice_target;    
+switch Current_con.correct_choice_target;
     case 0
-    
+        
     case 1 % target #1 correct, target 2 is incorrect
         task.correct_choice_target  = 1;
         
@@ -684,7 +683,7 @@ switch Current_con.correct_choice_target;
             task.hnd.cue(1).shape.option ='RR';       %% arrow lleft right
         end
         
-    case 2 % target #1 and target #2 correct 
+    case 2 % target #1 and target #2 correct
         task.correct_choice_target  = [1 2];
         
         %Cue position eye
@@ -705,7 +704,7 @@ switch Current_con.correct_choice_target;
         task.hnd.cue=rmfield(task.hnd.cue,'shape');
         task.hnd.cue(1).shape.mode ='arrows';       %% arrow lleft right
         task.hnd.cue(1).shape.option ='LR';       %% arrow lleft right
-        task.hnd.cue(1).size =0.66;       %% arrow lleft right        
+        task.hnd.cue(1).size =0.66;       %% arrow lleft right
 end
 
 % specific case for circles vs rectangles
@@ -726,42 +725,40 @@ task.eye.tar(1).radiusShape ='square';
 task.eye.tar(2).radiusShape ='square';
 task.eye.tar(1).shape ='square';
 task.eye.tar(2).shape ='square';
-        
-        
+
+
 switch Current_con.effector_con
     case 0 % saccade only (calibration with visible targets)
         
-        task.eye.tar(1).color_dim       = [128 0 0];  
+        task.eye.tar(1).color_dim       = [128 0 0];
         task.eye.tar(1).color_bright    = [200 0 0];
-        task.eye.tar(2).color_dim       = [128 0 0]; 
+        task.eye.tar(2).color_dim       = [128 0 0];
         task.eye.tar(2).color_bright    = [200 0 0];
-%     case 3 % dissociated saccade
-%         task.eye.cue(1).color_bright = [255 0 0]; %this is the color of the arrows!
-%         task.eye.tar(1).radiusShape ='square';
-%         task.eye.tar(2).radiusShape ='square';
-%         task.eye.tar(1).shape ='square';
-%         task.eye.tar(2).shape ='square';
-%         
-%         task.hnd_right.color_dim        = task.hnd_right.color_dim_fix; %
-%         task.hnd_right.color_bright     = task.hnd_right.color_bright_fix;% color of right hand target
-%         task.hnd_left.color_dim         = task.hnd_left.color_dim_fix; %
-%         task.hnd_left.color_bright      = task.hnd_left.color_bright_fix; % color of left hand target
-%     case 4 % dissociated reach        
-%         % eye fixation during target presentation
-%         task.eye.tar(1).color_dim       = [128 0 0];  % 2.5 or 3 change here to check if rectangles have the same size as background % also - color of cues
-%         task.eye.tar(1).color_bright    = [255 0 0];
-%         task.eye.tar(2).color_dim       = [128 0 0]; %  % 2.5 or 3
-%         task.eye.tar(2).color_bright    = [255 0 0];        
-% 
-%         task.hnd.tar(1).radiusShape ='square';
-%         task.hnd.tar(2).radiusShape ='square';
-%         task.hnd.tar(1).shape ='square';
-%         task.hnd.tar(2).shape ='square';
+        %     case 3 % dissociated saccade
+        %         task.eye.cue(1).color_bright = [255 0 0]; %this is the color of the arrows!
+        %         task.eye.tar(1).radiusShape ='square';
+        %         task.eye.tar(2).radiusShape ='square';
+        %         task.eye.tar(1).shape ='square';
+        %         task.eye.tar(2).shape ='square';
+        %
+        %         task.hnd_right.color_dim        = task.hnd_right.color_dim_fix; %
+        %         task.hnd_right.color_bright     = task.hnd_right.color_bright_fix;% color of right hand target
+        %         task.hnd_left.color_dim         = task.hnd_left.color_dim_fix; %
+        %         task.hnd_left.color_bright      = task.hnd_left.color_bright_fix; % color of left hand target
+        %     case 4 % dissociated reach
+        %         % eye fixation during target presentation
+        %         task.eye.tar(1).color_dim       = [128 0 0];  % 2.5 or 3 change here to check if rectangles have the same size as background % also - color of cues
+        %         task.eye.tar(1).color_bright    = [255 0 0];
+        %         task.eye.tar(2).color_dim       = [128 0 0]; %  % 2.5 or 3
+        %         task.eye.tar(2).color_bright    = [255 0 0];
+        %
+        %         task.hnd.tar(1).radiusShape ='square';
+        %         task.hnd.tar(2).radiusShape ='square';
+        %         task.hnd.tar(1).shape ='square';
+        %         task.hnd.tar(2).shape ='square';
 end
 
-if strcmp('Symbolic_cue_sac_reach',esperimentazione)
-% save updated _shuffled_conditions_S01
-               
-                    save([pathname filesep monkey filesep monkey_name filesep 'shuffled_conditions_S01.mat'],'present','shuffled_conditions_counter');
+if strcmp('Symbolic_cue_sac_reach',esperimentazione) % save updated _shuffled_conditions_S01
+    save([pathname filesep monkey filesep monkey_name filesep 'shuffled_conditions_S01.mat'],'present','shuffled_conditions_counter');
 end
-                    
+
