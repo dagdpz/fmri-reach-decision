@@ -103,6 +103,10 @@ if ~exist('dyn','var') || dyn.trialNumber == 1
                 % new part about pre-saved trial sequence
                 load([pathname filesep monkey filesep monkey_name filesep 'shuffled_conditions_S01.mat']);
                 
+                if dyn.trialNumber > 1
+                    shuffled_conditions_counter = shuffled_conditions_counter + 1;
+                end
+                
                 if exist('dyn','var') && dyn.trialNumber > 1,
                     
                     if trial(end-1).success==0 % previous trial was failure, put it back
@@ -757,7 +761,7 @@ end
 
 if strcmp('Symbolic_cue_sac_reach',esperimentazione)
 % save updated _shuffled_conditions_S01
-                    shuffled_conditions_counter = shuffled_conditions_counter + 1;
+               
                     save([pathname filesep monkey filesep monkey_name filesep 'shuffled_conditions_S01.mat'],'present','shuffled_conditions_counter');
 end
                     
