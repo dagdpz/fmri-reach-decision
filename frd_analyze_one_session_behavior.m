@@ -713,11 +713,11 @@ D = arrayfun(@(a)   {a.y_hnd(a.state == 9 | a.state == 10)},trial);
 C_abs = arrayfun(@(a)   {abs(a.x_hnd(a.state == 9 | a.state == 10))},trial);
 
 %% PLots
-if 0
+
 if ~do_summary 
     return
 end
-end
+
 
 %% Saccades normal 
 figure('Name','saccade trajectories, for target acquisiton + hold phase');
