@@ -3,16 +3,18 @@ function frd_analyze_one_session_behavior(runpath, list_successful_only, plot_tr
 
 % runpath:              A) specific matfile,    B) session folder   C) subject folder    D) experiment folder
 % list_successful_only: 0) all trials           1) successful only  2) failed only
-% plot_trials:          0) no plots of single trials                1) plots every single trial
+% plot_trials:          0) no plots of single trials                1) plots every single trial in 1D    2) plots every single trial in 1D 
 % do_summary:           0) no summary plots     1) summary plots
 % detect saccades:      idk
 % detect_saccades_custom_settings: idk
 
 
 % TODO:
+% only read in experimental folders, not shuffled conditions etc.
 % figure size
 % title with subj/session
 % export to pdf properly
+% plot trials in 2D for all trials, not only unsuccessful
 % subject wise analysis + whole experiment analysis
 
 
@@ -40,13 +42,13 @@ end
 %warning off
 
 %%
-% list_successful_only = 1; % 0 - list all, 1 - only successful, 2 - only not successful
+% list_successful_only = 0; % 0 - list all, 1 - only successful, 2 - only not successful
 % plot_trials = 0;
-% do_summary = 1;
+% do_summary = 0;
 % detect_saccades = 0;
 % detect_saccades_custom_settings = '';
-% runpath = ('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\LEHU\all_runs');
-% % load('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\LEHU\all_runs\LEHU_2019-07-24_02.mat');
+% runpath = ('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\IGKA\20191212');
+% % load('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\IGKA\20191212');
 
 
 %% concatenate matfiles
@@ -72,7 +74,7 @@ elseif length(endout{end}) == 4 % Y:\Personal\Peter\Data\pilot\PENE
     su.name = endout{end};
 
 % whole experiment
-elseif strcmp('pilot', endout{end}) % Y:\Personal\Peter\Data\pilot
+elseif strcmp('behavioral_data', endout{end}) % Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral_data
     analysis_level = 'experiment';
 end
 
@@ -85,77 +87,79 @@ if strcmp('experiment',analysis_level)
     su = dir(runpath);
     su = su(~ismember({su.name},{'.' '..'}));
 end
+
+for u = 1:length(su) % loop over subjects
     
-    for u = 1:length(su) % loop over subjects
-        
-        if strcmp('experiment',analysis_level) %analysis_level == 'experiment'
-            runpath_su = [runpath filesep su(u).name];
-        else 
-            runpath_su = runpath;
-        end
+    if strcmp('experiment',analysis_level) %analysis_level == 'experiment'
+        runpath_su = [runpath filesep su(u).name];
+    else
+        runpath_su = runpath;
+    end
+    
+    if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level)
+        se = dir(runpath_su);
+        se = se(~ismember({se.name},{'.' '..'}));
+    end
+    
+    for s = 1:length(se) % loop over sessions
         
         if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level)
-            se = dir(runpath_su);
-            se = se(~ismember({se.name},{'.' '..'}));
+            runpath_se = [runpath_su filesep se(s).name];
+        else
+            runpath_se=runpath_su;
         end
         
-        for s = 1:length(se) % loop over sessions
+        %How many files are there?
+        if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level) || strcmp('session',analysis_level)
+            fi  = dir([runpath_se filesep '*.mat']);
+            fi = fi(~ismember({fi.name},{'.' '..'}));
+        end
+        
+        for i = 1:length(fi) % loop over files
             
-            if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level)
-                runpath_se = [runpath_su filesep se(s).name];
-            else
-                runpath_se=runpath_su;
-            end
+            %here it loads each file into the temp variable, adds the
+            %respective RUN number, SESSION number, SUBJECT name (also path and
+            %file name) and attaches it to tempges
             
-            %How many files are there?
             if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level) || strcmp('session',analysis_level)
-                fi  = dir([runpath_se filesep '*.mat']);
-                fi = fi(~ismember({fi.name},{'.' '..'}));
+                runpath_fi = [runpath_se filesep fi(i).name];
+            else
+                runpath_fi = runpath_se;
             end
-                
-            for i = 1:length(fi) % loop over files
-                
-                %here it loads each file into the temp variable, adds the
-                %respective RUN number, SESSION number, SUBJECT name (also path and
-                %file name) and attaches it to tempges
-                
-                if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level) || strcmp('session',analysis_level)
-                    runpath_fi = [runpath_se filesep fi(i).name];
-                else
-                    runpath_fi = runpath_se;
-                end
-                
-                temp = load(runpath_fi);     % load first file
-                
-                [temp.trial(:).run] = deal(i);                    % add RUN number
-                [temp.trial(:).session] = deal(s);                % add SESSION number
-                [temp.trial(:).subj] = deal(fi(i).name(1:4));     % add SUBJECT name
-                [temp.trial(:).file_name] = deal(fi(i).name);     % add file name
-                [temp.trial(:).path] = deal(runpath_fi); %add path name
-                
-                i
-                s
-                fi(i).name(1:4)
-                deal(fi(i).name)
-                runpath_fi
-                
-                if i == 1 && s == 1 && u == 1
-                    trial = temp.trial;
-                else
-%                     if strcmp('LEHU',{trial.subj})
-%                         trial.condition = trial.CueAuditiv;
-%                         trial = rmfield(trial.CueAuditiv);
-%                     end
-                    trial = [trial temp.trial];
-                end
-                
-            end % loop over files
-        end %loop sessions
-    end % loop subjects
-    
- 
-    clear ('temp','runpath_fi','runpath_se','runpath_su');
-    
+            
+            temp = load(runpath_fi);     % load first file
+            
+            [temp.trial(:).run] = deal(i);                    % add RUN number
+            [temp.trial(:).session] = deal(s);                % add SESSION number
+            [temp.trial(:).subj] = deal(fi(i).name(1:4));     % add SUBJECT name
+            [temp.trial(:).file_name] = deal(fi(i).name);     % add file name
+            [temp.trial(:).path] = deal(runpath_fi); %add path name
+            
+            i
+            s
+            fi(i).name(1:4)
+            deal(fi(i).name)
+            runpath_fi
+            
+            if ~isfield(temp.trial,'CueAuditiv')
+                [temp.trial.CueAuditiv] = deal(0);
+                temp.trial = rmfield(temp.trial,'condition');
+            end
+            
+            
+            if i == 1 && s == 1 && u == 1
+                trial = temp.trial;
+            else
+                trial = [trial temp.trial];
+            end
+            
+        end % loop over files
+    end %loop sessions
+end % loop subjects
+
+
+clear ('temp','runpath_fi','runpath_se','runpath_su');
+
     
 
 %%
@@ -197,10 +201,11 @@ end
 
 
 %% Define new and correct states and states_onset
-
+% this part overwrites states_onset with the all onsets and their time from
+% tSample....
 for k = 1:length(trial)
     
-    trial(k).states = unique(trial(k).state,'stable')';
+    trial(k).states = unique(trial(k).state,'stable')'; % now trial.states includes all states
     
     indi = logical([1 (diff(trial(k).state) ~= 0)']);
     trial(k).states_onset = trial(k).tSample_from_time_start(indi)';
@@ -212,12 +217,12 @@ end
 RT= (NaN(length(trial),2));
 
 for k = 1:length(trial)
-    
+    %movement RTs
     if trial(k).completed
         RT(k,1)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
     end
     
-    
+    % if choice or not
     if trial(k).task.correct_choice_target == [1 2]
         RT(k,2) = 1;
     elseif trial(k).task.correct_choice_target == 1
@@ -237,6 +242,8 @@ RT.success = logical([trial.success]');
 RT.effector = [trial.effector]';
 RT.number = [1:length(RT.success)]';
 RT.run = categorical([trial.run]');
+RT.session = categorical([trial.session]');
+RT.subj = categorical({trial.subj}');
 
 RT.cause_abort = cell(height(RT),1);
 RT.cause_abort(strncmpi('ABORT_EYE',{trial.abort_code}',9)) = {'eye_cause'};
@@ -298,9 +305,9 @@ RT.abort_code = categorical({trial.abort_code}',valueset,names);
 RT.target_selected = cell(height(RT),1);
 RT.correct_target = cell(height(RT),1);
 
-%% chosen targets and correct targets
+%% chosen targets and correct targets and delays
 
-for k = 1:length(trial) %go through all trials
+for k = 1:length(trial) % go through all trials
     
     % target selected
     if ~isnan(trial(k).target_selected) %trial(k).completed == 1
@@ -364,15 +371,13 @@ for k = 1:length(trial) %go through all trials
     end
     
     
-    % NOCH ZU ÄNDERN:
-    
-    % Sollte alles abhängig sein davon, ob der Trial aborted wurde? Es ist ja auch interessant zu wissen, welches Target man ausgewählt hat, und dann einen Hold Fehler hatte?
-    
+    RT.delay(k) = trial(k).task.timing.mem_time_hold;
     
 end
 
 RT.correct_target = categorical(RT.correct_target);
 RT.target_selected = categorical(RT.target_selected);
+RT.delay = categorical(RT.delay);
 
 RT_struct=table2struct(RT);
 for k=1:size(RT,1)
@@ -793,7 +798,15 @@ figure('Name','left movements mirrored onto the right, for target acquisiton + h
     g.draw;
     %g.export('file_name',['RTs_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
     
+    if strcmp('experiment',analysis_level)
+        figure; %2 reaction times
+        g(1,1) = gramm('x', RT.value, 'color', RT.subj,'row', RT.target_selected,'column',RT.effector,'subset',logical(RT.success));
+        g(1,1).stat_density();
+        g(1,1).set_names('x','RT / s','Color','','row','','column','');
+        g.draw;
+    end
     
+        
     %%
     figure; %7 Which Errors
     g6 = gramm('x', Err.abort_code,'y', Err.prop,'color',Err.trial_type, 'subset', Err.abort_code ~= 'NO ABORT');
@@ -852,6 +865,91 @@ figure('Name','left movements mirrored onto the right, for target acquisiton + h
 %     g4.draw;
 
 
+%% Are trial durations as long as they are supposed to be? - Calculation
+if 0
+periods = struct();
+ITI_v1 = [];
+for k = 1:length(trial)
+    
+    periods(k).states = unique(trial(k).state,'stable')'; 
+    indi = logical([1 (diff(trial(k).state) ~= 0)']);
+    periods(k).states_onset = trial(k).tSample_from_time_start(indi)';
+    
+    periods(k).duration = diff(periods(k).states_onset);
+    ITI_timestamps = trial(k).tSample_from_time_start(trial(k).state == 50);
+    
+    ITI_dur = ITI_timestamps(end) - ITI_timestamps(1);
+    
+    if periods(k).states(end) ~= 99 % all trials when run is still going
+        periods(k).duration(end +1) = ITI_dur;
+    end
+    
+    ITI_v1 = [ITI_v1 ITI_dur];
+    
+end
+
+%% Are trial durations as long as they are supposed to be? - Visualization
+% this part gives you all supposed durations of periods (hard coded) and
+% their respective real durations (from tSample...)
+
+    a = struct();
+    for l = 1:length(periods)
+        
+        times = [3 11.8 0.2 trial(l).task.timing.mem_time_hold 1 1 0 0 0 2];
+        pnames = cell({'fix_acq' 'fix' 'cue' 'mem' 'tar_acq_inv' 'tar_hold_inv' 'tar_acq' 'tar_hold' 'reward/sucess??' 'ITI'});
+        a.pnames = pnames';
+        a.times = times';
+        
+        if length(periods(l).duration) == 10
+            
+            a.dur = periods(l).duration';
+            sum(periods(l).duration((end-3):(end-1)))
+            
+        elseif periods(l).states(end) == 99
+            continue;
+        else
+            w = length(periods(l).states);
+            pnames = [pnames(1:(w-1)) 'ITI'];
+            a.pnames = pnames';
+            times = [times(1:(w-1)) times(end)];
+            a.times = times';
+            a.dur = periods(l).duration';
+        end
+        
+        struct2table(a)
+        pause on
+        pause;
+    end
+    
+end
+
+%%
+if 0
+load('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\IGKA\shuffled_conditions\shuffled_conditions_IGKA_presented.mat')
+
+pre_order = [present.comb_del];
+pre_order = pre_order(1:length(trial));
+
+RT.pre_order = pre_order;
+[RT.effector RT.choice RT.correct_target categorical(RT.delay) RT.pre_order]
+
+
+    %%
+    figure; %2 reaction times
+    g(1,1) = gramm('x', RT.value,'column',RT.effector,'color',RT.run,'subset',logical(RT.success));
+    g(1,1).stat_density();
+    g(1,1).set_names('x','RT / s','Color','','row','','column','','linestyle','target selected');
+    
+    
+    g(2,1) = gramm('x', RT.target_selected, 'y', RT.value,'column',RT.effector,'color',RT.run,'subset',logical(RT.success));
+    g(2,1).geom_point('dodge', 0.8);
+    g(2,1).set_names('x','target selected','y','RT/s','Color','','row','','column','');
+    
+    g.set_title({'reaction time, successfull only, N = ' (sum(RT.success))});
+    g.draw;
+    %g.export('file_name',['RTs_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
+end    
+%%
 function circle(x,y,r)
 %x and y are the coordinates of the center of the circle
 %r is the radius of the circle
@@ -861,4 +959,3 @@ ang=0:0.01:2*pi;
 xp=r*cos(ang);
 yp=r*sin(ang);
 plot(x+xp,y+yp,'LineStyle',':','Color','k');
-
