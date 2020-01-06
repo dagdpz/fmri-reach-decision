@@ -898,7 +898,7 @@ end
     for l = 1:length(periods)
         
         times = [3 11.8 0.2 trial(l).task.timing.mem_time_hold 1 1 0 0 0 2];
-        pnames = cell({'fix_acq' 'fix' 'cue' 'mem' 'tar_acq_inv' 'tar_hold_inv' 'tar_acq' 'tar_hold' 'reward/sucess??' 'ITI'});
+        pnames = cell({'fix_acq' 'fix' 'cue' 'mem' 'tar_acq_inv' 'tar_hold_inv' 'tar_acq' 'tar_hold' 'reward' 'ITI'});
         a.pnames = pnames';
         a.times = times';
         
