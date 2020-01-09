@@ -51,7 +51,7 @@ end
 % % load('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\IGKA\20191212');
 
 
-%% concatenate matfiles
+%% Which analysis level are we doing? run, session, subject or whole epxeriment?
 
 endout=regexp(runpath,filesep,'split');
 
@@ -79,8 +79,7 @@ elseif strcmp('behavioral_data', endout{end}) % Y:\MRI\Human\fMRI-reach-decision
 end
 
     
-%%
-
+%% here it runs through all subfolders and concatenates matfiles
 
 
 if strcmp('experiment',analysis_level)
@@ -133,13 +132,8 @@ for u = 1:length(su) % loop over subjects
             [temp.trial(:).session] = deal(s);                % add SESSION number
             [temp.trial(:).subj] = deal(fi(i).name(1:4));     % add SUBJECT name
             [temp.trial(:).file_name] = deal(fi(i).name);     % add file name
-            [temp.trial(:).path] = deal(runpath_fi); %add path name
+            [temp.trial(:).path] = deal(runpath_fi);          % add path name
             
-            i
-            s
-            fi(i).name(1:4)
-            deal(fi(i).name)
-            runpath_fi
             
             if ~isfield(temp.trial,'CueAuditiv')
                 [temp.trial.CueAuditiv] = deal(0);
@@ -162,44 +156,6 @@ clear ('temp','runpath_fi','runpath_se','runpath_su');
 
     
 
-%%
-% if isempty(strfind(runpath,'.mat')), % folder
-%     
-%     
-%     
-%     
-%     fi  = dir([runpath filesep '*.mat']);       % How many mat files are there?
-%     fi = fi(~ismember({fi.name},{'.' '..'}));   % delete the dots in fi
-%     
-%     for i = 1:length(fi) % loop over files 
-%         
-%         temp = load([runpath filesep fi(i).name]);  % load first file
-%         
-%         [temp.trial(:).run] = deal(i);                    % add run number
-%         [temp.trial(:).subj] = deal(fi(i).name(1:4));     % add subject name
-%         [temp.trial(:).file_name] = deal(fi(i).name);     % add file name
-%         [temp.trial(:).path] = deal([runpath filesep fi(i).name]); %add path name
-%         
-%         if i == 1
-%             tempges = temp.trial;
-%         else
-%             tempges = [tempges temp.trial];
-%         end
-%     end % loop over files
-%     
-%     trial = tempges;
-%     clear ('temp','tempges');
-%     
-%     
-%     
-%     
-%     
-% else % single run wise
-%     load(runpath);
-%     [trial.run] = deal(1); % add run number
-% end
-
-
 %% Define new and correct states and states_onset
 % this part overwrites states_onset with the all onsets and their time from
 % tSample....
@@ -217,7 +173,7 @@ end
 RT= (NaN(length(trial),2));
 
 for k = 1:length(trial)
-    %movement RTs
+    % movement RTs
     if trial(k).completed
         RT(k,1)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
     end
@@ -228,22 +184,23 @@ for k = 1:length(trial)
     elseif trial(k).task.correct_choice_target == 1
         RT(k,2) = 0;
     end
-    
-    
+
 end % for each trial
 
 
 RT = array2table(RT);
 RT.Properties.VariableNames  = {'value' 'choice'};
 %RT.choice = categorical(RT.choice);
-RT.choice = categorical(RT.choice, [0 1], {'instructed' 'choice'});
-RT.completed = logical([trial.completed]');
-RT.success = logical([trial.success]');
-RT.effector = [trial.effector]';
-RT.number = [1:length(RT.success)]';
-RT.run = categorical([trial.run]');
-RT.session = categorical([trial.session]');
-RT.subj = categorical({trial.subj}');
+RT.choice       = categorical(RT.choice, [0 1], {'instructed' 'choice'});
+RT.complete     = logical([trial.completed]');
+RT.success      = logical([trial.success]');
+RT.effector     = [trial.effector]';
+RT.number       = [1:length(RT.success)]';
+
+% into categorical 
+RT.run          = categorical([trial.run]');
+RT.session      = categorical([trial.session]');
+RT.subj         = categorical({trial.subj}');
 
 RT.cause_abort = cell(height(RT),1);
 RT.cause_abort(strncmpi('ABORT_EYE',{trial.abort_code}',9)) = {'eye_cause'};
@@ -301,16 +258,17 @@ names = {
     'NO ABORT'
     };
 
-RT.abort_code = categorical({trial.abort_code}',valueset,names);
-RT.target_selected = cell(height(RT),1);
-RT.correct_target = cell(height(RT),1);
+RT.abort_code       = categorical({trial.abort_code}',valueset,names);
+RT.target_selected  = cell(height(RT),1);
+RT.correct_target   = cell(height(RT),1);
 
-%% chosen targets and correct targets and delays
+%% find chosen targets, correct targets and delays
 
 for k = 1:length(trial) % go through all trials
     
     % target selected
-    if ~isnan(trial(k).target_selected) %trial(k).completed == 1
+    if ~isnan(trial(k).target_selected) 
+        % used to be: if trial(k).completed == 1
         % the reason for that change here is, because you can have a
         % target selected, but abort during hold, meaning no completion.
         % Thats the difference.
