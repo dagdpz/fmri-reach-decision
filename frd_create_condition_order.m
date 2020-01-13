@@ -282,8 +282,8 @@ present.real_session = real_session;
 
 %% save mat file
 if 1
-    counter = 1;
-    save('Y:\MRI\Human\fMRI-reach-decision\Simulation\shuffled_conditions_S01.mat','present','counter');
+    shuffled_conditions_counter = 1;
+    save('Y:\MRI\Human\fMRI-reach-decision\Simulation\shuffled_conditions_Sxx_original.mat','present','shuffled_conditions_counter');
 end
 %%
 % Stats:
