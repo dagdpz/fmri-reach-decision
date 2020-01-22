@@ -1,8 +1,9 @@
 function frd_saccade_detection(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings)
 
-% 'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\ELRH\20200117\ELRH_2020-01-17_04.mat'
-% em_custom_settings_humanUMGscanner60Hz.m
+% EXAMPLE: frd_saccade_detection('Y:\Personal\Tihana\DAGU_2020-01-08_05.mat',1,1,1,'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscanner60Hz.m')
 
+% DATA: 'Y:\Personal\Tihana\DAGU_2020-01-08_05.mat'
+% CUSTUMS FILE: 'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscanner60Hz.m'
 
 if nargin < 2,
 	list_successful_only = 0;
@@ -29,7 +30,12 @@ if plot_trials,
 end
 
 for k = 1:length(trial),
-	
+    
+    if plot_trials == 3 && trial(k).effector == 4
+        continue;
+    elseif plot_trials == 4 && trial(k).effector == 3
+        continue;
+    end
 	
 	if (list_successful_only && trial(k).success) || ~list_successful_only
 		
