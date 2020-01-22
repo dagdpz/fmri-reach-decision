@@ -1,7 +1,7 @@
 function frd_reach_detection(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings)
 
 % 'Y:\Personal\Tihana\DAGU_2020-01-08_05.mat'
-% 'Y:\Personal\Tihana\Repos\fmri-reach-decisionem_custom_settings_humanUMGscanner60Hz.m'
+% 'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscannerTouchscreenXXHz.m'
 
 
 if nargin < 2,
