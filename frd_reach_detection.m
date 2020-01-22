@@ -1,7 +1,7 @@
 function frd_reach_detection(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings)
 
-% 'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\ELRH\20200117\ELRH_2020-01-17_04.mat'
-% em_custom_settings_humanUMGscanner60Hz.m
+% 'Y:\Personal\Tihana\DAGU_2020-01-08_05.mat'
+% 'Y:\Personal\Tihana\Repos\fmri-reach-decisionem_custom_settings_humanUMGscanner60Hz.m'
 
 
 if nargin < 2,
@@ -45,18 +45,18 @@ for k = 1:length(trial),
 				k));
 			
 			plot(trial(k).tSample_from_time_start,trial(k).state,'k');
-			plot(trial(k).tSample_from_time_start,trial(k).x_eye,'g');
-			plot(trial(k).tSample_from_time_start,trial(k).y_eye,'m');
+			plot(trial(k).tSample_from_time_start,trial(k).x_hnd,'g');
+			plot(trial(k).tSample_from_time_start,trial(k).y_hnd,'m');
 			ig_add_multiple_vertical_lines(trial(k).states_onset,'Color','k');
 			ylabel('Eye position, states');
 			
 			
 			if detect_saccades,
 				if ~isempty(detect_saccades_custom_settings),
-					em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
+					em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_hnd,trial(k).y_hnd,...
 					detect_saccades_custom_settings);				
 				else
-					em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
+					em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_hnd,trial(k).y_hnd,...
 					'Downsample2Real',0,'Plot',true,'OpenFigure',true);
 				end
 			end
