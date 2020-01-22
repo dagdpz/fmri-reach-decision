@@ -1,4 +1,4 @@
-function frd_saccade_reach_detection(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings)
+function frd_reach_detection(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings)
 
 % 'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\ELRH\20200117\ELRH_2020-01-17_04.mat'
 % em_custom_settings_humanUMGscanner60Hz.m
