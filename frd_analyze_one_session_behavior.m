@@ -826,7 +826,7 @@ figure('Name','left movements mirrored onto the right, for target acquisiton + h
 
 
 %% Are trial durations as long as they are supposed to be? - Calculation
-if 1
+if 0
 periods = struct();
 ITI_v1 = [];
 for k = 1:length(trial)
