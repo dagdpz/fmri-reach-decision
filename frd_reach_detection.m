@@ -3,6 +3,7 @@ function frd_reach_detection(runpath, list_successful_only, plot_trials, detect_
 % 'Y:\Personal\Tihana\DAGU_2020-01-08_05.mat'
 % 'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscannerTouchscreenXXHz.m'
 
+% set plot_trial to 3 for only saccades or to 4 for only reaches
 
 if nargin < 2,
 	list_successful_only = 0;
@@ -30,6 +31,11 @@ end
 
 for k = 1:length(trial),
 	
+    if plot_trials == 3 && trial(k).effector == 4
+        continue;
+    elseif plot_trials == 4 && trial(k).effector == 3
+        continue;
+    end
 	
 	if (list_successful_only && trial(k).success) || ~list_successful_only
 		
