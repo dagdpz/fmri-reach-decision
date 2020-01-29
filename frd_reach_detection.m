@@ -2,6 +2,7 @@ function frd_reach_detection(runpath, list_successful_only, plot_trials, detect_
 % EXAMPLE: frd_reach_detection('Y:\Personal\Tihana\DAGU_2020-01-08_05.mat',1,4,1,'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscannerTouchscreenXXHz.m')
 
 % DATA: 'Y:\Personal\Tihana\DAGU_2020-01-08_05.mat'
+% frd_reach_detection('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\CLSC\20200114\CLSC_2020-01-14_07.mat',1,4,1,'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscannerTouchscreenXXHz.m')
 % CUSTUM_FILE: 'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscannerTouchscreenXXHz.m'
 
 % set plot_trial to 3 for only saccades or to 4 for only reaches
