@@ -56,7 +56,7 @@ end
 endout=regexp(runpath,filesep,'split');
 
 % run
-if length(endout{end}) == 22 % Y:\Personal\Peter\Data\pilot\PENE\20190606\PENE_2019-06-06_16.mat
+if length(endout{end}) == 22 % Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\CLSC\20200114\CLSC_2020-01-14_07.mat
     analysis_level = 'run';
     su.name = endout{end-2};
     se.name = endout{end-1};
@@ -97,7 +97,7 @@ for u = 1:length(su) % loop over subjects
     
     if strcmp('experiment',analysis_level) || strcmp('subject',analysis_level)
         se = dir(runpath_su);
-        se = se(~ismember({se.name},{'.' '..'}));
+        se = se(~ismember({se.name},{'.' '..' 'last_eyecal.mat' 'shuffled_conditions' }));
     end
     
     for s = 1:length(se) % loop over sessions
