@@ -59,9 +59,20 @@ for k = 1:length(trial),
 			ylabel('Eye position, states');
 			
 			
-			if detect_saccades,
+			if detect_saccades % & k==30,
 				if ~isempty(detect_saccades_custom_settings),
-					em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_hnd,trial(k).y_hnd,...
+                    % Interpolate to remove NaNs
+                    idx_nonnan = find(~isnan(trial(k).x_hnd));
+                    
+                    t = trial(k).tSample_from_time_start(idx_nonnan(1):idx_nonnan(end));
+                    x_ = trial(k).x_hnd(idx_nonnan(1):idx_nonnan(end));
+                    y_ = trial(k).y_hnd(idx_nonnan(1):idx_nonnan(end));
+                    
+                    x = interp1(t(~isnan(x_)),x_(~isnan(x_)),t);
+                    y = interp1(t(~isnan(x_)),y_(~isnan(y_)),t);
+                    
+                    
+					em_saccade_blink_detection(t,x,y,...
 					detect_saccades_custom_settings);				
 				else
 					em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_hnd,trial(k).y_hnd,...
