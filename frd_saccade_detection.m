@@ -29,6 +29,11 @@ if plot_trials,
 	hf = figure('Name','Plot trial','CurrentChar',' ');
 end
 
+if 1, % plot saccade detection figure
+	hf2 = figure('Name','Saccade detection','CurrentChar',' ');
+end
+
+
 for k = 1:length(trial),
     
     if plot_trials == 3 && trial(k).effector == 4
@@ -59,8 +64,11 @@ for k = 1:length(trial),
 			
 			if detect_saccades,
 				if ~isempty(detect_saccades_custom_settings),
-					em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
-					detect_saccades_custom_settings);				
+                    if 1, 
+                        figure(hf2);
+                        em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
+                        detect_saccades_custom_settings);
+                    end
 				else
 					em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
 					'Downsample2Real',0,'Plot',true,'OpenFigure',true);
@@ -87,6 +95,9 @@ for k = 1:length(trial),
 				break;
 			end
 			clf(hf);
+            if 1 % plot saccade detection figure
+                clf(hf2);
+            end
 		end
 	end
 	

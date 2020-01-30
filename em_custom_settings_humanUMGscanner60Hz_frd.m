@@ -4,23 +4,25 @@
 % should contain variable **settings** as below!
 
 settings = {...
+	
     'SampleRate',       1000, ...       % Hz
-    'Downsample2Real',  125, ...         % Hz (actual eyetracker sampling
-    'SacOnsetVelThr',   1, ...         % deg/s
-    'SacOffsetVelThr',  0.3, ...         % deg/s
+    'Downsample2Real',  60, ...         % Hz (actual eyetracker sampling 
+    'SacOnsetVelThr',   30, ...         % deg/s
+    'SacOffsetVelThr',  9, ...          % deg/s
     'MinSacDuration',   0.03, ...       % s
     'MaxSacDuration',   Inf, ...        % s
-    'MinSacAmplitude',  6, ...          % deg
-    'MaxSacAmplitude',  Inf, ...        % deg
+    'MinSacAmplitude',  5, ...          % deg
+    'MaxSacAmplitude',  15, ...         % deg
     'PosSmoothConvWin', 'gausswin', ... % 'rectwin', 'gausswin', etc.
     'PosSmoothConvLen', 0 ...           % s, length of conv kernel, set
-    'PosFilterCutoff',  0, ...         % Hz, set to 0 if no filter 
+    'PosFilterCutoff',  30, ...         % Hz, set to 0 if no filter 
     'VelSmoothConvWin', 'gausswin', ... % 'rectwin', 'gausswin', etc.
-    'VelSmoothConvLen', 0.1, ...          % s, length of conv kernel, set 
-    'VelFilterCutoff',  0, ...         % Hz, set to 0 if no filter
+    'VelSmoothConvLen', 0, ...          % s, length of conv kernel, set
+    'VelFilterCutoff',  30, ...          % Hz, set to 0 if no filter
     'VelAdaptiveThr',   false, ...      % true or false
     'MinFixDurAfterSac',0, ...          % s
     'Plot',             true, ...       % true or false
-    'OpenFigure',       true ...        % true or false
-
+    'OpenFigure',       false, ...        % true or false
+    'Verbose',          false ...		% true or false
+	
 	};
