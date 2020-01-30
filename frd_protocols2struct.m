@@ -1,9 +1,15 @@
 function prot = frd_protocols2struct(runpathwithfilename)
 
-%('C:\Users\pneumann\Downloads\protocols - Tabellenblatt1.csv',1)
-%when importing: only session and scannernr1/-2 are numbers, the rest is
-%text
-% replace missing with NaN
+%  Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_exp.csv
+
+% when importing via ui: only session and scannernr1/-2 are numbers, the
+% rest is text AND replace missing with NaN --> in table
+
+if nargin < 1
+    runpathwithfilename = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_exp.csv';
+end
+
+
 
 %%
 
@@ -87,7 +93,7 @@ for p = 1:length(part_uni)
 end % loop participants
 
 
-
+save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_exp.mat','prot');
 
 
 
