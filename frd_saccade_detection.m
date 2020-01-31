@@ -1,6 +1,6 @@
-function frd_saccade_detection(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings)
+function frd_saccade_detection(runpath, list_successful_only, plot_trials ,detect_saccades,detect_saccades_custom_settings,plot_saccade_detection)
 
-% EXAMPLE: frd_saccade_detection('Y:\Personal\Tihana\DAGU_2020-01-08_05.mat',1,1,1,'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscanner60Hz.m')
+% EXAMPLE: frd_saccade_detection('Y:\Personal\Tihana\DAGU_2020-01-08_05.mat',1,1,1,'Y:\Personal\Tihana\Repos\fmri-reach-decision\frd_em_custom_settings_humanUMGscanner60Hz.m',1)
 
 % DATA: 'Y:\Personal\Tihana\DAGU_2020-01-08_05.mat'
 % CUSTUMS FILE: 'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscanner60Hz.m'
@@ -21,6 +21,9 @@ if nargin < 5,
 	detect_saccades_custom_settings = '';
 end
 
+if nargin < 6,
+	plot_saccade_detection = 0;
+end
 load(runpath);
 disp(runpath);
 
@@ -29,7 +32,7 @@ if plot_trials,
 	hf = figure('Name','Plot trial','CurrentChar',' ');
 end
 
-if 1, % plot saccade detection figure
+if plot_saccade_detection
 	hf2 = figure('Name','Saccade detection','CurrentChar',' ');
 end
 
@@ -64,7 +67,7 @@ for k = 1:length(trial),
 			
 			if detect_saccades,
 				if ~isempty(detect_saccades_custom_settings),
-                    if 1, 
+                    if plot_saccade_detection, 
                         figure(hf2);
                         em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
                         detect_saccades_custom_settings);
@@ -95,7 +98,7 @@ for k = 1:length(trial),
 				break;
 			end
 			clf(hf);
-            if 1 % plot saccade detection figure
+            if plot_saccade_detection % plot saccade detection figure
                 clf(hf2);
             end
 		end
