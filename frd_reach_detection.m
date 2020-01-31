@@ -1,4 +1,4 @@
-function frd_reach_detection(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings,plot_reach_detection)
+function frd_reach_detection(runpath, list_successful_only, list_reaches_only, plot_trials, detect_saccades,detect_saccades_custom_settings,plot_reach_detection)
 % EXAMPLE: frd_reach_detection('Y:\Personal\Tihana\DAGU_2020-01-08_05.mat',1,4,1,'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscannerTouchscreenXXHz.m')
 
 % DATA: 'Y:\Personal\Tihana\DAGU_2020-01-08_05.mat'
@@ -7,23 +7,29 @@ function frd_reach_detection(runpath, list_successful_only, plot_trials, detect_
 
 % set plot_trial to 3 for only saccades or to 4 for only reaches
 
+
+
 if nargin < 2,
     list_successful_only = 0;
 end
 
-if nargin < 3,
-    plot_trials = 0;
+if nargin < 3
+    list_reaches_only = 0;
 end
 
 if nargin < 4,
-    detect_saccades = 0;
+    plot_trials = 0;
 end
 
 if nargin < 5,
-    detect_saccades_custom_settings = '';
+    detect_saccades = 0;
 end
 
 if nargin < 6,
+    detect_saccades_custom_settings = '';
+end
+
+if nargin < 7,
     plot_reach_detection = 0;
 end
 
@@ -42,10 +48,10 @@ end
 
 for k = 1:length(trial),
     
-    if plot_trials == 3 && trial(k).effector == 4
+    if list_reaches_only == 1 && trial(k).effector == 3
         continue;
-    elseif plot_trials == 4 && trial(k).effector == 3
-        continue;
+        %     elseif plot_trials == 4 && trial(k).effector == 3
+        %         continue;
     end
     
     if (list_successful_only && trial(k).success) || ~list_successful_only
@@ -70,8 +76,10 @@ for k = 1:length(trial),
             
             if detect_saccades % & k==30,
                 if ~isempty(detect_saccades_custom_settings),
-                    if plot_reach_detection,
-                        figure(hf2);
+                    if list_reaches_only
+                        if plot_reach_detection,
+                            figure(hf2);
+                        end
                         % Interpolate to remove NaNs
                         idx_nonnan = find(~isnan(trial(k).x_hnd));
                         
@@ -86,37 +94,38 @@ for k = 1:length(trial),
                         em_saccade_blink_detection(t,x,y,...
                             detect_saccades_custom_settings);
                     end
-                else
-                    em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_hnd,trial(k).y_hnd,...
-                        'Downsample2Real',0,'Plot',true,'OpenFigure',true);
                 end
+            else
+                em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_hnd,trial(k).y_hnd,...
+                    'Downsample2Real',0,'Plot',true,'OpenFigure',true);
             end
-            
-            
-            
-            figure(hf);
-            subplot(2,1,2)
-            plot(trial(k).tSample_from_time_start,[NaN; diff(trial(k).tSample_from_time_start)],'k.');
-            ylabel('Sampling interval');
-            
         end
         
         
-        if plot_trials,
-            figure(hf);
-            ig_set_all_axes('Xlim',[trial(k).tSample_from_time_start(1) trial(k).tSample_from_time_start(end)]);
-            drawnow; pause;
-            
-            if get(gcf,'CurrentChar')=='q',
-                % close;
-                break;
-            end
-            clf(hf);
-            if plot_reach_detection % plot saccade detection figure
-                clf(hf2);
-            end
-        end
+        
+        figure(hf);
+        subplot(2,1,2)
+        plot(trial(k).tSample_from_time_start,[NaN; diff(trial(k).tSample_from_time_start)],'k.');
+        ylabel('Sampling interval');
+        
     end
     
+    
+    if plot_trials,
+        figure(hf);
+        ig_set_all_axes('Xlim',[trial(k).tSample_from_time_start(1) trial(k).tSample_from_time_start(end)]);
+        drawnow; pause;
+        
+        if get(gcf,'CurrentChar')=='q',
+            % close;
+            break;
+        end
+        clf(hf);
+        if plot_reach_detection % plot saccade detection figure
+            clf(hf2);
+        end
+    end
+end
+
 end % for each trial
 
