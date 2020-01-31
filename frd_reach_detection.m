@@ -76,7 +76,7 @@ for k = 1:length(trial),
             
             if detect_saccades % & k==30,
                 if ~isempty(detect_saccades_custom_settings),
-                    if list_reaches_only
+     
                         if plot_reach_detection,
                             figure(hf2);
                         end
@@ -93,7 +93,7 @@ for k = 1:length(trial),
                         
                         em_saccade_blink_detection(t,x,y,...
                             detect_saccades_custom_settings);
-                    end
+                  
                 end
             else
                 em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_hnd,trial(k).y_hnd,...
