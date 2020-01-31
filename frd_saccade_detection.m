@@ -1,31 +1,29 @@
-function frd_saccade_detection(runpath, list_successful_only,list_saccades_only ,plot_trials ,detect_saccades,detect_saccades_custom_settings,plot_saccade_detection)
+function frd_saccade_detection(runpath, list_successful_only, plot_trials ,detect_saccades,detect_saccades_custom_settings,plot_saccade_detection)
 
 % EXAMPLE: frd_saccade_detection('Y:\Personal\Tihana\DAGU_2020-01-08_05.mat',1,1,1,'Y:\Personal\Tihana\Repos\fmri-reach-decision\frd_em_custom_settings_humanUMGscanner60Hz.m',1)
 
 % DATA: 'Y:\Personal\Tihana\DAGU_2020-01-08_05.mat'
 % CUSTUMS FILE: 'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscanner60Hz.m'
 
+% % set plot_trial to 3 for only saccades or to 4 for only reaches
+
 if nargin < 2,
 	list_successful_only = 0;
 end
 
 if nargin < 3,
-	list_saccades_only = 0;
-end
-
-if nargin < 4,
 	plot_trials = 0;
 end
 
-if nargin < 5,
+if nargin < 4,
 	detect_saccades = 0;
 end
 
-if nargin < 6,
+if nargin < 5,
 	detect_saccades_custom_settings = '';
 end
 
-if nargin < 7,
+if nargin < 6,
 	plot_saccade_detection = 0;
 end
 load(runpath);
@@ -43,10 +41,10 @@ end
 
 for k = 1:length(trial),
     
-    if list_saccades_only == 1 && trial(k).effector == 4
+    if plot_trials == 3 && trial(k).effector == 4
         continue;
-%     elseif plot_trials == 4 && trial(k).effector == 3
-%         continue;
+    elseif plot_trials == 4 && trial(k).effector == 3
+        continue;
     end
 	
 	if (list_successful_only && trial(k).success) || ~list_successful_only
