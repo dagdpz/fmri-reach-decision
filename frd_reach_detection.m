@@ -1,4 +1,4 @@
-function frd_reach_detection(runpath, list_successful_only, list_reaches_only, plot_trials, detect_saccades,detect_saccades_custom_settings,plot_reach_detection)
+function frd_reach_detection(runpath, list_successful_only, plot_trials, detect_saccades,detect_saccades_custom_settings,plot_reach_detection)
 % EXAMPLE: frd_reach_detection('Y:\Personal\Tihana\DAGU_2020-01-08_05.mat',1,4,1,'Y:\Personal\Tihana\Repos\fmri-reach-decision\em_custom_settings_humanUMGscannerTouchscreenXXHz.m')
 
 % DATA: 'Y:\Personal\Tihana\DAGU_2020-01-08_05.mat'
@@ -13,23 +13,19 @@ if nargin < 2,
     list_successful_only = 0;
 end
 
-if nargin < 3
-    list_reaches_only = 0;
-end
-
-if nargin < 4,
+if nargin < 3,
     plot_trials = 0;
 end
 
-if nargin < 5,
+if nargin < 4,
     detect_saccades = 0;
 end
 
-if nargin < 6,
+if nargin < 5,
     detect_saccades_custom_settings = '';
 end
 
-if nargin < 7,
+if nargin < 6,
     plot_reach_detection = 0;
 end
 
@@ -48,10 +44,10 @@ end
 
 for k = 1:length(trial),
     
-    if list_reaches_only == 1 && trial(k).effector == 3
+    if plot_trials == 3 && trial(k).effector == 4
         continue;
-        %     elseif plot_trials == 4 && trial(k).effector == 3
-        %         continue;
+    elseif plot_trials == 4 && trial(k).effector == 3
+        continue;
     end
     
     if (list_successful_only && trial(k).success) || ~list_successful_only
