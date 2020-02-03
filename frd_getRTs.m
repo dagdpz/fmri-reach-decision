@@ -1,4 +1,6 @@
-function [trial, RT] = frd_getRTs(runpath, detect_SACCADES_custom_settings, detect_REACHES_custom_settings)
+function [trial, RT_states, onset_state9] = frd_getRTs(runpath, detect_SACCADES_custom_settings, detect_REACHES_custom_settings)
+
+
 % 'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\CLSC\20200114\CLSC_2020-01-14_07.mat'
 
 load(runpath);
@@ -46,7 +48,8 @@ for k = 1:length(trial);
     end
     
     if trial(k).success == 1
-    RT(k,1)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
+    RT_states(k,1)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
+    onset_state9(k,1) = trial(k).states_onset(trial(k).states==9);
     end
 end
 
