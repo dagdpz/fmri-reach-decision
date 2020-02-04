@@ -12,6 +12,24 @@ for i = 1:length(prot)
     
     for k = 1:sessions
         
+        for m = 1 : length(prot(i).session(k).epi) 
+            
+            runpath_beh = [runpath filesep ... % Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\CLSC\20200114\CLSC_2020-01-14_07.mat
+                'behavioral_data' filesep ...
+                prot(i).name{1} filesep ...
+                prot(i).session(k).date{1} filesep ...
+                prot(i).session(k).epi(m).mat_file ];
+            
+            runpath_mri = [runpath filesep ... % Y:\MRI\Human\fMRI-reach-decision\Experiment\CLSC\20200114
+                prot(i).name{1} filesep ...
+                prot(i).session(k).date{1}];
+            
+            if ~(exist([runpath_mri filesep prot(i).session(k).epi(m).mat_file],'file') == 2) % if it is not there already
+                copyfile(runpath_beh,[runpath_mri filesep])
+            end
+            
+        end
+        
 %     ne_pl_process_one_session_3TUMG_part1(...
 %         'Y:\MRI\Human\fMRI-reach-decision\Pilot\MAPA\20190802',...    
 %         'hum_14406\dicom',...
