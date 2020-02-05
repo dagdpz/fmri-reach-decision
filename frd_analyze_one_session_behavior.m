@@ -137,7 +137,9 @@ for u = 1:length(su) % loop over subjects
             
             if ~isfield(temp.trial,'CueAuditiv')
                 [temp.trial.CueAuditiv] = deal(0);
-                temp.trial = rmfield(temp.trial,'condition');
+                if isfield(temp.trial,'condition')
+                    temp.trial = rmfield(temp.trial,'condition');
+                end
             end
             
             
@@ -173,23 +175,59 @@ end
 RT= (NaN(length(trial),2));
 
 for k = 1:length(trial)
+    
+    if trial(k).effector == 3 && trial(k).success == 1 %saccades
+        
+        out = em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
+            'frd_em_custom_settings_humanUMGscanner60Hz.m');
+        
+        mov_onset = [out.sac_onsets];
+        mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
+        
+        RT(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+    elseif trial(k).effector == 4 && trial(k).success == 1% reaches
+        % Interpolate to remove NaNs
+        idx_nonnan = find(~isnan(trial(k).x_hnd));
+        
+        t = trial(k).tSample_from_time_start(idx_nonnan(1):idx_nonnan(end));
+        x_ = trial(k).x_hnd(idx_nonnan(1):idx_nonnan(end));
+        y_ = trial(k).y_hnd(idx_nonnan(1):idx_nonnan(end));
+        
+        x = interp1(t(~isnan(x_)),x_(~isnan(x_)),t);
+        y = interp1(t(~isnan(x_)),y_(~isnan(y_)),t);
+        
+        
+        out = em_saccade_blink_detection(t,x,y,...
+            'frd_em_custom_settings_humanUMGscannerTouchscreen125Hz.m');
+        
+        mov_onset = [out.sac_onsets];
+        mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
+        
+        RT(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+        
+    end
+    
+
+    
+    
+    
     % movement RTs
     if trial(k).completed
-        RT(k,1)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
+        RT(k,2)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
     end
     
     % if choice or not
     if trial(k).task.correct_choice_target == [1 2]
-        RT(k,2) = 1;
+        RT(k,3) = 1;
     elseif trial(k).task.correct_choice_target == 1
-        RT(k,2) = 0;
+        RT(k,3) = 0;
     end
 
 end % for each trial
 
 
 RT = array2table(RT);
-RT.Properties.VariableNames  = {'value' 'choice'};
+RT.Properties.VariableNames  = {'RT' 'stateRT' 'choice'};
 %RT.choice = categorical(RT.choice);
 RT.choice       = categorical(RT.choice, [0 1], {'instructed' 'choice'});
 RT.complete     = logical([trial.completed]');
