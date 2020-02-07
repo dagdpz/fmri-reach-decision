@@ -1,9 +1,9 @@
 function frd_pipeline1_automized
 
 load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_exp.mat');
-
-runpath = 'Y:\MRI\Human\fMRI-reach-decision\Experiment';
-
+prot(1) = [];
+prot(2).session(1) = [];
+runpath = 'D:\Experiment';
 %subjects = {'CLSC', 'DAGU', 'ELRH', 'EVBO', 'NORE', 'OLPE'};
 
 for i = 1:length(prot)
@@ -13,6 +13,8 @@ for i = 1:length(prot)
     for k = 1:sessions
         
         for m = 1 : length(prot(i).session(k).epi) 
+            
+            pack
             
             runpath_beh = [runpath filesep ... % Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\CLSC\20200114\CLSC_2020-01-14_07.mat
                 'behavioral_data' filesep ...
@@ -50,6 +52,16 @@ for i = 1:length(prot)
 
     end
 end 
-
-
+%%
+% 
+%     ne_pl_process_one_session_3TUMG_part1(...
+%         [runpath filesep prot(i).name{1} filesep prot(i).session(k).date{1}],... % session folder
+%         [prot(i).session(k).hum{1} filesep 'dicom'],...                                         % hum_nummer
+%         [prot(i).session(k).epi.nr1], ...                                  % first number of EPIs
+%         prot(i).session(k).T1.nr2,...                                      % secpnd number of T1
+%         prot(i).name{1},...                                                         % subject name
+%         'Human_reach_decision',...                                         % (see ne_pl_session_settings.m)
+%         {'all'});       
+% 
+% ne_pl_process_one_session_3TUMG_part1('Y:\MRI\Human\fMRI-reach-decision\Experiment\CLSC\20200114','hum_14741\dicom', [ 6     9    12    17    20], 15,'CLSC','Human_reach_decision',{'all'});  
 
