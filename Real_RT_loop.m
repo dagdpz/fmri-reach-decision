@@ -4,6 +4,7 @@ function Real_RT_loop
  
 RealRT = [];
 k = 0;
+Mem_time_hold =[];
 for j = 1:length(trial);
     
     if trial(j).success == 1 && trial(j).effector == 4
@@ -18,10 +19,10 @@ for j = 1:length(trial);
         % continue
  
     
-%         if trial(j).task.timing.mem_time_hold > 0
-%            Mem_time_hold(j) = [trial(j).task.timing.mem_time_hold];
-% 
-%         end
+      
+        Mem_time_hold(k,1) = trial(j).task.timing.mem_time_hold;
+
+       
     
     end
     
@@ -42,13 +43,7 @@ StateRT - RealRT
 %         Mem_time(Mem_time == 0) = [];
 
 
-%  Mem_time_hold = [];
-%     for j =  1:length(trial)
-%         %if trial(j).task.timing.mem_time_hold > 0
-%            Mem_time_hold(j,1) = trial(j).task.timing.mem_time_hold;
-% 
-%        % end
-%     end    
+
 
 
 
