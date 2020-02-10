@@ -2,7 +2,10 @@ function frd_pipeline1_automized
 
 load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_exp.mat');
 prot(1) = [];
-prot(2).session(1) = [];
+prot(2) = [];
+prot(3) = [];
+
+
 runpath = 'D:\Experiment';
 %subjects = {'CLSC', 'DAGU', 'ELRH', 'EVBO', 'NORE', 'OLPE'};
 
@@ -13,8 +16,6 @@ for i = 1:length(prot)
     for k = 1:sessions
         
         for m = 1 : length(prot(i).session(k).epi) 
-            
-            pack
             
             runpath_beh = [runpath filesep ... % Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\CLSC\20200114\CLSC_2020-01-14_07.mat
                 'behavioral_data' filesep ...
