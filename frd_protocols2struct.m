@@ -6,7 +6,7 @@ function prot = frd_protocols2struct(runpathwithfilename)
 % rest is text AND replace missing with NaN --> in table
 
 if nargin < 1
-    runpathwithfilename = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_exp.csv';
+    runpathwithfilename = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.csv';
 end
 
 
@@ -55,9 +55,9 @@ for p = 1:length(part_uni)
         
         temp_p_s = temp_p(temp_p.session == sesh_uni(s), : );
         
-        prot(p).name = part_uni(p);
-        prot(p).session(s).date = temp_p_s.session_date(1);
-        prot(p).session(s).hum = temp_p_s.hum_nummer(1);
+        prot(p).name = char(part_uni(p));
+        prot(p).session(s).date = char(temp_p_s.session_date(1));
+        prot(p).session(s).hum = char(temp_p_s.hum_nummer(1));
         
         
         e = 1;
@@ -93,8 +93,8 @@ for p = 1:length(part_uni)
 end % loop participants
 
 
-save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_exp.mat','prot');
-
+save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.mat','prot');
+disp('++++ saved file ++++')
 
 
 function protocolsTabellenblatt1 = importfile(filename, startRow, endRow)
