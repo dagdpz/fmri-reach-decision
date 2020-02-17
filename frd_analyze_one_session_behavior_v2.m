@@ -22,7 +22,16 @@ function frd_analyze_one_session_behavior_v2(runpath)
 
 [trial, analysis_level] = frd_conc_trial(runpath);
 
-   
+
+% trial(1124) = [];
+% trial(1286) = [];   
+% trial(1563) = [];  
+% trial(1638) = [];
+% trial(1659) = [];
+% trial(1750) = [];
+% trial(1804) = [];
+% trial(1811) = [];
+% trial(1300) = [];
 %% Define new and correct states and states_onset
 % this part overwrites states_onset with the all onsets and their time from
 % tSample....
@@ -50,7 +59,11 @@ for k = 1:length(trial)
         mov_onset = [out.sac_onsets];
         mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
         
-        dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+            if isempty(mov_onset) % if no saccade is detected after onset state 9
+                dat(k,1) = -99;
+            else
+                dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT 
+            end
         
     elseif trial(k).effector == 4 && trial(k).completed == 1% reaches
         % Interpolate to remove NaNs
@@ -69,9 +82,12 @@ for k = 1:length(trial)
         
         mov_onset = [out.sac_onsets];
         mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
-        
-        dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
-        
+
+            if isempty(mov_onset)
+                dat(k,1) = -99;
+            else
+                dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+            end
     end
     
 
@@ -264,49 +280,127 @@ dat.wrong_target_selected = logical(dat.wrong_target_selected);
 dat.aborted_state_duration = [trial.aborted_state_duration]';
 %%
 disp('stop here')
+
+save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_file.mat','dat');
+
+
+
+
 %%
 % RT AND DELAY
 figure;
-gDelay=gramm('x',dat.delay,'y',dat.RT,'color',dat.session)
-gDelay.set_order_options('x',{'3' '6' '9' '12' '15'})
-gDelay.facet_grid(dat.target_selected,dat.effector)
-gDelay.stat_boxplot()
-gDelay.set_names('Column','','x','delay','y','reaction time')
-gDelay.set_title('Influence of delay on reaction time')
-gDelay.draw()
+gDelay=gramm('x',dat.RT,'color',dat.delay,'subset', dat.success & dat.RT > 0);
+gDelay.set_order_options('color',{'3' '6' '9' '12' '15'});
+%gDelay.facet_wrap(dat.subj);
+gDelay.stat_density();
+gDelay.axe_property('xlim', [0 1])
+gDelay.set_names('Column','','x','reaction time');
+gDelay.set_title('Influence of delay on reaction time');
+gDelay.draw();
+
+figure;
+gDelayIns=gramm('x',dat.RT,'color', dat.subj,'subset', dat.success)
+% gDelayIns.set_order_options('x',{'3' '6' '9' '12' '15'})
+gDelayIns.facet_grid(dat.choice,dat.effector)
+% gDelay.facet_wrap(dat.subj)
+gDelayIns.stat_density()
+gDelayIns.axe_property('xlim', [0 1])
+gDelayIns.set_names('Column','','x','reaction time')
+gDelayIns.set_title('Influence of instruction on reaction time')
+gDelayIns.draw()
+
+% RT VS RT STATE
+figure;
+gDelayIns=gramm('x',dat.stateRT,'y',dat.RT,'color', dat.subj,'subset', dat.success & dat.RT > 0 )
+% gDelayIns.set_order_options('x',{'3' '6' '9' '12' '15'})
+%gDelayIns.facet_grid(dat.choice,dat.effector)
+gDelayIns.facet_wrap(dat.effector)
+gDelayIns.geom_point;
+%gDelayIns.axe_property('ylim', [-2.7 0.6])
+gDelayIns.set_names('Column','','x','stateRT','y','realRT')
+gDelayIns.set_title('Influence of instruction on reaction time')
+gDelayIns.draw()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% figure;
+% gDelayChoice=gramm('x',dat.RT,'y',dat.delay,'color', dat.subj,'subset', ~('none'==dat.target_selected) & dat.choice ~= 'instructed')
+% gDelayChoice.set_order_options('y',{'3' '6' '9' '12' '15'})
+% gDelayChoice.facet_grid(dat.target_selected,dat.effector)
+% gDelayChoice.stat_density()
+% gDelayChoice.set_names('Column','','x','delay','y','reaction time')
+% gDelayChoice.set_title('Influence of choice on reaction time')
+% gDelayChoice.draw()
+
+% Instructed VS Choice
+% figure;
+% gChoice=gramm('x',dat.choice,'y',dat.RT,'subset', ~('none'==dat.target_selected))
+% gChoice.facet_grid(dat.target_selected,dat.effector)
+% gChoice.stat_boxplot()
+% gChoice.set_names('Column','session','x','Decision','y','reaction time')
+% gChoice.set_title('Influence of free choice on reaction time')
+% gChoice.draw()
 
 % Right VS Left hand
 figure;
-gHand=gramm('x',dat.target_selected,'y',dat.RT,'color',dat.session)
-gHand.facet_grid([],dat.session)
+gHand=gramm('x',dat.target_selected,'y',dat.RT,'color',dat.effector,'subset', ~('none'==dat.target_selected))
+gHand.facet_grid([],dat.choice)
+gHand.facet_wrap(dat.subj)
 gHand.stat_boxplot()
-gHand.set_names('Column','session','x','Hand choice','y','reaction time')
-gHand.set_title('Influence of Hand choice on reaction time')
+gHand.set_names('Column','','x','target choice','y','reaction time')
+gHand.axe_property('ylim',[0.2 0.5])
+gHand.set_title('Influence of target choice on reaction time')
 gHand.draw()
 
-% Instructed VS Choice
-figure;
-gChoice=gramm('x',dat.choice,'y',dat.RT,'color',dat.session)
-gChoice.facet_grid([],dat.session)
-gChoice.stat_boxplot()
-gChoice.set_names('Column','session','x','Decision','y','reaction time')
-gChoice.set_title('Influence of free choice on reaction time')
-gChoice.draw()
 
 % Saccade VS Reach
 figure;
-gEffector=gramm('x',dat.effector,'y',dat.RT,'color',dat.session)
-gEffector.facet_grid([],dat.session)
+gEffector=gramm('x',dat.effector,'y',dat.RT)
+gEffector.facet_grid([],[])
 gEffector.stat_boxplot()
-gEffector.set_names('Column','session','x','Effector','y','reaction time')
+gEffector.set_names('Column','','x','Effector','y','reaction time')
+gEffector.axe_property('ylim',[0.2 0.7])
 gEffector.set_title('Influence of effector choice on reaction time')
 gEffector.draw()
 
+figure;
+gEffector=gramm('x',dat.effector,'y',dat.RT,'color',dat.choice)
+gEffector.facet_grid([],dat.choice =='choice')
+gEffector.stat_boxplot()
+gEffector.set_names('Column','decision','x','Effector','y','reaction time')
+gEffector.axe_property('ylim',[0.2 0.7])
+gEffector.set_title('Influence of effector choice on reaction time')
+gEffector.draw()
+
+% figure;
+% gEffector=gramm('x',dat.effector,'y',dat.RT)
+% gEffector.facet_grid([],[])
+% gEffector.stat_boxplot()
+% gEffector.set_names('Column','','x','Effector','y','reaction time')
+% gEffector.axe_property('ylim',[0 0.9])
+% gEffector.set_title('Influence of effector choice on reaction time')
+% gEffector.draw()
 
 
-
-
-
+% COMPARISON OF ERROR RATE BETWEEN SACCADE & REACH
+% gError=gramm('x',dat.target_selected,'y',dat.success,'color',dat.effector)
+% gError.facet_grid([],[])
+% gError.stat_boxplot()
+% gError.set_names('Column','','x','target','y','success')
+% gError.axe_property()
+% gError.set_title('Error rate saccade vs reach')
+% gError.draw()
 
 
 %% Errors clustered by intruction
