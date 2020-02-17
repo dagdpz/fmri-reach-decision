@@ -7,7 +7,7 @@ k = 0;
 Mem_time_hold =[];
 for j = 1:length(trial);
     
-    if trial(j).success == 1 && trial(j).effector == 4
+    if trial(j).success == 1 && trial(j).effector == 3
         
         k = k + 1;
         nice_saccade = [trial(j).RT.sac_onsets];
