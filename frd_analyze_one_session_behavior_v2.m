@@ -22,7 +22,16 @@ function frd_analyze_one_session_behavior_v2(runpath)
 
 [trial, analysis_level] = frd_conc_trial(runpath);
 
-   
+
+% trial(1124) = [];
+% trial(1286) = [];   
+% trial(1563) = [];  
+% trial(1638) = [];
+% trial(1659) = [];
+% trial(1750) = [];
+% trial(1804) = [];
+% trial(1811) = [];
+% trial(1300) = [];
 %% Define new and correct states and states_onset
 % this part overwrites states_onset with the all onsets and their time from
 % tSample....
@@ -50,7 +59,11 @@ for k = 1:length(trial)
         mov_onset = [out.sac_onsets];
         mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
         
-        dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+            if isempty(mov_onset) % if no saccade is detected after onset state 9
+                dat(k,1) = -99;
+            else
+                dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT 
+            end
         
     elseif trial(k).effector == 4 && trial(k).completed == 1% reaches
         % Interpolate to remove NaNs
@@ -69,9 +82,12 @@ for k = 1:length(trial)
         
         mov_onset = [out.sac_onsets];
         mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
-        
-        dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
-        
+
+            if isempty(mov_onset)
+                dat(k,1) = -99;
+            else
+                dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+            end
     end
     
 
@@ -89,7 +105,7 @@ for k = 1:length(trial)
 
     
     % +++ delay
-    dat.delay(k) = trial(k).task.timing.mem_time_hold;
+    dat(k,4) = trial(k).task.timing.mem_time_hold;
     
     % +++ target selected
     if ~isnan(trial(k).target_selected) 
@@ -101,54 +117,51 @@ for k = 1:length(trial)
         if trial(k).effector == 3 % get only saccade trials
             whichtarget = trial(k).target_selected(1); % here in saccade trials pic the number (can be 1 or 2) which is FIRST in target_selected (because it is for saccades)
             
-            dat.target_N_selected(k)=trial(k).target_selected(1);
+            %dat.target_N_selected(k)=trial(k).target_selected(1);
             if       trial(k).eye.tar(whichtarget).pos(1) < 0
-                dat.target_selected(k) = {'left'};
+               dat(k,5) = -1;
             elseif   trial(k).eye.tar(whichtarget).pos(1) > 0
-                dat.target_selected(k) = {'right'};
+               dat(k,5) = 1;
             else
-                dat.target_selected(k) = {'error'};
+               dat(k,5) = 99;
             end
             
         elseif trial(k).effector == 4 % get only reach trials
             whichtarget = trial(k).target_selected(2); % here in reach trials pic the number (its value can be 1 or 2) which is SECOND in target_selected (because it is for reaches)
             
-            dat.target_N_selected(k)=trial(k).target_selected(2);
+            %dat.target_N_selected(k)=trial(k).target_selected(2);
             if       trial(k).hnd.tar(whichtarget).pos(1) < 0
-                dat.target_selected(k) = {'left'};
+                dat(k,5) = -1;
             elseif   trial(k).hnd.tar(whichtarget).pos(1) > 0
-                dat.target_selected(k) = {'right'};
+                dat(k,5) = 1;
             else
-                dat.target_selected(k) = {'error'};
+                dat(k,5) = 99;
             end
             
-        else
-            dat.target_selected(k) = {'effector unknown'};
         end
         
     else
-        dat.target_selected(k) = {'none'};
+        dat(k,5) = 0;
         
     end
     
     
     % +++ correct target
-    dat.correct_target(k) = {'unclear'};
     if numel(trial(k).task.correct_choice_target)>1
-        dat.correct_target(k) = {'both'};
+        dat(k,6) = 0;
         
     elseif trial(k).effector==3
         if trial(k).task.eye.tar(trial(k).task.correct_choice_target).x <0
-            dat.correct_target(k) = {'left'};
+            dat(k,6) = -1;
         elseif trial(k).task.eye.tar(trial(k).task.correct_choice_target).x >0
-            dat.correct_target(k) = {'right'};
+            dat(k,6) = 1;
         end
         
     elseif trial(k).effector==4
         if trial(k).task.hnd.tar(trial(k).task.correct_choice_target).x <0
-            dat.correct_target(k) = {'left'};
+            dat(k,6) = -1;
         elseif trial(k).task.hnd.tar(trial(k).task.correct_choice_target).x >0
-            dat.correct_target(k) = {'right'};
+            dat(k,6) = 1;
         end
         
     end
@@ -173,10 +186,10 @@ dat.number       = [1:length(dat.success)]';
 dat.run          = categorical([trial.run]');
 dat.session      = categorical([trial.session]');
 dat.subj         = categorical({trial.subj}');
-dat.correct_target  = categorical(dat.correct_target);
-dat.target_selected = categorical(dat.target_selected);
+dat.correct_target  = categorical(dat.correct_target,[-1 0 1],{'left' 'both' 'right'});
+dat.target_selected = categorical(dat.target_selected,[-1 0 1],{'left' 'none' 'right'});
 dat.delay        = categorical(dat.delay);
-
+dat.effector = categorical(dat.effector, [3 4], {'saccade', 'reach'});
 
 % shorten 
 dat.cause_abort = cell(height(dat),1);
@@ -236,20 +249,19 @@ names = {
     };
 
 dat.abort_code       = categorical({trial.abort_code}',valueset,names);
-dat.target_selected  = cell(height(dat),1);
-dat.correct_target   = cell(height(dat),1);
 
 
 
-RT_struct=table2struct(dat);
-for k=1:size(dat,1)
-    choice_cell=cellstr(RT_struct(k).choice);
-    correct_cell=cellstr(RT_struct(k).correct_target);
-    dat.trial_type{k}=[choice_cell{1} '_' correct_cell{1}];
-end
 
-dat.trial_type= categorical(dat.trial_type);
-dat.effector = categorical(dat.effector, [3 4], {'saccade', 'reach'});
+% RT_struct=table2struct(dat);
+% for k=1:size(dat,1)
+%     choice_cell=cellstr(RT_struct(k).choice);
+%     correct_cell=cellstr(RT_struct(k).correct_target);
+%     dat.trial_type{k}=[choice_cell{1} '_' correct_cell{1}];
+% end
+
+% dat.trial_type= categorical(dat.trial_type);
+
 
 
 % gib mir für alle instructed trials(nicht both), die Targets an, in denen
@@ -266,6 +278,129 @@ dat.wrong_target_selected(...
 dat.wrong_target_selected = logical(dat.wrong_target_selected);
 
 dat.aborted_state_duration = [trial.aborted_state_duration]';
+%%
+disp('stop here')
+
+save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_file.mat','dat');
+
+
+
+
+%%
+% RT AND DELAY
+figure;
+gDelay=gramm('x',dat.RT,'color',dat.delay,'subset', dat.success & dat.RT > 0);
+gDelay.set_order_options('color',{'3' '6' '9' '12' '15'});
+%gDelay.facet_wrap(dat.subj);
+gDelay.stat_density();
+gDelay.axe_property('xlim', [0 1])
+gDelay.set_names('Column','','x','reaction time');
+gDelay.set_title('Influence of delay on reaction time');
+gDelay.draw();
+
+figure;
+gDelayIns=gramm('x',dat.RT,'color', dat.subj,'subset', dat.success)
+% gDelayIns.set_order_options('x',{'3' '6' '9' '12' '15'})
+gDelayIns.facet_grid(dat.choice,dat.effector)
+% gDelay.facet_wrap(dat.subj)
+gDelayIns.stat_density()
+gDelayIns.axe_property('xlim', [0 1])
+gDelayIns.set_names('Column','','x','reaction time')
+gDelayIns.set_title('Influence of instruction on reaction time')
+gDelayIns.draw()
+
+% RT VS RT STATE
+figure;
+gDelayIns=gramm('x',dat.stateRT,'y',dat.RT,'color', dat.subj,'subset', dat.success & dat.RT > 0 )
+% gDelayIns.set_order_options('x',{'3' '6' '9' '12' '15'})
+%gDelayIns.facet_grid(dat.choice,dat.effector)
+gDelayIns.facet_wrap(dat.effector)
+gDelayIns.geom_point;
+%gDelayIns.axe_property('ylim', [-2.7 0.6])
+gDelayIns.set_names('Column','','x','stateRT','y','realRT')
+gDelayIns.set_title('Influence of instruction on reaction time')
+gDelayIns.draw()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% figure;
+% gDelayChoice=gramm('x',dat.RT,'y',dat.delay,'color', dat.subj,'subset', ~('none'==dat.target_selected) & dat.choice ~= 'instructed')
+% gDelayChoice.set_order_options('y',{'3' '6' '9' '12' '15'})
+% gDelayChoice.facet_grid(dat.target_selected,dat.effector)
+% gDelayChoice.stat_density()
+% gDelayChoice.set_names('Column','','x','delay','y','reaction time')
+% gDelayChoice.set_title('Influence of choice on reaction time')
+% gDelayChoice.draw()
+
+% Instructed VS Choice
+% figure;
+% gChoice=gramm('x',dat.choice,'y',dat.RT,'subset', ~('none'==dat.target_selected))
+% gChoice.facet_grid(dat.target_selected,dat.effector)
+% gChoice.stat_boxplot()
+% gChoice.set_names('Column','session','x','Decision','y','reaction time')
+% gChoice.set_title('Influence of free choice on reaction time')
+% gChoice.draw()
+
+% Right VS Left hand
+figure;
+gHand=gramm('x',dat.target_selected,'y',dat.RT,'color',dat.effector,'subset', ~('none'==dat.target_selected))
+gHand.facet_grid([],dat.choice)
+gHand.facet_wrap(dat.subj)
+gHand.stat_boxplot()
+gHand.set_names('Column','','x','target choice','y','reaction time')
+gHand.axe_property('ylim',[0.2 0.5])
+gHand.set_title('Influence of target choice on reaction time')
+gHand.draw()
+
+
+% Saccade VS Reach
+figure;
+gEffector=gramm('x',dat.effector,'y',dat.RT)
+gEffector.facet_grid([],[])
+gEffector.stat_boxplot()
+gEffector.set_names('Column','','x','Effector','y','reaction time')
+gEffector.axe_property('ylim',[0.2 0.7])
+gEffector.set_title('Influence of effector choice on reaction time')
+gEffector.draw()
+
+figure;
+gEffector=gramm('x',dat.effector,'y',dat.RT,'color',dat.choice)
+gEffector.facet_grid([],dat.choice =='choice')
+gEffector.stat_boxplot()
+gEffector.set_names('Column','decision','x','Effector','y','reaction time')
+gEffector.axe_property('ylim',[0.2 0.7])
+gEffector.set_title('Influence of effector choice on reaction time')
+gEffector.draw()
+
+% figure;
+% gEffector=gramm('x',dat.effector,'y',dat.RT)
+% gEffector.facet_grid([],[])
+% gEffector.stat_boxplot()
+% gEffector.set_names('Column','','x','Effector','y','reaction time')
+% gEffector.axe_property('ylim',[0 0.9])
+% gEffector.set_title('Influence of effector choice on reaction time')
+% gEffector.draw()
+
+
+% COMPARISON OF ERROR RATE BETWEEN SACCADE & REACH
+% gError=gramm('x',dat.target_selected,'y',dat.success,'color',dat.effector)
+% gError.facet_grid([],[])
+% gError.stat_boxplot()
+% gError.set_names('Column','','x','target','y','success')
+% gError.axe_property()
+% gError.set_title('Error rate saccade vs reach')
+% gError.draw()
 
 
 %% Errors clustered by intruction
@@ -290,245 +425,251 @@ C = arrayfun(@(a)   {a.x_hnd(a.state == 9 | a.state == 10)},trial);
 D = arrayfun(@(a)   {a.y_hnd(a.state == 9 | a.state == 10)},trial);
 C_abs = arrayfun(@(a)   {abs(a.x_hnd(a.state == 9 | a.state == 10))},trial);
 
-%% PLots
-
-if ~do_summary 
-    return
-end
+%%
 
 
-%% Saccades normal 
-figure('Name','saccade trajectories, for target acquisiton + hold phase');
-    g1 = gramm('x',A,'y',B,'group',categorical([1:length(trial)]),'color',dat.choice, 'subset',dat.effector == 'saccade' & dat.success);
-    g1.geom_line();
-    g1.axe_property('Xlim',[-15 15],'Ylim',[-9 9]);
-    g1.set_line_options('base_size',0.1);
-    g1.set_title('saccade trajectories, for target acquisiton + hold phase');
-    g1.set_names('x','x_trajcetories','y','y_trajectories','Color','','row','','column',''); 
-    g1.draw;
-
-%% Reaches normal
-figure('Name','reach trajectories, for target acquisiton + hold phase');
-    g2 = gramm('x',C,'y',D,'group',categorical([1:length(trial)]),'color',dat.choice, 'subset',dat.effector == 'reach' & dat.success);
-    g2.geom_line('alpha',0);
-    g2.axe_property('Xlim',[-15 15],'Ylim',[-9 9]);
-    g2.set_line_options('base_size',0.1);
-    g2.set_title('reach trajectories, for target acquisiton + hold phase');
-    g2.set_names('x','x_trajcetories','y','y_trajectories','Color','','row','','column',''); 
-    g2.draw;
-    
-
-%% AUGEN folded left to right
-figure('Name','left movements mirrored onto the right, for target acquisiton + hold phase');
-    g0(1,1) = gramm('x',A_abs,'y',B,'group',categorical([1:length(trial)]),'color',dat.target_selected, 'subset',dat.effector == 'saccade' & dat.success);
-    g0(1,1).geom_point();
-    g0(1,1).axe_property('Xlim',[0 15],'Ylim',[-4 4]);
-    g0(1,1).set_names('x','abs(x_trajcetories)','y','y_trajectories','Color','','row','','column','');   
-    g0(1,1).set_title('saccades');
-    
-    g0(2,1) = gramm('x',C_abs,'y',D,'group',categorical([1:length(trial)]),'color',dat.target_selected, 'subset',dat.effector == 'reach' & dat.success);
-    g0(2,1).geom_point('alpha',0);
-    g0(2,1).axe_property('Xlim',[0 15],'Ylim',[-4 4]);
-    g0(2,1).set_title('reaches');
-    
-    g0.set_names('x','abs(x_trajcetories)','y','y_trajectories','Color','','row','','column','');   
-    g0.set_title('left movements mirrored onto the right, for target acquisiton + hold phase');
-    g0.set_color_options('map','brewer2');
-    g0.set_point_options('base_size',2);
-    g0.draw;
-
-%% plots
-
-    %%
-    figure; % Succes Rate
-    g5(1,1) = gramm('x',categorical(dat.success), 'color', dat.choice,'column',dat.effector);%,'subset',dat.success == 1); %'x',categorical(dat.success
-    g5(1,1).stat_bin('normalization','probability');
-    %g5(1,1).facet_wrap(dat.effector);
-    g5(1,1).set_names('x','','y','proportion in %','Color','','row','','column','');
-    
-    g5(2,1) = gramm('x',categorical(dat.success),'color', dat.trial_type,'column',dat.effector,'subset', dat.trial_type ~= 'choi_both');
-    g5(2,1).stat_bin('normalization','probability');
-    g5(2,1).set_color_options('map','brewer2');
-    g5(2,1).set_names('x','','y','proportion in %','Color','','row','','column','');
-    
-    g5.set_title({'success rate clustered by instruction'});
-    g5.draw;
-    %g5.export('file_name',['SuccessRate_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
-    % g5(2,1) = gramm('x', Err.trial_type,'color', Err.trial_type,'column',Err.effector,'subset', Err.abort_code ~= {'NO ABORT'} & Err.trial_type ~= 'choi_both');
-    % g5(2,1).stat_bin('geom','bar');
-    % g5(2,1).set_color_options('map','brewer2');
-    % g5(2,1).set_names('x','','y','proportion in %','Color','','row','','column','');
-    % g5(2,1).set_title({'instructed left vs. right'});
-    %
-    % g5.set_title({'Proportion of Errors clustered by instruction'});
-    % g5.draw;
-    
-    %%
-    figure; %2 reaction times
-    g(1,1) = gramm('x', dat.value, 'color', dat.choice,'linestyle', dat.target_selected,'column',dat.effector,'subset',logical(dat.success));
-    g(1,1).stat_density();
-    g(1,1).set_names('x','dat / s','Color','','row','','column','','linestyle','target selected');
-    
-    
-    g(2,1) = gramm('x', dat.target_selected, 'y', dat.value,'column',dat.effector,'color', dat.choice,'subset',logical(dat.success));
-    g(2,1).geom_jitter('dodge', 0.8);
-    g(2,1).set_names('x','target selected','y','dat/s','Color','','row','','column','');
-    
-    g.set_title({'reaction time, successfull only, N = ' (sum(dat.success))});
-    g.draw;
-    %g.export('file_name',['RTs_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
-    
-    if strcmp('experiment',analysis_level)
-        figure; %2 reaction times
-        g(1,1) = gramm('x', dat.value, 'color', dat.subj,'row', dat.target_selected,'column',dat.effector,'subset',logical(dat.success));
-        g(1,1).stat_density();
-        g(1,1).set_names('x','dat / s','Color','','row','','column','');
-        g.draw;
-    end
-    
-        
-    %%
-    figure; %7 Which Errors
-    g6 = gramm('x', Err.abort_code,'y', Err.prop,'color',Err.trial_type, 'subset', Err.abort_code ~= 'NO ABORT');
-    g6.stat_summary('geom','bar');
-    g6.facet_grid(Err.cause,Err.effector);
-    g6.set_text_options('base_size',8);
-    g6.set_names('x','','y','proportion in %','Color','instruction','row','cause of error','column','');
-    g6.set_title({'Which errors occur for which effector? Clustered by instruction. proportion of errors: ' (sum(~dat.success))/length(dat.success)  });
-    
-    g6.draw;
-    %g6.export('file_name',['Errors_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
-    
-    %%
-    
-    figure; %4 choice bias
-    g3(1,1) = gramm('x', dat.target_selected, 'subset', dat.target_selected ~= 'none' & dat.choice == 'choice' & dat.success);
-    g3(1,1).stat_bin('geom','bar','normalization','probability');
-    g3(1,1).facet_wrap(dat.effector,'ncols',2);
-    g3(1,1).set_names('x','','y','proportion in %','Color','','row','','column','');
-    g3(1,1).set_title({'relative amount of left/right answers in choice trials'});
-    
-    g3(1,2) = gramm('x',categorical(dat.target_selected), 'color', dat.choice, 'subset', dat.target_selected ~= 'none' & dat.success);
-    g3(1,2).stat_bin('geom','bar','normalization','count');
-    g3(1,2).facet_wrap(dat.effector,'ncols',2);
-    g3(1,2).set_names('x','','y','count','Color','','row','','column','');
-    g3(1,2).set_title({'Is there an equal amount of N in each condition?'});
-    
-    g3(2,2) = gramm('x',dat.effector, 'color', dat.choice, 'subset', dat.target_selected ~= 'none' & dat.success);
-    g3(2,2).stat_bin('geom','bar','normalization','count');
-    g3(2,2).set_names('x','','y','count','Color','','row','','column','');
-    g3(2,2).set_title({'How many trials in choice vs. instructed?'});
-    
-    g3.set_title({'Choice Bias for successful trials'})
-    
-    g3.draw;
-    %g3.export('file_name',['ChoiceBias_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59),'width',56,'height',33,'units','centimeters');
-
-    %%
-
-%%    
-%     figure; % 5 aborted_state_duration
-%     g2 = gramm('x',dat.aborted_state_duration,'row',dat.abort_code,'subset',or(dat.abort_code == 'HND FIX HOLD', dat.abort_code == 'EYE FIX HOLD'));
-%     g2.stat_bin('nbins',200);
-%    % g2.axe_property('XLim',[0 2]);
-%     g2.set_names('x','time in s','y','count','Color','','row','');
-%     g2.set_title({'Fixation Hold Errors for first 2 seconds'})
-%     g2.draw;
-%     
-%     figure;    
-%     g4 = gramm('x',dat.aborted_state_duration,'color',dat.abort_code,'subset',or(dat.abort_code == 'HND FIX HOLD', dat.abort_code == 'EYE FIX HOLD'));
-%     g4.stat_bin('nbins',200);
-%     %g4.axe_property('XLim',[0 2]);
-%     g4.facet_wrap(double(dat.run));
-%     g4.set_names('x','time in s','y','count','Color','','row','');
-%     g4.set_title({'Fixation Hold Errors for first 2 seconds by run'})
-%     g4.draw;
-
-
-%% Are trial durations as long as they are supposed to be? - Calculation
-if 0
-periods = struct();
-ITI_v1 = [];
-for k = 1:length(trial)
-    
-    periods(k).states = unique(trial(k).state,'stable')'; 
-    indi = logical([1 (diff(trial(k).state) ~= 0)']);
-    periods(k).states_onset = trial(k).tSample_from_time_start(indi)';
-    
-    periods(k).duration = diff(periods(k).states_onset);
-    ITI_timestamps = trial(k).tSample_from_time_start(trial(k).state == 50);
-    
-    ITI_dur = ITI_timestamps(end) - ITI_timestamps(1);
-    
-    if periods(k).states(end) ~= 99 % all trials when run is still going
-        periods(k).duration(end +1) = ITI_dur;
-    end
-    
-    ITI_v1 = [ITI_v1 ITI_dur];
-    
-end
-
-%% Are trial durations as long as they are supposed to be? - Visualization
-% this part gives you all supposed durations of periods (hard coded) and
-% their respective real durations (from tSample...)
-
-    a = struct();
-    for l = 1:length(periods)
-        
-        times = [3 11.8 0.2 trial(l).task.timing.mem_time_hold 1 1 0 0 0 2];
-        pnames = cell({'fix_acq' 'fix' 'cue' 'mem' 'tar_acq_inv' 'tar_hold_inv' 'tar_acq' 'tar_hold' 'reward' 'ITI'});
-        a.pnames = pnames';
-        a.times = times';
-        
-        if length(periods(l).duration) == 10
-            
-            a.dur = periods(l).duration';
-            sum(periods(l).duration((end-3):(end-1)))
-            
-        elseif periods(l).states(end) == 99
-            continue;
-        else
-            w = length(periods(l).states);
-            pnames = [pnames(1:(w-1)) 'ITI'];
-            a.pnames = pnames';
-            times = [times(1:(w-1)) times(end)];
-            a.times = times';
-            a.dur = periods(l).duration';
-        end
-        
-        struct2table(a)
-        pause on
-        pause;
-    end
-    
-end
 
 %%
-if 0
-load('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\IGKA\shuffled_conditions\shuffled_conditions_IGKA_presented.mat')
-
-pre_order = [present.comb_del];
-pre_order = pre_order(1:length(trial));
-
-dat.pre_order = pre_order;
-[dat.effector dat.choice dat.correct_target categorical(dat.delay) dat.pre_order]
 
 
-    %%
-    figure; %2 reaction times
-    g(1,1) = gramm('x', dat.value,'column',dat.effector,'color',dat.run,'subset',logical(dat.success));
-    g(1,1).stat_density();
-    g(1,1).set_names('x','dat / s','Color','','row','','column','','linestyle','target selected');
-    
-    
-    g(2,1) = gramm('x', dat.target_selected, 'y', dat.value,'column',dat.effector,'color',dat.run,'subset',logical(dat.success));
-    g(2,1).geom_point('dodge', 0.8);
-    g(2,1).set_names('x','target selected','y','dat/s','Color','','row','','column','');
-    
-    g.set_title({'reaction time, successfull only, N = ' (sum(dat.success))});
-    g.draw;
-    %g.export('file_name',['RTs_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
-end    
+
+
+
+
+
+
+% %% Saccades normal 
+% figure('Name','saccade trajectories, for target acquisiton + hold phase');
+%     g1 = gramm('x',A,'y',B,'group',categorical([1:length(trial)]),'color',dat.choice, 'subset',dat.effector == 'saccade' & dat.success);
+%     g1.geom_line();
+%     g1.axe_property('Xlim',[-15 15],'Ylim',[-9 9]);
+%     g1.set_line_options('base_size',0.1);
+%     g1.set_title('saccade trajectories, for target acquisiton + hold phase');
+%     g1.set_names('x','x_trajcetories','y','y_trajectories','Color','','row','','column',''); 
+%     g1.draw;
+% 
+% %% Reaches normal
+% figure('Name','reach trajectories, for target acquisiton + hold phase');
+%     g2 = gramm('x',C,'y',D,'group',categorical([1:length(trial)]),'color',dat.choice, 'subset',dat.effector == 'reach' & dat.success);
+%     g2.geom_line('alpha',0);
+%     g2.axe_property('Xlim',[-15 15],'Ylim',[-9 9]);
+%     g2.set_line_options('base_size',0.1);
+%     g2.set_title('reach trajectories, for target acquisiton + hold phase');
+%     g2.set_names('x','x_trajcetories','y','y_trajectories','Color','','row','','column',''); 
+%     g2.draw;
+%     
+% 
+% %% AUGEN folded left to right
+% figure('Name','left movements mirrored onto the right, for target acquisiton + hold phase');
+%     g0(1,1) = gramm('x',A_abs,'y',B,'group',categorical([1:length(trial)]),'color',dat.target_selected, 'subset',dat.effector == 'saccade' & dat.success);
+%     g0(1,1).geom_point();
+%     g0(1,1).axe_property('Xlim',[0 15],'Ylim',[-4 4]);
+%     g0(1,1).set_names('x','abs(x_trajcetories)','y','y_trajectories','Color','','row','','column','');   
+%     g0(1,1).set_title('saccades');
+%     
+%     g0(2,1) = gramm('x',C_abs,'y',D,'group',categorical([1:length(trial)]),'color',dat.target_selected, 'subset',dat.effector == 'reach' & dat.success);
+%     g0(2,1).geom_point('alpha',0);
+%     g0(2,1).axe_property('Xlim',[0 15],'Ylim',[-4 4]);
+%     g0(2,1).set_title('reaches');
+%     
+%     g0.set_names('x','abs(x_trajcetories)','y','y_trajectories','Color','','row','','column','');   
+%     g0.set_title('left movements mirrored onto the right, for target acquisiton + hold phase');
+%     g0.set_color_options('map','brewer2');
+%     g0.set_point_options('base_size',2);
+%     g0.draw;
+% 
+% %% plots
+% 
+%     %%
+%     figure; % Succes Rate
+%     g5(1,1) = gramm('x',categorical(dat.success), 'color', dat.choice,'column',dat.effector);%,'subset',dat.success == 1); %'x',categorical(dat.success
+%     g5(1,1).stat_bin('normalization','probability');
+%     %g5(1,1).facet_wrap(dat.effector);
+%     g5(1,1).set_names('x','','y','proportion in %','Color','','row','','column','');
+%     
+%     g5(2,1) = gramm('x',categorical(dat.success),'color', dat.trial_type,'column',dat.effector,'subset', dat.trial_type ~= 'choi_both');
+%     g5(2,1).stat_bin('normalization','probability');
+%     g5(2,1).set_color_options('map','brewer2');
+%     g5(2,1).set_names('x','','y','proportion in %','Color','','row','','column','');
+%     
+%     g5.set_title({'success rate clustered by instruction'});
+%     g5.draw;
+%     %g5.export('file_name',['SuccessRate_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
+%     % g5(2,1) = gramm('x', Err.trial_type,'color', Err.trial_type,'column',Err.effector,'subset', Err.abort_code ~= {'NO ABORT'} & Err.trial_type ~= 'choi_both');
+%     % g5(2,1).stat_bin('geom','bar');
+%     % g5(2,1).set_color_options('map','brewer2');
+%     % g5(2,1).set_names('x','','y','proportion in %','Color','','row','','column','');
+%     % g5(2,1).set_title({'instructed left vs. right'});
+%     %
+%     % g5.set_title({'Proportion of Errors clustered by instruction'});
+%     % g5.draw;
+%     
+%     %%
+%     figure; %2 reaction times
+%     g(1,1) = gramm('x', dat.value, 'color', dat.choice,'linestyle', dat.target_selected,'column',dat.effector,'subset',logical(dat.success));
+%     g(1,1).stat_density();
+%     g(1,1).set_names('x','dat / s','Color','','row','','column','','linestyle','target selected');
+%     
+%     
+%     g(2,1) = gramm('x', dat.target_selected, 'y', dat.value,'column',dat.effector,'color', dat.choice,'subset',logical(dat.success));
+%     g(2,1).geom_jitter('dodge', 0.8);
+%     g(2,1).set_names('x','target selected','y','dat/s','Color','','row','','column','');
+%     
+%     g.set_title({'reaction time, successfull only, N = ' (sum(dat.success))});
+%     g.draw;
+%     %g.export('file_name',['RTs_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
+%     
+%     if strcmp('experiment',analysis_level)
+%         figure; %2 reaction times
+%         g(1,1) = gramm('x', dat.value, 'color', dat.subj,'row', dat.target_selected,'column',dat.effector,'subset',logical(dat.success));
+%         g(1,1).stat_density();
+%         g(1,1).set_names('x','dat / s','Color','','row','','column','');
+%         g.draw;
+%     end
+%     
+%         
+%     %%
+%     figure; %7 Which Errors
+%     g6 = gramm('x', Err.abort_code,'y', Err.prop,'color',Err.trial_type, 'subset', Err.abort_code ~= 'NO ABORT');
+%     g6.stat_summary('geom','bar');
+%     g6.facet_grid(Err.cause,Err.effector);
+%     g6.set_text_options('base_size',8);
+%     g6.set_names('x','','y','proportion in %','Color','instruction','row','cause of error','column','');
+%     g6.set_title({'Which errors occur for which effector? Clustered by instruction. proportion of errors: ' (sum(~dat.success))/length(dat.success)  });
+%     
+%     g6.draw;
+%     %g6.export('file_name',['Errors_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
+%     
+%     %%
+%     
+%     figure; %4 choice bias
+%     g3(1,1) = gramm('x', dat.target_selected, 'subset', dat.target_selected ~= 'none' & dat.choice == 'choice' & dat.success);
+%     g3(1,1).stat_bin('geom','bar','normalization','probability');
+%     g3(1,1).facet_wrap(dat.effector,'ncols',2);
+%     g3(1,1).set_names('x','','y','proportion in %','Color','','row','','column','');
+%     g3(1,1).set_title({'relative amount of left/right answers in choice trials'});
+%     
+%     g3(1,2) = gramm('x',categorical(dat.target_selected), 'color', dat.choice, 'subset', dat.target_selected ~= 'none' & dat.success);
+%     g3(1,2).stat_bin('geom','bar','normalization','count');
+%     g3(1,2).facet_wrap(dat.effector,'ncols',2);
+%     g3(1,2).set_names('x','','y','count','Color','','row','','column','');
+%     g3(1,2).set_title({'Is there an equal amount of N in each condition?'});
+%     
+%     g3(2,2) = gramm('x',dat.effector, 'color', dat.choice, 'subset', dat.target_selected ~= 'none' & dat.success);
+%     g3(2,2).stat_bin('geom','bar','normalization','count');
+%     g3(2,2).set_names('x','','y','count','Color','','row','','column','');
+%     g3(2,2).set_title({'How many trials in choice vs. instructed?'});
+%     
+%     g3.set_title({'Choice Bias for successful trials'})
+%     
+%     g3.draw;
+%     %g3.export('file_name',['ChoiceBias_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59),'width',56,'height',33,'units','centimeters');
+% 
+%     %%
+% 
+% %%    
+% %     figure; % 5 aborted_state_duration
+% %     g2 = gramm('x',dat.aborted_state_duration,'row',dat.abort_code,'subset',or(dat.abort_code == 'HND FIX HOLD', dat.abort_code == 'EYE FIX HOLD'));
+% %     g2.stat_bin('nbins',200);
+% %    % g2.axe_property('XLim',[0 2]);
+% %     g2.set_names('x','time in s','y','count','Color','','row','');
+% %     g2.set_title({'Fixation Hold Errors for first 2 seconds'})
+% %     g2.draw;
+% %     
+% %     figure;    
+% %     g4 = gramm('x',dat.aborted_state_duration,'color',dat.abort_code,'subset',or(dat.abort_code == 'HND FIX HOLD', dat.abort_code == 'EYE FIX HOLD'));
+% %     g4.stat_bin('nbins',200);
+% %     %g4.axe_property('XLim',[0 2]);
+% %     g4.facet_wrap(double(dat.run));
+% %     g4.set_names('x','time in s','y','count','Color','','row','');
+% %     g4.set_title({'Fixation Hold Errors for first 2 seconds by run'})
+% %     g4.draw;
+% 
+% 
+% %% Are trial durations as long as they are supposed to be? - Calculation
+% if 0
+% periods = struct();
+% ITI_v1 = [];
+% for k = 1:length(trial)
+%     
+%     periods(k).states = unique(trial(k).state,'stable')'; 
+%     indi = logical([1 (diff(trial(k).state) ~= 0)']);
+%     periods(k).states_onset = trial(k).tSample_from_time_start(indi)';
+%     
+%     periods(k).duration = diff(periods(k).states_onset);
+%     ITI_timestamps = trial(k).tSample_from_time_start(trial(k).state == 50);
+%     
+%     ITI_dur = ITI_timestamps(end) - ITI_timestamps(1);
+%     
+%     if periods(k).states(end) ~= 99 % all trials when run is still going
+%         periods(k).duration(end +1) = ITI_dur;
+%     end
+%     
+%     ITI_v1 = [ITI_v1 ITI_dur];
+%     
+% end
+% 
+% %% Are trial durations as long as they are supposed to be? - Visualization
+% % this part gives you all supposed durations of periods (hard coded) and
+% % their respective real durations (from tSample...)
+% 
+%     a = struct();
+%     for l = 1:length(periods)
+%         
+%         times = [3 11.8 0.2 trial(l).task.timing.mem_time_hold 1 1 0 0 0 2];
+%         pnames = cell({'fix_acq' 'fix' 'cue' 'mem' 'tar_acq_inv' 'tar_hold_inv' 'tar_acq' 'tar_hold' 'reward' 'ITI'});
+%         a.pnames = pnames';
+%         a.times = times';
+%         
+%         if length(periods(l).duration) == 10
+%             
+%             a.dur = periods(l).duration';
+%             sum(periods(l).duration((end-3):(end-1)))
+%             
+%         elseif periods(l).states(end) == 99
+%             continue;
+%         else
+%             w = length(periods(l).states);
+%             pnames = [pnames(1:(w-1)) 'ITI'];
+%             a.pnames = pnames';
+%             times = [times(1:(w-1)) times(end)];
+%             a.times = times';
+%             a.dur = periods(l).duration';
+%         end
+%         
+%         struct2table(a)
+%         pause on
+%         pause;
+%     end
+%     
+% end
+% 
+% %%
+% if 0
+% load('Y:\MRI\Human\fMRI-reach-decision\Pilot\behavioral data\IGKA\shuffled_conditions\shuffled_conditions_IGKA_presented.mat')
+% 
+% pre_order = [present.comb_del];
+% pre_order = pre_order(1:length(trial));
+% 
+% dat.pre_order = pre_order;
+% [dat.effector dat.choice dat.correct_target categorical(dat.delay) dat.pre_order]
+% 
+% 
+%     %%
+%     figure; %2 reaction times
+%     g(1,1) = gramm('x', dat.value,'column',dat.effector,'color',dat.run,'subset',logical(dat.success));
+%     g(1,1).stat_density();
+%     g(1,1).set_names('x','dat / s','Color','','row','','column','','linestyle','target selected');
+%     
+%     
+%     g(2,1) = gramm('x', dat.target_selected, 'y', dat.value,'column',dat.effector,'color',dat.run,'subset',logical(dat.success));
+%     g(2,1).geom_point('dodge', 0.8);
+%     g(2,1).set_names('x','target selected','y','dat/s','Color','','row','','column','');
+%     
+%     g.set_title({'reaction time, successfull only, N = ' (sum(dat.success))});
+%     g.draw;
+%     %g.export('file_name',['RTs_' trial(1).fileinfo.name(1:4) '_' trial(1).path(61:70)],'export_path', runpath(1:59));
+% end    
 %%
 % function circle(x,y,r)
 % %x and y are the coordinates of the center of the circle
