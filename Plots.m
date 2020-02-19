@@ -1,10 +1,11 @@
+%% Plot stuff
+
+
 load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_file.mat','dat');
 
 
-
-
 dat.unrealRT = dat.RT == -99 | dat.RT>dat.stateRT | dat.RT > 0.8;
-
+weirdos = dat(dat.unrealRT,:);
 
 %         1566
 %         1729
@@ -18,6 +19,29 @@ dat.unrealRT = dat.RT == -99 | dat.RT>dat.stateRT | dat.RT > 0.8;
 %         4009
 %         4064
 %         4072
+
+
+%% sanity checks
+
+figure;
+sRT = gramm('x',dat.stateRT, 'y', dat.RT, 'color', dat.choice, 'subset',~dat.unrealRT & ~('none'==dat.target_selected));
+sRT.geom_point();
+sRT.facet_grid(dat.effector,dat.target_selected);
+sRT.set_names('x','state RT', 'y',' real RT','Column','','Row','','color','');
+sRT.set_title('real RT vs. state RT');
+sRT.draw;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 % RT AND DELAY
