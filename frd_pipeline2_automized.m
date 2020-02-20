@@ -4,11 +4,20 @@ clear all
 
 load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.mat');
 
-throwaway = strcmp('ANEL',{prot.name}) | ...
-    strcmp('CLSC',{prot.name});
-prot(throwaway) = [];
-prot(7).session(2) = [];
+% throwaway = strcmp('ANEL',{prot.name}) | ...
+%     strcmp('CLSC',{prot.name});
 
+throwaway = ~strcmp('EVBO',{prot.name})& ...
+      ~strcmp('FARA',{prot.name}) &...    
+      ~strcmp('JOOD',{prot.name}) &...    
+      ~strcmp('LIKU',{prot.name}) &...    
+      ~strcmp('MABL',{prot.name});  
+
+
+prot(throwaway) = [];
+prot(1).session(1) = [];
+prot(2).session(1) = [];
+prot(3).session(1) = [];
 
 runpath = 'D:\Experiment';
 
