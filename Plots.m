@@ -5,6 +5,7 @@ load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_fi
 
 
 dat.unrealRT = dat.RT == -99 | dat.RT>dat.stateRT | dat.RT > 0.8;
+alsoweird = (dat.stateRT -dat.RT) > 0.2 & dat.effector == 'saccade';
 weirdos = dat(dat.unrealRT,:);
 
 %         1566
@@ -24,7 +25,7 @@ weirdos = dat(dat.unrealRT,:);
 %% sanity checks
 
 figure;
-sRT = gramm('x',dat.stateRT, 'y', dat.RT, 'color', dat.choice, 'subset',~dat.unrealRT & ~('none'==dat.target_selected));
+sRT = gramm('x',dat.stateRT, 'y', dat.RT, 'color', alsoweird, 'subset',~dat.unrealRT & ~('none'==dat.target_selected));
 sRT.geom_point();
 sRT.facet_grid(dat.effector,dat.target_selected);
 sRT.set_names('x','state RT', 'y',' real RT','Column','','Row','','color','');
