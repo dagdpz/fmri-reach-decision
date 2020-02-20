@@ -23,7 +23,7 @@ weirdos = dat(dat.unrealRT,:);
 
 %% sanity checks
 
-figure;
+figure; % stateRT vs. realRT
 sRT = gramm('x',dat.stateRT, 'y', dat.RT, 'color', dat.choice, 'subset',~dat.unrealRT & ~('none'==dat.target_selected));
 sRT.geom_point();
 sRT.facet_grid(dat.effector,dat.target_selected);
@@ -32,6 +32,7 @@ sRT.set_title('real RT vs. state RT');
 sRT.draw;
 
 
+figure;
 
 
 
