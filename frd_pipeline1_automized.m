@@ -14,12 +14,19 @@ load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.m
 %     strcmp('LORU',{prot.name}) |...
 %     strcmp('ANEL',{prot.name}) ;
 
+% throwaway = ~strcmp('EVBO',{prot.name})& ...
+%       ~strcmp('FARA',{prot.name}) &...    
+%       ~strcmp('JOOD',{prot.name}) &...    
+%       ~strcmp('LIKU',{prot.name}) &...    
+%       ~strcmp('MABL',{prot.name}) &...    
+%       ~strcmp('MARO',{prot.name});
+
 throwaway = ~strcmp('LORU',{prot.name});
+
 prot(throwaway) = [];
 prot.session(1) = [];
+prot.session(1) = [];
 
- 
- 
 runpath = 'D:\Experiment';
 
 save('D:\Experiment\buffer_for_pipleine_1.mat','prot', 'runpath')
