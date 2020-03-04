@@ -35,15 +35,15 @@ dat.trial_type_del = strcat(cellstr(dat.effector),'_' ,cellstr(dat.choice),'_',c
 
 % RT in conditions
 figure;
-gRTcon = gramm('x',dat.RT,'color',dat.target_selected,'linestyle',dat.choice,'subset', dat.success & ~dat.unrealRT);
+gRTcon = gramm('x',dat.RT,'color',dat.choice,'linestyle',dat.target_selected,'subset', dat.success & ~dat.unrealRT);
 % gRTcon.set_order_options('x',{'3' '6' '9' '12' '15'});
 gRTcon.facet_grid(dat.effector,[]);
 % gDelay.facet_wrap(dat.subj);
 gRTcon.stat_density();
 gRTcon.axe_property('xlim', [0 0.8]);
-gRTcon.set_color_options('map','brewer2')
+%gRTcon.set_color_options('map','brewer2')
 
-gRTcon.set_names('Row','','x','reaction time','LineStyle','');
+gRTcon.set_names('Row','','x','reaction time','LineStyle','','color','');
 gRTcon.set_title('Reaction Time');
 gRTcon.draw();
 
@@ -56,7 +56,7 @@ gRTdel.facet_grid(dat.effector,[]);
 % gDelay.facet_wrap(dat.subj);
 gRTdel.stat_density();
 gRTdel.axe_property('xlim', [0 0.8]);
-gRTdel.set_names('Row','','x','reaction time','LineStyle','');
+gRTdel.set_names('Row','','x','reaction time','color','delay');
 gRTdel.set_title('Reaction Time');
 gRTdel.draw();
 
@@ -77,34 +77,52 @@ cb_ges = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_selecte
 clear gCBtime
 figure;
 gCBtime = gramm('x',cb.run,'y',cb.choice_bias);
-gCBtime.stat_summary('geom','line')
-gCBtime.stat_summary('geom','point')
+gCBtime.stat_glm('distribution', 'normal');
+%gCBtime.stat_summary('geom','line')
+%gCBtime.stat_summary('geom','point')
 gCBtime.facet_grid([],cb.effector)
-gCBtime.set_color_options('lightness',[0])%,'chroma_range',[80 40]);
+gCBtime.set_color_options('lightness',80,'chroma',0)%,'chroma_range',[80 40]);
 gCBtime.geom_hline('yintercept',0,'style','k--');
-gCBtime.set_names('x','run','y','proportion right - left','column','','color','session');
+gCBtime.set_names('x','run','y','proportion right minus left  in %','column','','color','session');
 gCBtime.set_title({'Choice Bias over time'});
 gCBtime.axe_property('Ylim',[-100 100]);
 
 gCBtime.update('color',cb.session)
 gCBtime.geom_line();
 gCBtime.geom_point();
-gCBtime.set_color_options('lightness',[65])
+gCBtime.set_color_options('lightness',65,'chroma',75)
 
 gCBtime.draw;
 
 %%
 clear gCBges
 figure;
-gCBges = gramm('x',(cb.effector),'y',cb.choice_bias);
-gCBges.stat_summary('geom','bar','setylim',true)
+gCBges = gramm('x',(cb_ges.effector),'y',cb_ges.choice_bias,'label',round(cb_ges.choice_bias,1));
+gCBges.geom_bar();
+gCBges.geom_label('VerticalAlignment','middle','HorizontalAlignment','center','BackgroundColor','w','Color','k');
 gCBges.geom_hline('yintercept',0,'style','k--');
-gCBges.set_names('x','','y','proportion right minus left');
+gCBges.set_names('x','','y','proportion right minus left in %');
 gCBges.set_title('Choice Bias overall');
+gCBges.axe_property('Ylim',[-50 50])
+gCBges.coord_flip();
+gCBges.set_color_options('map','brewer2');
 gCBges.draw;
 
+%% HERE
+figure;
+gCBsel = gramm('x',dat.delay,'row',dat.effector,'color',dat.target_selected,'subset',dat.success & dat.choice == 'choice' & dat.target_selected ~= 'none');
+gCBsel.stat_bin('normalization','probability','geom','stacked_bars');
+gCBsel.geom_hline('yintercept',0.5,'style','k--');
+gCBsel.set_names('x','target selected','column','');
+gCBsel.set_title('Choice Bias overall');
+gCBsel.set_color_options('map','brewer2');
+gCBsel.axe_property('Ylim',[0 1])
+gCBsel.set_order_options('column',{'3' '6' '9' '12' '15'});
+gCBsel.draw;
 
-%% Delay Errors relative to all
+%% errors and delays
+
+% Delay Errors relative to all
 err = table();
 err.delay = (unique(dat.delay));
 err.prob_err = NaN(length(err.delay),1);
@@ -112,15 +130,16 @@ err.prob_delay = NaN(length(err.delay),1);
 
 for i = 1:length(err.delay)
  
-    err.prob_err(i)   = sum(~dat.success(dat.delay == err.delay(i))) / length(dat.delay);
-    err.prob_delay(i) = sum(dat.delay == err.delay(i))               / length(dat.delay);
+    err.prob_err(i)   = sum(~dat.success(dat.delay == err.delay(i))) / length(dat.delay) * 100;
+    err.prob_delay(i) = sum(dat.delay == err.delay(i))               / length(dat.delay) * 100;
 end
 
-%% Delay Errors relativ normalized
+% Delay Errors relativ normalized
 
 err_del = rowfun(@(s) sum(~s),dat,'InputVariables',{'success'},'GroupingVariable', {'delay'},'OutputVariableNames','err_per_del');
 err_del.err_normalized = err_del.err_per_del ./ err_del.GroupCount * 100;
-%% WHY NOT USING STAT_BIN????
+
+% errors in delays
 clear gErrDel
 
 figure;
@@ -130,12 +149,12 @@ gErrDel(1,1).set_order_options('x',{'3' '6' '9' '12' '15'});
 gErrDel(1,1).set_color_options('chroma',0,'lightness',90)
 gErrDel(1,1).set_names('x','all (grey) + erroneous (red) delays','y','probability overall')
 gErrDel(1,1).set_title('relative to all trials')
+gErrDel(1,1).axe_property('Ylim',[0 35]);
 
 gErrDel(1,1).update('y',err.prob_err);
 gErrDel(1,1).geom_bar();
 
 gErrDel(1,1).set_color_options('chroma',75)
-
 
 
 gErrDel(1,2) = gramm('x',err_del.delay,'y',err_del.err_normalized);
@@ -144,32 +163,43 @@ gErrDel(1,2).geom_point();
 gErrDel(1,2).set_order_options('x',{'3' '6' '9' '12' '15'});
 %gErrDel(1,2).set_color_options('chroma',0,'lightness',90)
 gErrDel(1,2).geom_hline('yintercept',mean(err_del.err_normalized),'style','k:');
-gErrDel(1,2).axe_property('Ylim',[0 30]);
+gErrDel(1,2).axe_property('Ylim',[0 25]);
 
 gErrDel(1,2).set_names('x','erroneous delays','y','probability per group')
-gErrDel(1,2).set_title('relative to n per group')
+gErrDel(1,2).set_title('normalized with n per delay')
 gErrDel(1,2).set_color_options('chroma',75)
 
 gErrDel.set_title('erroneous delays')
 gErrDel.draw;
 
-%%
+%% Error over time
+
 err_time = rowfun(@(x) sum(~x),dat,'InputVariables',{'success'},'GroupingVariable', {'effector', 'session', 'run'},'OutputVariableNames','n_error');
-err_time.err_prob = err_time.n_error./err_time.GroupCount;
+err_time.err_prob = err_time.n_error./err_time.GroupCount * 100;
 
 figure;
-gErrTime = gramm('x',err_time.run,'y',err_time.err_prob);
-gErrTime.stat_summary();
-%gErrTime.stat_bin('geom','bar','normalization','countdensity');
-%gErrTime.axe_property('Ylim',[0 0.5])
-gErrTime.draw
+gErrTime = gramm('x',err_time.run,'y',err_time.err_prob,'column',err_time.effector);
+gErrTime.stat_glm();
+gErrTime.set_color_options('lightness',80,'chroma',0)
+gErrTime.set_names('x','runs','y','probability per group','color','Session','column','')
+gErrTime.axe_property('Ylim',[0 50]);
+gErrTime.set_title('errors over time')
 
+gErrTime.update('color',err_time.session)
+gErrTime.geom_line();
+gErrTime.geom_point();
+gErrTime.set_color_options('lightness',65,'chroma',75)
 
+gErrTime.draw;
 
+%% erros in conditions
+% 
+% figure;
+% err_con = gramm('x',dat.choice,'column',dat.target_selected,'color',dat.effector,'subset',~dat.success);
+% err_con.stat_bin('normalization','probability')
+% err_con.draw;
 
-
-
-
+%%
 
 
 
