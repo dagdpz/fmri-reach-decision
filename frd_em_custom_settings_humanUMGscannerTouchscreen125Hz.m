@@ -20,7 +20,7 @@ settings = {...
     'VelFilterCutoff',  30, ...         % Hz, set to 0 if no filter
     'VelAdaptiveThr',   false, ...      % true or false
     'MinFixDurAfterSac',0, ...          % s
-    'Plot',             true, ...       % true or false
+    'Plot',             false, ...       % true or false
     'OpenFigure',       false, ...        % true or false
     'Verbose',          false ...		% true or false
 
