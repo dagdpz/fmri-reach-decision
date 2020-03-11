@@ -13,7 +13,8 @@ dat(dat.subj == 'CAST'|...
     dat.subj == 'MARO'|...    
     dat.subj == 'PASC',:) = [];
 %%
-%dat(~(dat.subj == 'ANEL'),:) = [];
+% dat(~(dat.subj == 'ANEL'),:) = [];
+% 
 
 
 
