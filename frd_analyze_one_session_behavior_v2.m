@@ -1,27 +1,11 @@
 function frd_analyze_one_session_behavior_v2(runpath)
-% What to put in:
-
-% runpath:              A) specific matfile,    B) session folder   C) subject folder    D) experiment folder
-% list_successful_only: 0) all trials           1) successful only  2) failed only
-% plot_trials:          0) no plots of single trials                1) plots every single trial in 1D    2) plots every single trial in 2D 
-% do_summary:           0) no summary plots     1) summary plots
-% detect saccades:      idk
-% detect_saccades_custom_settings: idk
-
-
-% TODO:
-% only read in experimental folders, not shuffled conditions etc.
-% figure size
-% title with subj/session
-% export to pdf properly
-% plot trials in 2D for all trials, not only unsuccessful
-% subject wise analysis + whole experiment analysis
 
 
 %% load in data
 
 [trial, analysis_level] = frd_conc_trial(runpath);
 
+%frd_analyze_one_session_behavior_v2('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data');
 
 % trial(1124) = [];
 % trial(1286) = [];   
@@ -188,6 +172,7 @@ dat.session      = categorical([trial.session]');
 dat.subj         = categorical({trial.subj}');
 dat.correct_target  = categorical(dat.correct_target,[-1 0 1],{'left' 'both' 'right'});
 dat.target_selected = categorical(dat.target_selected,[-1 0 1],{'left' 'none' 'right'});
+dat.num_delay    = dat.delay;
 dat.delay        = categorical(dat.delay);
 dat.effector = categorical(dat.effector, [3 4], {'saccade', 'reach'});
 
@@ -285,157 +270,7 @@ save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_fi
 
 
 
-
 %%
-% RT AND DELAY
-figure;
-gDelay=gramm('x',dat.RT,'color',dat.delay,'subset', dat.success & dat.RT > 0);
-gDelay.set_order_options('color',{'3' '6' '9' '12' '15'});
-%gDelay.facet_wrap(dat.subj);
-gDelay.stat_density();
-gDelay.axe_property('xlim', [0 1])
-gDelay.set_names('Column','','x','reaction time');
-gDelay.set_title('Influence of delay on reaction time');
-gDelay.draw();
-
-figure;
-gDelayIns=gramm('x',dat.RT,'color', dat.subj,'subset', dat.success)
-% gDelayIns.set_order_options('x',{'3' '6' '9' '12' '15'})
-gDelayIns.facet_grid(dat.choice,dat.effector)
-% gDelay.facet_wrap(dat.subj)
-gDelayIns.stat_density()
-gDelayIns.axe_property('xlim', [0 1])
-gDelayIns.set_names('Column','','x','reaction time')
-gDelayIns.set_title('Influence of instruction on reaction time')
-gDelayIns.draw()
-
-% RT VS RT STATE
-figure;
-gDelayIns=gramm('x',dat.stateRT,'y',dat.RT,'color', dat.subj,'subset', dat.success & dat.RT > 0 )
-% gDelayIns.set_order_options('x',{'3' '6' '9' '12' '15'})
-%gDelayIns.facet_grid(dat.choice,dat.effector)
-gDelayIns.facet_wrap(dat.effector)
-gDelayIns.geom_point;
-%gDelayIns.axe_property('ylim', [-2.7 0.6])
-gDelayIns.set_names('Column','','x','stateRT','y','realRT')
-gDelayIns.set_title('Influence of instruction on reaction time')
-gDelayIns.draw()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% figure;
-% gDelayChoice=gramm('x',dat.RT,'y',dat.delay,'color', dat.subj,'subset', ~('none'==dat.target_selected) & dat.choice ~= 'instructed')
-% gDelayChoice.set_order_options('y',{'3' '6' '9' '12' '15'})
-% gDelayChoice.facet_grid(dat.target_selected,dat.effector)
-% gDelayChoice.stat_density()
-% gDelayChoice.set_names('Column','','x','delay','y','reaction time')
-% gDelayChoice.set_title('Influence of choice on reaction time')
-% gDelayChoice.draw()
-
-% Instructed VS Choice
-% figure;
-% gChoice=gramm('x',dat.choice,'y',dat.RT,'subset', ~('none'==dat.target_selected))
-% gChoice.facet_grid(dat.target_selected,dat.effector)
-% gChoice.stat_boxplot()
-% gChoice.set_names('Column','session','x','Decision','y','reaction time')
-% gChoice.set_title('Influence of free choice on reaction time')
-% gChoice.draw()
-
-% Right VS Left hand
-figure;
-gHand=gramm('x',dat.target_selected,'y',dat.RT,'color',dat.effector,'subset', ~('none'==dat.target_selected))
-gHand.facet_grid([],dat.choice)
-gHand.facet_wrap(dat.subj)
-gHand.stat_boxplot()
-gHand.set_names('Column','','x','target choice','y','reaction time')
-gHand.axe_property('ylim',[0.2 0.5])
-gHand.set_title('Influence of target choice on reaction time')
-gHand.draw()
-
-
-% Saccade VS Reach
-figure;
-gEffector=gramm('x',dat.effector,'y',dat.RT)
-gEffector.facet_grid([],[])
-gEffector.stat_boxplot()
-gEffector.set_names('Column','','x','Effector','y','reaction time')
-gEffector.axe_property('ylim',[0.2 0.7])
-gEffector.set_title('Influence of effector choice on reaction time')
-gEffector.draw()
-
-figure;
-gEffector=gramm('x',dat.effector,'y',dat.RT,'color',dat.choice)
-gEffector.facet_grid([],dat.choice =='choice')
-gEffector.stat_boxplot()
-gEffector.set_names('Column','decision','x','Effector','y','reaction time')
-gEffector.axe_property('ylim',[0.2 0.7])
-gEffector.set_title('Influence of effector choice on reaction time')
-gEffector.draw()
-
-% figure;
-% gEffector=gramm('x',dat.effector,'y',dat.RT)
-% gEffector.facet_grid([],[])
-% gEffector.stat_boxplot()
-% gEffector.set_names('Column','','x','Effector','y','reaction time')
-% gEffector.axe_property('ylim',[0 0.9])
-% gEffector.set_title('Influence of effector choice on reaction time')
-% gEffector.draw()
-
-
-% COMPARISON OF ERROR RATE BETWEEN SACCADE & REACH
-% gError=gramm('x',dat.target_selected,'y',dat.success,'color',dat.effector)
-% gError.facet_grid([],[])
-% gError.stat_boxplot()
-% gError.set_names('Column','','x','target','y','success')
-% gError.axe_property()
-% gError.set_title('Error rate saccade vs reach')
-% gError.draw()
-
-
-%% Errors clustered by intruction
-
-Err= rowfun(@numel,dat,'GroupingVariables',{'abort_code','effector','trial_type'},'InputVariables',{'value'});
-Err.prop = Err.GroupCount./(sum(Err.GroupCount)) * 100 ;
-Err.choi = zeros(height(Err),1);
-Err.choi(Err.trial_type == 'choi_both') = +1;
-Err.choi = categorical(Err.choi, [0 1], {'instr' 'choi'});
-
-Err.cause = cell(height(Err),1);
-Err.cause(strncmpi('EYE',cellstr(Err.abort_code),3)) = {'eye_cause'};
-Err.cause(strncmpi('HND',cellstr(Err.abort_code),3)) = {'hand_cause'};
-
-
-%% Trajectories using gramm
-A = arrayfun(@(a)   {a.x_eye(a.state == 9 | a.state == 10)},trial);
-B = arrayfun(@(a)   {a.y_eye(a.state == 9 | a.state == 10)},trial);
-A_abs = arrayfun(@(a)   {abs(a.x_eye(a.state == 9 | a.state == 10))},trial);
-
-C = arrayfun(@(a)   {a.x_hnd(a.state == 9 | a.state == 10)},trial);
-D = arrayfun(@(a)   {a.y_hnd(a.state == 9 | a.state == 10)},trial);
-C_abs = arrayfun(@(a)   {abs(a.x_hnd(a.state == 9 | a.state == 10))},trial);
-
-%%
-
-
-
-%%
-
-
-
-
-
-
 
 
 % %% Saccades normal 
