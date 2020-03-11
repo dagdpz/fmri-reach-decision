@@ -12,9 +12,11 @@ load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.m
 %     strcmp('LORU',{prot.name}) |...
 %     strcmp('ANEL',{prot.name}) ;
 
-% throwaway = ~strcmp('LORU',{prot.name});
-% prot(throwaway) = [];
-prot(9).session(2) = [];
+throwaway = ~strcmp('FARA',{prot.name})&...
+    ~strcmp('JOOD',{prot.name});
+
+prot(throwaway) = [];
+
 
 
 
