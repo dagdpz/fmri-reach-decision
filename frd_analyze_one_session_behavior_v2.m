@@ -3,7 +3,8 @@ function frd_analyze_one_session_behavior_v2(runpath)
 
 %% load in data
 
-[trial, analysis_level] = frd_conc_trial(runpath);
+[trial, analysis_level] = frd_conc_trial(runpath,1);
+%load(runpath)
 
 %frd_analyze_one_session_behavior_v2('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data');
 
@@ -35,21 +36,38 @@ dat = (NaN(length(trial),6));
 for k = 1:length(trial)
     
     % +++ real RT
-    if trial(k).effector == 3 && trial(k).completed == 1 %saccades
+
+    if trial(k).completed == 1 
         
+        % ++++ SACCADES ++++
         out = em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
             'frd_em_custom_settings_humanUMGscanner60Hz.m');
         
         mov_onset = [out.sac_onsets];
         mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
+        mov_onset = mov_onset(mov_onset < trial(k).states_onset(trial(k).states==50));
         
-            if isempty(mov_onset) % if no saccade is detected after onset state 9
+        if trial(k).effector == 3 
+
+            if isempty(mov_onset) % if no saccade is detected after onset state 9 and before onset 4
                 dat(k,1) = -99;
             else
-                dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT 
+                dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
             end
+            
+        elseif trial(k).effector == 4
+            
+            if isempty(mov_onset) % if no saccade is detected after onset state 9 and before onset 4
+                dat(k,2) = -99;
+            else
+                dat(k,2) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+            end        
+        end
         
-    elseif trial(k).effector == 4 && trial(k).completed == 1% reaches
+        clear out;
+        clear mov_onset;
+        
+        % ++++ REACHES ++++
         % Interpolate to remove NaNs
         idx_nonnan = find(~isnan(trial(k).x_hnd));
         
@@ -66,30 +84,43 @@ for k = 1:length(trial)
         
         mov_onset = [out.sac_onsets];
         mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
-
+        mov_onset = mov_onset(mov_onset < trial(k).states_onset(trial(k).states==50));
+        
+        if trial(k).effector == 4 
+            
             if isempty(mov_onset)
                 dat(k,1) = -99;
             else
                 dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
             end
+            
+        elseif trial(k).effector == 3
+            
+            if isempty(mov_onset)
+                dat(k,2) = -99;
+            else
+                dat(k,2) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+            end
+        end
+            
     end
     
-
+%%
     % +++ state RT
     if trial(k).completed
-        dat(k,2)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
+        dat(k,3)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
     end
     
     % +++ if choice or not
     if trial(k).task.correct_choice_target == [1 2]
-        dat(k,3) = 1;
+        dat(k,4) = 1;
     elseif trial(k).task.correct_choice_target == 1
-        dat(k,3) = 0;
+        dat(k,4) = 0;
     end
 
     
     % +++ delay
-    dat(k,4) = trial(k).task.timing.mem_time_hold;
+    dat(k,5) = trial(k).task.timing.mem_time_hold;
     
     % +++ target selected
     if ~isnan(trial(k).target_selected) 
@@ -103,11 +134,11 @@ for k = 1:length(trial)
             
             %dat.target_N_selected(k)=trial(k).target_selected(1);
             if       trial(k).eye.tar(whichtarget).pos(1) < 0
-               dat(k,5) = -1;
+               dat(k,6) = -1;
             elseif   trial(k).eye.tar(whichtarget).pos(1) > 0
-               dat(k,5) = 1;
+               dat(k,6) = 1;
             else
-               dat(k,5) = 99;
+               dat(k,6) = 99;
             end
             
         elseif trial(k).effector == 4 % get only reach trials
@@ -115,37 +146,37 @@ for k = 1:length(trial)
             
             %dat.target_N_selected(k)=trial(k).target_selected(2);
             if       trial(k).hnd.tar(whichtarget).pos(1) < 0
-                dat(k,5) = -1;
+                dat(k,6) = -1;
             elseif   trial(k).hnd.tar(whichtarget).pos(1) > 0
-                dat(k,5) = 1;
+                dat(k,6) = 1;
             else
-                dat(k,5) = 99;
+                dat(k,6) = 99;
             end
             
         end
         
     else
-        dat(k,5) = 0;
+        dat(k,6) = 0;
         
     end
     
     
     % +++ correct target
     if numel(trial(k).task.correct_choice_target)>1
-        dat(k,6) = 0;
+        dat(k,7) = 0;
         
     elseif trial(k).effector==3
         if trial(k).task.eye.tar(trial(k).task.correct_choice_target).x <0
-            dat(k,6) = -1;
+            dat(k,7) = -1;
         elseif trial(k).task.eye.tar(trial(k).task.correct_choice_target).x >0
-            dat(k,6) = 1;
+            dat(k,7) = 1;
         end
         
     elseif trial(k).effector==4
         if trial(k).task.hnd.tar(trial(k).task.correct_choice_target).x <0
-            dat(k,6) = -1;
+            dat(k,7) = -1;
         elseif trial(k).task.hnd.tar(trial(k).task.correct_choice_target).x >0
-            dat(k,6) = 1;
+            dat(k,7) = 1;
         end
         
     end
@@ -157,19 +188,22 @@ end % for each trial
 
 % create table
 dat = array2table(dat);
-dat.Properties.VariableNames  = {'RT' 'stateRT' 'choice' 'delay' 'target_selected' 'correct_target'};
+dat.Properties.VariableNames  = {'RT' 'wrongRT' 'stateRT' 'choice' 'delay' 'target_selected' 'correct_target'};
 
 % add complete, success, effector and a running number
 dat.choice       = categorical(dat.choice, [0 1], {'instructed' 'choice'});
 dat.complete     = logical([trial.completed]');
 dat.success      = logical([trial.success]');
 dat.effector     = [trial.effector]';
-dat.number       = [1:length(dat.success)]';
+dat.id           = [1:length(dat.success)]';
 
 % into categorical 
-dat.run          = categorical([trial.run]');
-dat.session      = categorical([trial.session]');
 dat.subj         = categorical({trial.subj}');
+dat.session      = categorical([trial.session]');
+dat.run          = categorical([trial.run]');
+dat.n            = [trial.n]';
+
+
 dat.correct_target  = categorical(dat.correct_target,[-1 0 1],{'left' 'both' 'right'});
 dat.target_selected = categorical(dat.target_selected,[-1 0 1],{'left' 'none' 'right'});
 dat.num_delay    = dat.delay;
@@ -191,9 +225,6 @@ valueset  = {
     'ABORT_EYE_CUE_ON'
     'ABORT_HND_CUE_ON'
     
-    'ABORT_EYE_TAR_ACQ_STATE' % wenn dya.time_spent_in_state < 0.2
-    'ABORT_HND_TAR_ACQ_STATE' % ???
-    
     'ABORT_EYE_MEM_PER_STATE'
     'ABORT_HND_MEM_PER_STATE'
     
@@ -203,66 +234,76 @@ valueset  = {
     'ABORT_EYE_TAR_HOLD_INV_STATE'
     'ABORT_HND_TAR_HOLD_INV_STATE'
     
+    'ABORT_EYE_TAR_ACQ_STATE' 
+    'ABORT_HND_TAR_ACQ_STATE' 
+    
+    'ABORT_EYE_TAR_HOLD_STATE' 
+    'ABORT_HND_TAR_HOLD_STATE' 
+    
     'ABORT_WRONG_TARGET_SELECTED'
     'NO ABORT'
     };
 
 names = {
-    'EYE FIX ACQ'
-    'HND FIX ACQ'
+    'FIX ACQ'
+    'FIX ACQ'
     
-    'EYE FIX HOLD'
-    'HND FIX HOLD'
+    'FIX HOLD'
+    'FIX HOLD'
     
-    'EYE CUE ON'
-    'HND CUE ON'
+    'CUE ON'
+    'CUE ON'
     
-    'EYE TAR ACQ' % wenn dya.time_spent_in_state < 0.2
-    'HND TAR ACQ' % ???
+    'MEM PER'
+    'MEM PER'
     
-    'EYE MEM PER'
-    'HND MEM PER'
+    'TAR ACQ INV'
+    'TAR ACQ INV'
     
-    'EYE TAR ACQ INV'
-    'HND TAR ACQ INV'
+    'TAR HOLD INV'
+    'TAR HOLD INV'
     
-    'EYE TAR HOLD INV'
-    'HND TAR HOLD INV'
+    'TAR HOLD INV' % in real TAR ACQ
+    'TAR HOLD INV'
+    
+    'TAR HOLD INV' % in real TAR HOLD
+    'TAR HOLD INV'
     
     'WRONG TARGET SELECTED'
     'NO ABORT'
     };
 
-dat.abort_code       = categorical({trial.abort_code}',valueset,names);
+% names = {
+%     'EYE FIX ACQ'
+%     'HND FIX ACQ'
+%     
+%     'EYE FIX HOLD'
+%     'HND FIX HOLD'
+%     
+%     'EYE CUE ON'
+%     'HND CUE ON'
+%     
+%     'EYE TAR ACQ' % wenn dya.time_spent_in_state < 0.2
+%     'HND TAR ACQ' % ???
+%     
+%     'EYE MEM PER'
+%     'HND MEM PER'
+%     
+%     'EYE TAR ACQ INV'
+%     'HND TAR ACQ INV'
+%     
+%     'EYE TAR HOLD INV'
+%     'HND TAR HOLD INV'
+%     
+%     'WRONG TARGET SELECTED'
+%     'NO ABORT'
+%     };
 
-
-
-
-% RT_struct=table2struct(dat);
-% for k=1:size(dat,1)
-%     choice_cell=cellstr(RT_struct(k).choice);
-%     correct_cell=cellstr(RT_struct(k).correct_target);
-%     dat.trial_type{k}=[choice_cell{1} '_' correct_cell{1}];
-% end
-
-% dat.trial_type= categorical(dat.trial_type);
-
-
-
-% gib mir für alle instructed trials(nicht both), die Targets an, in denen
-% das falsche Target gewählt wurde (auch die, wo vorher der Trial aborted
-% wurde weil fixation break during HOLD
-
-dat.wrong_target_selected = zeros(height(dat),1);
-dat.wrong_target_selected(...
-    dat.correct_target ~= 'both' & ...
-    dat.target_selected == ('right') & ...
-    dat.target_selected == ('left') & ...
-    dat.target_selected ~= dat.correct_target ...
-    ) = 1;
-dat.wrong_target_selected = logical(dat.wrong_target_selected);
+dat.abort_code       = categorical({trial.abort_code}',valueset,names,'Ordinal',true);
 
 dat.aborted_state_duration = [trial.aborted_state_duration]';
+
+
 %%
 disp('stop here')
 
