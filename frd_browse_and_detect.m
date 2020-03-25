@@ -2,8 +2,10 @@ function frd_browse_and_detect (runpath, list_successful_only,which_effector, pl
 
 % runpath:              A) specific matfile,    B) session folder   C) subject folder    D) experiment folder
 % list_successful_only: 0) all trials           1) successful only  2) failed only
-% only_reaches_or_sa    1) all trials           3) only saccades     4) only reaches
+% which_effector        1) all trials           3) only saccades     4) only reaches
 % plot_trials:          0) no plots of single trials                1) plots every single trial in 1D    2) plots every single trial in 2D
+% detect_movements
+% plot_movement_detection
 
 
 if nargin < 2,
@@ -35,8 +37,10 @@ if nargin < 8,
 end
 
 
-trial = frd_conc_trial(runpath);
+%trial = frd_conc_trial(runpath);
+load(runpath);
 disp(runpath);
+
 
 if plot_trials,
     hf = figure('Name','Plot trial','CurrentChar',' ');
@@ -69,16 +73,18 @@ for k = 1:length(trial)
         trial(k).tSample_from_time_start = trial(k).tSample_from_time_start - trial(k).tSample_from_time_start(1); % setze den Beginn des Trials auf 0
         
         
-        if plot_trials == 1,
+        if plot_trials == 1
             figure(hf);
             subplot(2,1,1); hold on;
-            title([sprintf('Eye/Hand Position, Trial %d',k)]); %,...
-%                             cellstr(trial(k).subj),...
-%                             cellstr(trial(k).session),...
-%                             cellstr(trial(k).run),...
-%                             cellstr(trial(k).path),...
-%                             {trial(k).aborted_state_duration} ]);
-            
+            title([sprintf('Eye/Hand Position, Trial %d, Subject %s, session %d, run %d, number %d', k, trial(k).subj,trial(k).session, trial(k).run, trial(k).n)]);
+%                             (trial(k).effector),...
+%                             (trial(k).subj),...
+%                             (trial(k).session),...
+%                             (trial(k).run),...
+%                             (trial(k).path),...
+%                             (trial(k).aborted_state),...
+%                             (trial(k).aborted_state_duration))]);
+%             
             
             % eye and hand trajectories
             plot(trial(k).tSample_from_time_start,trial(k).x_eye,'g');
