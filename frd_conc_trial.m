@@ -1,7 +1,11 @@
-function [trial, analysis_level] = frd_conc_trial(runpath)
+function [trial, analysis_level] = frd_conc_trial(runpath,saveit)
+
+if nargin < 2
+    saveit = 0;
+end
+
 
 %% Which analysis level are we doing? run, session, subject or whole epxeriment?
-
 endout=regexp(runpath,filesep,'split');
 
 % run
@@ -33,7 +37,8 @@ end
 
 if strcmp('experiment',analysis_level)
     su = dir(runpath);
-    su = su(~ismember({su.name},{'.' '..'}));
+    su = su(~ismember({su.name},{'.' '..' 'analysis_stats'}));
+    su = su([su.isdir]);
 end
 
 for u = 1:length(su) % loop over subjects
@@ -77,9 +82,10 @@ for u = 1:length(su) % loop over subjects
             
             temp = load(runpath_fi);     % load first file
             
-            [temp.trial(:).run] = deal(i);                    % add RUN number
-            [temp.trial(:).session] = deal(s);                % add SESSION number
             [temp.trial(:).subj] = deal(fi(i).name(1:4));     % add SUBJECT name
+            [temp.trial(:).session] = deal(s);                % add SESSION number
+            [temp.trial(:).run] = deal(i);                    % add RUN number
+            
             [temp.trial(:).file_name] = deal(fi(i).name);     % add file name
             [temp.trial(:).path] = deal(runpath_fi);          % add path name
             
@@ -100,7 +106,11 @@ for u = 1:length(su) % loop over subjects
     end %loop sessions
 end % loop subjects
 
-    
+if saveit
+%     save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_trial_file1.mat','trial1');
+%         save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_trial_file2.mat', 'trial2');
+    save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_trial_file.mat', 'trial','-v7.3');
 
+end
 
 
