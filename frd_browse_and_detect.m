@@ -41,6 +41,7 @@ end
 load(runpath);
 disp(runpath);
 
+%trial = trial(randperm(length(trial)));
 
 if plot_trials,
     hf = figure('Name','Plot trial','CurrentChar',' ');
