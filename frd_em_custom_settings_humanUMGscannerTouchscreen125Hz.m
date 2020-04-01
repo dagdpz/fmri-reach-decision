@@ -5,19 +5,19 @@
 
 settings = {...
     'SampleRate',       1000, ...       % Hz
-    'Downsample2Real',  0, ...         % Hz (actual eyetracker sampling
-    'SacOnsetVelThr',   5, ...         % deg/s
-    'SacOffsetVelThr',  4, ...         % deg/s
+    'Downsample2Real',  125, ...         % Hz (actual eyetracker sampling
+    'SacOnsetVelThr',   4.2, ...         % deg/s
+    'SacOffsetVelThr',  1.5, ...         % deg/s
     'MinSacDuration',   0.03, ...       % s
     'MaxSacDuration',   Inf, ...        % s
-    'MinSacAmplitude',  6, ...          % deg
+    'MinSacAmplitude',  5, ...          % deg
     'MaxSacAmplitude',  Inf, ...        % deg
     'PosSmoothConvWin', 'gausswin', ... % 'rectwin', 'gausswin', etc.
     'PosSmoothConvLen', 0 ...           % s, length of conv kernel, set
-    'PosFilterCutoff',  10, ...         % Hz, set to 0 if no filter 
+    'PosFilterCutoff',  20, ...         % Hz, set to 0 if no filter %10 
     'VelSmoothConvWin', 'gausswin', ... % 'rectwin', 'gausswin', etc.
     'VelSmoothConvLen', 0, ...          % s, length of conv kernel, set 
-    'VelFilterCutoff',  30, ...         % Hz, set to 0 if no filter
+    'VelFilterCutoff',  12, ...         % Hz, set to 0 if no filter
     'VelAdaptiveThr',   false, ...      % true or false
     'MinFixDurAfterSac',0, ...          % s
     'Plot',             true, ...       % true or false
