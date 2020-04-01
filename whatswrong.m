@@ -51,12 +51,12 @@ clear we_tr;
 clear we_dat;
 
 %% which weirdo trials
-trial = trial([trial.bidiff]);
-dat = dat(dat.bidiff,:);
 
+%trial = trial([trial.biggerRT]);
 
-% trial = trial((dat.stateRT -dat.RT) > 0.15 & dat.effector == 'saccade');
-% dat = dat((dat.stateRT -dat.RT) > 0.15 & dat.effector == 'saccade',:);
+% 
+  trial = trial((dat.stateRT -dat.RT) > 0.2 & dat.effector == 'saccade');
+  dat = dat((dat.stateRT -dat.RT) > 0.2 & dat.effector == 'saccade',:);
 
 
 %% plot it
@@ -65,87 +65,46 @@ save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_wei_fi
 close all
 frd_browse_and_detect('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_wei_file.mat',0,1,1,1,1)
 
+%% compare with duration
+
+
+figure ('Position', [100 100 800 500],'Name','comparison of both RT measures');
+gCompRT = gramm('x',dat.RT,'y',dat.mov_dur,'column',dat.effector,'color',(dat.stateRT-dat.RT) > 0.2, 'subset',dat.success & dat.RT > -98);
+%gCompRT.set_color_options('map',[0.9765, 0.4510, 0.0157; 0.0863, 0.6000, 0.7804],'n_color',2,'n_lightness',1);
+gCompRT.geom_point();
+gCompRT.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCompRT.set_text_options('base_size',12);
+%gCompRT.set_names('x','state RT','y','trajectory RT','color','','column','');
+gCompRT.set_title('comparison of both RT measures');
+gCompRT.draw();
+ 
+%%
+
 
 
 %%
-frd_browse_and_detect('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\DAGU\20200120\DAGU_2020-01-20_10.mat',0,1,1,1,1)
-%% add problematic cases
-
-
-% save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\still_problematic.mat','trial');
-
-
-
-%% analyze it
 for k = 1:length(trial)
     
-    % Aus Trajectorys + Zeit (beide Auflösung: 1000Hz) die states onsets rausholen
     trial(k).states = unique(trial(k).state,'stable')'; % now trial.states includes all states
     
     indi = logical([1 (diff(trial(k).state) ~= 0)']);
     trial(k).states_onset = trial(k).tSample_from_time_start(indi)';
     
-    % jeden trial auf 0 zurücksetzen
-    trial(k).states_onset            = trial(k).states_onset            - trial(k).tSample_from_time_start(1); % setze die states_onsets auf "Null"(nicht wirklich, da irgendwie nicht wirklich 0)
-    trial(k).tSample_from_time_start = trial(k).tSample_from_time_start - trial(k).tSample_from_time_start(1); % setze den Beginn des Trials auf 0
-        
 end
 
+%%
+
+
+% ++++ SACCADES ++++
+out = em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
+    'frd_em_custom_settings_humanUMGscanner60Hz.m');%% add problematic cases
+mov_onset = [out.sac_onsets];
+in = find((mov_onset > trial(k).states_onset(trial(k).states==9)) & ... % all onsets occuring after Tar_Aqu state
+    (mov_onset < trial(k).states_onset(trial(k).states==50)));       % all onsets occuring before ITI state
+in = in(1);
+
+
+[dat.RT(k) out.sac_onsets(in) out.sac_dur(in) out.sac_amp(in)]
 
 
 
-for k = 1:length(trial)
-    if trial(k).effector == 3 && trial(k).completed == 1 %saccades
-        
-        out = em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
-            'frd_em_custom_settings_humanUMGscanner60Hz.m');
-        
-        mov_onset = [out.sac_onsets];
-        mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
-        
-        trial(k).tar_aqu = trial(k).states_onset(trial(k).states==9);
-
-        
-            if isempty(mov_onset) % if no saccade is detected after onset state 9
-                %dat(k,1) = -99;
-                trial(k).sac_onsets = [out.sac_onsets];
-                trial(k).mov_onset = NaN;
-            else
-                %dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT 
-                trial(k).sac_onsets = [out.sac_onsets];
-                trial(k).mov_onset = mov_onset;
-            end
-        
-    elseif trial(k).effector == 4 && trial(k).completed == 1% reaches
-        % Interpolate to remove NaNs
-        idx_nonnan = find(~isnan(trial(k).x_hnd));
-        
-        t = trial(k).tSample_from_time_start(idx_nonnan(1):idx_nonnan(end));
-        x_ = trial(k).x_hnd(idx_nonnan(1):idx_nonnan(end));
-        y_ = trial(k).y_hnd(idx_nonnan(1):idx_nonnan(end));
-        
-        x = interp1(t(~isnan(x_)),x_(~isnan(x_)),t);
-        y = interp1(t(~isnan(x_)),y_(~isnan(y_)),t);
-        
-        
-        out = em_saccade_blink_detection(t,x,y,...
-            'frd_em_custom_settings_humanUMGscannerTouchscreen125Hz.m');
-        
-        mov_onset = [out.sac_onsets];
-        mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
-        
-        trial(k).tar_aqu = trial(k).states_onset(trial(k).states==9);
-
-        
-            if isempty(mov_onset) % if no saccade is detected after onset state 9
-                %dat(k,1) = -99;
-                trial(k).sac_onsets = [out.sac_onsets];
-                trial(k).mov_onset = NaN;
-            else
-                %dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT 
-                trial(k).sac_onsets = [out.sac_onsets];
-                trial(k).mov_onset = mov_onset;
-            end
-    end
-
-end
