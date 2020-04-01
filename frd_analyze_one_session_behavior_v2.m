@@ -3,8 +3,8 @@ function frd_analyze_one_session_behavior_v2(runpath)
 
 %% load in data
 
-[trial, analysis_level] = frd_conc_trial(runpath,1);
-%load(runpath)
+%[trial, analysis_level] = frd_conc_trial(runpath,1);
+load(runpath)
 
 %frd_analyze_one_session_behavior_v2('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data');
 
@@ -31,7 +31,7 @@ end
 
 %% create reaction time and such
 
-dat = (NaN(length(trial),6));
+dat = (NaN(length(trial),13));
 
 for k = 1:length(trial)
     
@@ -44,28 +44,36 @@ for k = 1:length(trial)
             'frd_em_custom_settings_humanUMGscanner60Hz.m');
         
         mov_onset = [out.sac_onsets];
-        mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
-        mov_onset = mov_onset(mov_onset < trial(k).states_onset(trial(k).states==50));
+        in = find((mov_onset > trial(k).states_onset(trial(k).states==9)) & ... % all onsets occuring after Tar_Aqu state
+                  (mov_onset < trial(k).states_onset(trial(k).states==50)));       % all onsets occuring before ITI state
         
         if trial(k).effector == 3 
 
-            if isempty(mov_onset) % if no saccade is detected after onset state 9 and before onset 4
+            if isempty(in) % if no saccade is detected after onset state 9 and before onset 4
                 dat(k,1) = -99;
             else
-                dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+                dat(k,1) = mov_onset(in(1)) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+                dat(k,2) = out.sac_onsets(in(1));
+                dat(k,3) = out.sac_offsets(in(1));
+                dat(k,4) = out.sac_amp(in(1));
+                dat(k,5) = out.sac_dur(in(1));
+                dat(k,6) = out.sac_max_vel(in(1));
+                dat(k,7) = out.sac_mean_vel(in(1));
+                
             end
             
         elseif trial(k).effector == 4
             
-            if isempty(mov_onset) % if no saccade is detected after onset state 9 and before onset 4
-                dat(k,2) = -99;
+            if isempty(in) % if no saccade is detected after onset state 9 and before onset 4
+                dat(k,8) = -99;
             else
-                dat(k,2) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+                dat(k,8) = mov_onset(in(1)) - trial(k).states_onset(trial(k).states==9); % calulate realRT
             end        
         end
         
         clear out;
         clear mov_onset;
+        clear in;
         
         % ++++ REACHES ++++
         % Interpolate to remove NaNs
@@ -83,23 +91,29 @@ for k = 1:length(trial)
             'frd_em_custom_settings_humanUMGscannerTouchscreen125Hz.m');
         
         mov_onset = [out.sac_onsets];
-        mov_onset = mov_onset(mov_onset > trial(k).states_onset(trial(k).states==9)); % all onsets occuring after Tar_Aqu state
-        mov_onset = mov_onset(mov_onset < trial(k).states_onset(trial(k).states==50));
+        in = find((mov_onset > trial(k).states_onset(trial(k).states==9)) & ... % all onsets occuring after Tar_Aqu state
+                  (mov_onset < trial(k).states_onset(trial(k).states==50)));       % all onsets occuring before ITI state
         
         if trial(k).effector == 4 
             
-            if isempty(mov_onset)
+            if isempty(in)
                 dat(k,1) = -99;
             else
-                dat(k,1) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+                dat(k,1) = mov_onset(in(1)) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+                dat(k,2) = out.sac_onsets(in(1));
+                dat(k,3) = out.sac_offsets(in(1));
+                dat(k,4) = out.sac_amp(in(1));
+                dat(k,5) = out.sac_dur(in(1));
+                dat(k,6) = out.sac_max_vel(in(1));
+                dat(k,7) = out.sac_mean_vel(in(1));
             end
             
         elseif trial(k).effector == 3
             
-            if isempty(mov_onset)
-                dat(k,2) = -99;
+            if isempty(in)
+                dat(k,8) = -99;
             else
-                dat(k,2) = mov_onset(1) - trial(k).states_onset(trial(k).states==9); % calulate realRT
+                dat(k,8) = mov_onset(in(1)) - trial(k).states_onset(trial(k).states==9); % calulate realRT
             end
         end
             
@@ -108,19 +122,19 @@ for k = 1:length(trial)
 %%
     % +++ state RT
     if trial(k).completed
-        dat(k,3)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
+        dat(k,9)= trial(k).states_onset(trial(k).states==10) - trial(k).states_onset(trial(k).states==9); %%% CHANGE HERE
     end
     
     % +++ if choice or not
     if trial(k).task.correct_choice_target == [1 2]
-        dat(k,4) = 1;
+        dat(k,10) = 1;
     elseif trial(k).task.correct_choice_target == 1
-        dat(k,4) = 0;
+        dat(k,10) = 0;
     end
 
     
     % +++ delay
-    dat(k,5) = trial(k).task.timing.mem_time_hold;
+    dat(k,11) = trial(k).task.timing.mem_time_hold;
     
     % +++ target selected
     if ~isnan(trial(k).target_selected) 
@@ -134,11 +148,11 @@ for k = 1:length(trial)
             
             %dat.target_N_selected(k)=trial(k).target_selected(1);
             if       trial(k).eye.tar(whichtarget).pos(1) < 0
-               dat(k,6) = -1;
+               dat(k,12) = -1;
             elseif   trial(k).eye.tar(whichtarget).pos(1) > 0
-               dat(k,6) = 1;
+               dat(k,12) = 1;
             else
-               dat(k,6) = 99;
+               dat(k,12) = 99;
             end
             
         elseif trial(k).effector == 4 % get only reach trials
@@ -146,37 +160,37 @@ for k = 1:length(trial)
             
             %dat.target_N_selected(k)=trial(k).target_selected(2);
             if       trial(k).hnd.tar(whichtarget).pos(1) < 0
-                dat(k,6) = -1;
+                dat(k,12) = -1;
             elseif   trial(k).hnd.tar(whichtarget).pos(1) > 0
-                dat(k,6) = 1;
+                dat(k,12) = 1;
             else
-                dat(k,6) = 99;
+                dat(k,12) = 99;
             end
             
         end
         
     else
-        dat(k,6) = 0;
+        dat(k,12) = 0;
         
     end
     
     
     % +++ correct target
     if numel(trial(k).task.correct_choice_target)>1
-        dat(k,7) = 0;
+        dat(k,13) = 0;
         
     elseif trial(k).effector==3
         if trial(k).task.eye.tar(trial(k).task.correct_choice_target).x <0
-            dat(k,7) = -1;
+            dat(k,13) = -1;
         elseif trial(k).task.eye.tar(trial(k).task.correct_choice_target).x >0
-            dat(k,7) = 1;
+            dat(k,13) = 1;
         end
         
     elseif trial(k).effector==4
         if trial(k).task.hnd.tar(trial(k).task.correct_choice_target).x <0
-            dat(k,7) = -1;
+            dat(k,13) = -1;
         elseif trial(k).task.hnd.tar(trial(k).task.correct_choice_target).x >0
-            dat(k,7) = 1;
+            dat(k,13) = 1;
         end
         
     end
@@ -188,7 +202,8 @@ end % for each trial
 
 % create table
 dat = array2table(dat);
-dat.Properties.VariableNames  = {'RT' 'wrongRT' 'stateRT' 'choice' 'delay' 'target_selected' 'correct_target'};
+dat.Properties.VariableNames  = {'RT' 'mov_onset' 'mov_offset' 'mov_amp' 'mov_dur' 'mov_max_vel' 'mov_mean_vel'...   % movement stuff
+    'wrongRT' 'stateRT' 'choice' 'delay' 'target_selected' 'correct_target'};                                        % condition stuff
 
 % add complete, success, effector and a running number
 dat.choice       = categorical(dat.choice, [0 1], {'instructed' 'choice'});
