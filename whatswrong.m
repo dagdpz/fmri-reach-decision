@@ -107,4 +107,41 @@ in = in(1);
 [dat.RT(k) out.sac_onsets(in) out.sac_dur(in) out.sac_amp(in)]
 
 
+%% caluclation succesful trials
+
+pay = rowfun(@(x) sum(x)/length(x),dat,'InputVariables',{'success'},'GroupingVariable', {'subj','session'},'OutputVariableNames','perc');
+pay.money = zeros(length(pay.perc),1);
+pay.money(pay.perc >= 0.84) = 4;
+pay.money(pay.perc >= 0.89) = 7;
+pay.money(pay.perc >= 0.94) = 10;
+
+
+tabulate(pay.money)
+A = table();
+A.pSession(1) = mean(pay.money);
+A.pSubject(1) = mean(pay.money)*3;
+A.pSessionIfReward(1) = mean(pay.money(pay.perc >=0.85))
+
+gm = rowfun(@sum,pay,'InputVariables',{'money'},'GroupingVariable', {'subj'},'OutputVariableNames','money');
+
+mean(gm.money)
+
+
+
+figure;
+g = gramm('x',pay.perc,'subset',pay.perc>=0.85)
+g.axe_property('XLim',[0.85 1]);
+g.stat_bin('nbins',12);
+g.draw;
+
+figure;
+g = gramm('x',pay.perc)
+g.axe_property('XLim',[0.79 0.99]);
+g.stat_bin();
+g.draw;
+
+
+
+
+
 
