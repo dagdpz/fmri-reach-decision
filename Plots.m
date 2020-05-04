@@ -15,8 +15,8 @@ load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_fi
 
 
 
-dat.unrealRT = dat.RT == -99 | dat.RT>dat.stateRT | dat.RT > 0.8;
-alsoweird = (dat.stateRT -dat.RT) > 0.1 & dat.effector == 'saccade';
+dat.unrealRT = dat.RT == -99 | dat.RT>dat.stateRT | dat.RT > 0.8 | dat.RT < 0.1;
+alsoweird = (dat.stateRT -dat.RT) > 0.2 & dat.effector == 'saccade';
 weirdos = dat(dat.unrealRT |alsoweird ,:);
 
 dat.unrealRT = dat.unrealRT |alsoweird;
@@ -36,7 +36,7 @@ dat(dat.unrealRT,:) = [];
 dat.trial_type = strcat(cellstr(dat.effector),'_' ,cellstr(dat.choice),'_',cellstr(dat.target_selected));
 dat.trial_type_del = strcat(cellstr(dat.effector),'_' ,cellstr(dat.choice),'_',cellstr(dat.target_selected),'_',cellstr(dat.delay));
 
-save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_file.mat','dat','weirdos');
+%save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_file.mat','dat','weirdos');
 
 %% Sanity Check: state RT vs. trajectory RT
 % problematic RTs are excluded (N = 142, remaining: N = 4014)
@@ -393,8 +393,16 @@ gCBges.draw;
 
 % grey points are means per subject
 % errorbars are 95% standard errors of the mean
+%% stats
+cb_ges_all.norm_cb = cb_ges_all.choice_bias - 50;
+lcb = fitlme(cb_ges_all,'norm_cb ~ effector + (1|subj)');
 
 
+lcb
+lcb.anova
+lcb.Rsquared
+
+%%
 cb_ges_all = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_selected_choice'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','choice_bias');
 cb_ges_all.cb_right = cb_ges_all.choice_bias > 0; 
 
@@ -545,7 +553,6 @@ lmecb
 lmecb.anova
 lmecb.Rsquared
 
-
 %% Errors
 
 % ATTENTION: This analysis is across all trials, regardless of different
@@ -635,16 +642,17 @@ dat_cl.target_selected = removecats(dat_cl.target_selected);
 
 %%
 
-glme = fitglme(dat_cl,'RT ~ 1+ effector * choice * target_selected + (effector * choice * target_selected|subj) + (effector * choice * target_selected|delay)','Distribution','InverseGaussian');
+glme = fitglme(dat_cl,'RT ~ effector * choice * target_selected + (effector * choice * target_selected|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
 
-glme_2 = fitglme(dat_cl,'RT ~    1+ effector * choice * target_selected         + (1|subj) + (effector * choice * target_selected|delay)','Distribution','InverseGaussian');
+glme_2 = fitglme(dat_cl,'RT ~ effector * choice * target_selected  + (1|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
 
-glme_3 = fitglme(dat_cl,'RT ~ 1+ effector * choice * target_selected  + (1|subj) + (1|delay)','Distribution','InverseGaussian');
+glme_3 = fitglme(dat_cl,'RT ~ effector * choice * target_selected  + (1|subj) + (1|num_delay)','Distribution','InverseGaussian');
 
 
-glme3 = fitglme(dat_cl,'RT ~ 1+ effector * choice * target_selected * delay + (effector * choice  *target_selected|subj) ','Distribution','InverseGaussian');
 
-glme3_2 = fitglme(dat_cl,'RT ~ 1+ effector * choice * target_selected * delay + (1|subj) ','Distribution','InverseGaussian');
+glme3 = fitglme(dat_cl,'RT ~ effector * choice * target_selected * num_delay + (effector * choice  *target_selected|subj) ','Distribution','InverseGaussian');
+
+glme3_2 = fitglme(dat_cl,'RT ~ effector * choice * target_selected * num_delay + (1|subj) ','Distribution','InverseGaussian');
 
 %%
 msel = fitglme (dat_cl,'target_selected ~ num_delay + (1|subj)','Distribution','Binomial');
