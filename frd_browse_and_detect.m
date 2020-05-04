@@ -37,9 +37,9 @@ if nargin < 8,
 end
 
 
-%trial = frd_conc_trial(runpath);
-load(runpath);
-disp(runpath);
+trial = frd_conc_trial(runpath);
+%load(runpath);
+%disp(runpath);
 
 %trial = trial(randperm(length(trial)));
 
@@ -134,9 +134,11 @@ for k = 1:length(trial)
                     if ~isempty(detect_saccades_custom_settings),
                         if plot_movement_detection,
                             figure(hf2);
-                            em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
-                                detect_saccades_custom_settings);
+%                         em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
+%                             detect_saccades_custom_settings);
                         end
+                        em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
+                            detect_saccades_custom_settings);
                     else
                         em_saccade_blink_detection(trial(k).tSample_from_time_start,trial(k).x_eye,trial(k).y_eye,...
                             'Downsample2Real',0,'Plot',true,'OpenFigure',true);
