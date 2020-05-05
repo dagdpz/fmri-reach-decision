@@ -1,8 +1,8 @@
-function sort_nifti_into_folders(session_path,unzip_nifti_path,series_order,anat)
+function sort_nifti_into_folders(session_path,unzip_nifti_path,hum_nr,series_order,anat)
 % this function takes unziped EPIs and anatomical per session and puts them
 % in session_path in new folder structure
 
-% sort_nifti_into_folders('D:\MRI\Human\fMRI-reach-decision\mni_Experiment\JOOD\20200207','D:\MRI\Human\fMRI-reach-decision\Carsten_folder',[6, 9, 12, 17, 20], 15)
+% sort_nifti_into_folders('D:\MRI\Human\fMRI-reach-decision\mni_Experiment\JOOD\20200207','D:\MRI\Human\fMRI-reach-decision\Carsten_folder','hum_14835',[6, 9, 12, 17, 20], 15)
 
 if series_order
     for m = 1:length(series_order) % loop runs
@@ -23,7 +23,6 @@ if series_order
             disp([gzipfilename ' unpacked']);
         else
             disp([[session_path filesep run_name] ' already exists']);
-            disp([gzipfilename ' already unpacked']);
         end
         
     end
@@ -45,7 +44,6 @@ if anat
         disp([gzipfilename ' unpacked']);
     else
         disp([[session_path filesep 'anat'] ' already exists']);
-        disp([gzipfilename ' already unpacked']);
     end
 end
 
