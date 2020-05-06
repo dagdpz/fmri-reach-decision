@@ -4,23 +4,15 @@ clear all
 
 load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.mat');
 
-% throwaway = strcmp('ANEL',{prot.name}) | ...
-%     strcmp('CLSC',{prot.name});
 
-throwaway = ~strcmp('EVBO',{prot.name});
-%       ~strcmp('FARA',{prot.name}) &...    
-%       ~strcmp('JOOD',{prot.name}) &...    
-%       ~strcmp('LIKU',{prot.name}) &...    
-%       ~strcmp('MABL',{prot.name});  
-
+throwaway = ~strcmp('ELRH',{prot.name});
 
 prot(throwaway) = [];
-prot(1).session(1) = [];
 
 
-runpath = 'D:\Experiment';
+runpath = 'D:\MRI\Human\fMRI-reach-decision\test_subject';
 
-save('D:\Experiment\buffer_for_pipleine_2.mat','prot', 'runpath')
+save('D:\MRI\Human\fMRI-reach-decision\test_subject\buffer_for_pipeline.mat','prot', 'runpath') % has to be hard coded, so below as well
 
 for i = 1:length(prot)
     
@@ -47,22 +39,22 @@ for i = 1:length(prot)
             'Human_reach_decision',...
             {'all'},...
             'prt2avg_script',...
-                'ne_prt2avg_reach_decision_pilot',...
+                'ne_prt2avg_reach_decision_vardelay_foravg',...
             'vmr_pattern',...
                 '.vmr',...
             'sdm_pattern',...
                 '*_outlier_preds.sdm');
         
         
-        save('D:\Experiment\buffer_for_pipleine_2.mat','prot', 'runpath','i','k')
-        memory
-        inmem
+        save('D:\MRI\Human\fMRI-reach-decision\test_subject\buffer_for_pipeline.mat','prot', 'runpath','i','k')
+        %memory
+        %inmem
         
         clear all
         
-        load('D:\Experiment\buffer_for_pipleine_2.mat')
-        memory
-        inmem
+        load('D:\MRI\Human\fMRI-reach-decision\test_subject\buffer_for_pipeline.mat')
+        %memory
+        %inmem
         
     end
 end
