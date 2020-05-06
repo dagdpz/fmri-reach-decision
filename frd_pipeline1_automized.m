@@ -21,15 +21,14 @@ load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.m
 %       ~strcmp('MABL',{prot.name}) &...    
 %       ~strcmp('MARO',{prot.name});
 
-throwaway = ~strcmp('LORU',{prot.name});
+throwaway = ~strcmp('ELRH',{prot.name});
 
 prot(throwaway) = [];
-prot.session(1) = [];
-prot.session(1) = [];
 
-runpath = 'D:\Experiment';
 
-save('D:\Experiment\buffer_for_pipleine_1.mat','prot', 'runpath')
+runpath = 'D:\MRI\Human\fMRI-reach-decision\test_subject';
+
+save('D:\MRI\Human\fMRI-reach-decision\test_subject\buffer_for_pipleine.mat','prot', 'runpath') % has to be hard coded, so below as well
 
 for i = 1:length(prot)
     
@@ -73,15 +72,15 @@ for i = 1:length(prot)
         'Human_reach_decision',...                                         % (see ne_pl_session_settings.m)
         {'all'});                                                          % sth
 
-    save('D:\Experiment\buffer_for_pipleine_1.mat','prot', 'runpath','i','k','m')
-    memory
-    inmem
+    save('D:\MRI\Human\fMRI-reach-decision\test_subject\buffer_for_pipeline.mat','prot', 'runpath','i','k','m')
+    %memory
+    %inmem
     
     clear all
     
-    load('D:\Experiment\buffer_for_pipleine_1.mat')
-    memory
-    inmem
+    load('D:\MRI\Human\fMRI-reach-decision\test_subject\buffer_for_pipeline.mat')
+    %memory
+    %inmem
     
     end
 end 
