@@ -26,9 +26,9 @@ throwaway = ~strcmp('ELRH',{prot.name});
 prot(throwaway) = [];
 
 
-runpath = 'D:\MRI\Human\fMRI-reach-decision\test_subject';
+runpath = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\TAL';
 
-save('D:\MRI\Human\fMRI-reach-decision\test_subject\buffer_for_pipleine.mat','prot', 'runpath') % has to be hard coded, so below as well
+save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipleine.mat','prot', 'runpath') % has to be hard coded, so below as well
 
 for i = 1:length(prot)
     
@@ -72,13 +72,13 @@ for i = 1:length(prot)
         'Human_reach_decision',...                                         % (see ne_pl_session_settings.m)
         {'all'});                                                          % sth
 
-    save('D:\MRI\Human\fMRI-reach-decision\test_subject\buffer_for_pipeline.mat','prot', 'runpath','i','k','m')
+    save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat','prot', 'runpath','i','k','m')
     %memory
     %inmem
     
     clear all
     
-    load('D:\MRI\Human\fMRI-reach-decision\test_subject\buffer_for_pipeline.mat')
+    load('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat')
     %memory
     %inmem
     
