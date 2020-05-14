@@ -24,11 +24,12 @@ load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.m
 throwaway = ~strcmp('ELRH',{prot.name});
 
 prot(throwaway) = [];
-
+prot(1).session(2) = [];
+prot(1).session(2) = [];
 
 runpath = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\TAL';
 
-save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipleine.mat','prot', 'runpath') % has to be hard coded, so below as well
+save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat','prot', 'runpath') % has to be hard coded, so below as well
 
 for i = 1:length(prot)
     
@@ -62,15 +63,29 @@ for i = 1:length(prot)
 %         'MAPA',...
 %         'Human_reach_decision_pilot',...
 %         {'all'});
-        
+     
+    % for GLM
     ne_pl_process_one_session_3TUMG_part1(...
         [runpath filesep prot(i).name filesep prot(i).session(k).date],... % session folder
-        [prot(i).session(k).hum filesep 'dicom'],...                                         % hum_nummer
+        [prot(i).session(k).hum filesep 'dicom'],...                       % hum_nummer
         [prot(i).session(k).epi.nr1], ...                                  % first number of EPIs
         prot(i).session(k).T1.nr2,...                                      % secpnd number of T1
-        prot(i).name,...                                                         % subject name
+        prot(i).name,...                                                   % subject name
         'Human_reach_decision',...                                         % (see ne_pl_session_settings.m)
-        {'all'});                                                          % sth
+        {'all'},...
+        'beh2prt_function_handle',@mat2prt_reach_decision_vardelay_forglm);% respective function handle                                                         
+    
+    % for AVG
+       ne_pl_process_one_session_3TUMG_part1(...
+        [runpath filesep prot(i).name filesep prot(i).session(k).date],... % session folder
+        [prot(i).session(k).hum filesep 'dicom'],...                       % hum_nummer
+        [prot(i).session(k).epi.nr1], ...                                  % first number of EPIs
+        prot(i).session(k).T1.nr2,...                                      % secpnd number of T1
+        prot(i).name,...                                                   % subject name
+        'Human_reach_decision',...                                         % (see ne_pl_session_settings.m)
+        {'create_prt'},...                                                 % sth 
+        'beh2prt_function_handle',@mat2prt_reach_decision_vardelay_foravg);%
+    
 
     save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat','prot', 'runpath','i','k','m')
     %memory
