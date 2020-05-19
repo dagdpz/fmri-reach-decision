@@ -14,22 +14,26 @@ load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.m
 %     strcmp('LORU',{prot.name}) |...
 %     strcmp('ANEL',{prot.name}) ;
 
-% throwaway = ~strcmp('EVBO',{prot.name})& ...
-%       ~strcmp('FARA',{prot.name}) &...    
-%       ~strcmp('JOOD',{prot.name}) &...    
-%       ~strcmp('LIKU',{prot.name}) &...    
-%       ~strcmp('MABL',{prot.name}) &...    
-%       ~strcmp('MARO',{prot.name});
+throwaway = ~strcmp('CAST',{prot.name})& ...
+      ~strcmp('EVBO',{prot.name}) &...    
+      ~strcmp('JAGE',{prot.name}) &...    
+      ~strcmp('LIKU',{prot.name}) &...    
+      ~strcmp('LEKU',{prot.name}) &...  
+      ~strcmp('LIKU',{prot.name}) &...
+      ~strcmp('LORU',{prot.name}) &...
+      ~strcmp('MABA',{prot.name}) &...
+      ~strcmp('MABL',{prot.name}) &...
+      ~strcmp('MARO',{prot.name}) &...
+      ~strcmp('PASC',{prot.name});
 
-throwaway = ~strcmp('ELRH',{prot.name});
+%throwaway = ~strcmp('ELRH',{prot.name});
 
-prot(throwaway) = [];
-prot(1).session(2) = [];
-prot(1).session(2) = [];
+prot(~throwaway) = [];
 
-runpath = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\TAL';
 
-save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat','prot', 'runpath') % has to be hard coded, so below as well
+runpath = 'D:\MRI\Human\fMRI-reach-decision\Experiment\TAL';
+
+save('D:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat','prot', 'runpath') % has to be hard coded, so below as well
 
 for i = 1:length(prot)
     
@@ -87,13 +91,13 @@ for i = 1:length(prot)
         'beh2prt_function_handle',@mat2prt_reach_decision_vardelay_foravg);%
     
 
-    save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat','prot', 'runpath','i','k','m')
+    save('D:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat','prot', 'runpath','i','k','m')
     %memory
     %inmem
     
     clear all
     
-    load('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat')
+    load('D:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline.mat')
     %memory
     %inmem
     
