@@ -37,8 +37,8 @@ if nargin < 8,
 end
 
 
-trial = frd_conc_trial(runpath);
-%load(runpath);
+%trial = frd_conc_trial(runpath);
+load(runpath);
 %disp(runpath);
 
 %trial = trial(randperm(length(trial)));

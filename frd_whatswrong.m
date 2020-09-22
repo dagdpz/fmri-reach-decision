@@ -2,7 +2,7 @@
 cc;
 
 load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_file.mat')
-load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_trial_file.mat')
+%load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_trial_file.mat')
 
 %% check for weird trials
 
@@ -53,10 +53,13 @@ clear we_dat;
 %% which weirdo trials
 
 %trial = trial([trial.biggerRT]);
+%trial = trial( dat.biggerRT);
+%dat = dat(dat.biggerRT,:);
 
-% 
-  trial = trial((dat.stateRT -dat.RT) > 0.2 & dat.effector == 'saccade');
-  dat = dat((dat.stateRT -dat.RT) > 0.2 & dat.effector == 'saccade',:);
+%dat = dat(dat.noRT | dat.biggerRT | dat.bimax,:);
+
+trial = trial((dat.stateRT -dat.RT) > 0.3 & dat.effector == 'saccade' & dat.RT >0.2);
+dat = dat((dat.stateRT -dat.RT) > 0.3 & dat.effector == 'saccade'& dat.RT >0.2,:);
 
 
 %% plot it
@@ -109,13 +112,19 @@ in = in(1);
 
 %% caluclation succesful trials
 
-pay = rowfun(@(x) sum(x)/length(x),dat,'InputVariables',{'success'},'GroupingVariable', {'subj','session'},'OutputVariableNames','perc');
+trial = frd_conc_trial('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\PASC');
+
+
+dat = struct2table(trial);
+
+
+pay = rowfun(@(x) sum(x)/length(x),dat,'InputVariables',{'success'},'GroupingVariable', {'session'},'OutputVariableNames','perc');
 pay.money = zeros(length(pay.perc),1);
 pay.money(pay.perc >= 0.84) = 4;
 pay.money(pay.perc >= 0.89) = 7;
 pay.money(pay.perc >= 0.94) = 10;
 
-
+%%
 tabulate(pay.money)
 A = table();
 A.pSession(1) = mean(pay.money);

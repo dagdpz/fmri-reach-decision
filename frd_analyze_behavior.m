@@ -3,10 +3,11 @@ function frd_analyze_behavior(runpath)
 
 %% load in data
 
-%[trial, analysis_level] = frd_conc_trial(runpath,1);
-load(runpath)
+% [trial, analysis_level] = frd_conc_trial(runpath,0);      % frd_analyze_behavior('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data')
 
-%frd_analyze_one_session_behavior_v2('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data');
+load(runpath);  % frd_analyze_behavior('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_trial_file.mat')
+
+
 
 % trial(1124) = [];
 % trial(1286) = [];   
@@ -318,11 +319,18 @@ dat.abort_code       = categorical({trial.abort_code}',valueset,names,'Ordinal',
 
 dat.aborted_state_duration = [trial.aborted_state_duration]';
 
-
+%% might have to change because subjects already have a number - for now alphabetically
+helper = table();
+helper.subj = unique(dat.subj,'sorted');
+helper.subj_id = [1:length(helper.subj)]';
+dat = join(dat,helper);
+dat.subj_id = categorical(dat.subj_id);
 %%
 disp('stop here')
 
 save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_file.mat','dat');
+
+disp('saved')
 
 
 
