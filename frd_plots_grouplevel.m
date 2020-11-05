@@ -5,7 +5,7 @@ load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_fi
 
 
 % excluding criteria
-dat.unrealRT = dat.RT == -99 | dat.RT > 0.8 | (dat.RT < 0.2 & dat.effector == 'saccade');
+dat.unrealRT = dat.RT == -99 | dat.RT > 0.8 | (dat.RT < 0.2 );
 weirdos = dat(dat.unrealRT,:);
 
 dat = dat(dat.success,:);
@@ -168,6 +168,32 @@ gAmount_overall.set_title('Amount of trials overall');
 %gAmount_overall.set_order_options('x',{'3' '6' '9' '12' '15'});
 %gAmount_overall.facet_wrap(avgAmount.trial_type,'ncols',4);
 
+gAmount_overall.draw; 
+%%
+
+clear gAmount_overall
+figure ('Position', [100 100 1300 600],'Name','Amount of trials overall');
+gAmount_overall(1,1) = gramm('y',dat.success,'x',dat.delay,'color',dat.choice,'subset',dat.effector == 'saccade','lightness',dat.target_selected);
+gAmount_overall(1,1).facet_wrap(dat.subj,'ncols',5);
+gAmount_overall(1,1).stat_bin('normalization','count');
+%gAmount_overall(1,1).set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.3804    0.8902    0.5412; 0.8431, 0.0980, 0.1098;0.9373    0.4745    0.4784],'n_color',2,'n_lightness',2);
+gAmount_overall(1,1).set_names('x','','color','','column','');
+gAmount_overall(1,1).axe_property('Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gAmount_overall(1,1).set_title('Amount of trials overall');
+%gAmount_overall(1,1).set_text_options('base_size',12);
+gAmount_overall(1,1).set_order_options('x',{'3' '6' '9' '12' '15'});
+%gAmount_overall(1,1).facet_wrap(avgAmount.trial_type,'ncols',4);
+
+gAmount_overall(1,2) = gramm('y',dat.success,'x',dat.delay,'color',dat.choice,'subset',dat.effector == 'reach','lightness',dat.target_selected);
+gAmount_overall(1,2).facet_wrap(dat.subj,'ncols',5);
+gAmount_overall(1,2).stat_bin();
+%gAmount_overall(1,2).set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.3804    0.8902    0.5412; 0.8431, 0.0980, 0.1098;0.9373    0.4745    0.4784],'n_color',2,'n_lightness',2);
+gAmount_overall(1,2).set_names('x','','color','','column','');
+gAmount_overall(1,2).axe_property('Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gAmount_overall(1,2).set_title('Amount of trials overall');
+%gAmount_overall(1,2).set_text_options('base_size',12);
+gAmount_overall(1,2).set_order_options('x',{'3' '6' '9' '12' '15'});
+%gAmount_overall(1,2).facet_wrap(avgAmount.trial_type,'ncols',4);
 gAmount_overall.draw; 
 
 
@@ -442,44 +468,44 @@ gRTdelcon.draw();
 
 %%
 %%
-% subject: random slope / delay: random slope
-glme_SubSl_DelSl = fitglme(dat_cl,'RT ~ effector * choice * target_selected + (effector * choice * target_selected|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
-% subject: random intercept / delay: random slope
-glme_SubIn_DelSl = fitglme(dat_cl,'RT ~ effector * choice * target_selected   +                                 (1|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
-% subject: random slope / delay: random intercept
-glme_SubSl_DelIn = fitglme(dat,'RT ~ effector * choice * target_selected + (effector * choice * target_selected|subj) +                                   (1|num_delay)','Distribution','InverseGaussian');
-% subject: random intercept / delay: random intercept
-glme_SubIn_DelIn = fitglme(dat,'RT ~ effector * choice * target_selected   +                                 (1|subj) +                                   (1|num_delay)','Distribution','InverseGaussian');
-
-
+% % subject: random slope / delay: random slope
+% glme_SubSl_DelSl = fitglme(dat_cl,'RT ~ effector * choice * target_selected + (effector * choice * target_selected|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
+% % subject: random intercept / delay: random slope
+% glme_SubIn_DelSl = fitglme(dat_cl,'RT ~ effector * choice * target_selected   +                                 (1|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
+% % subject: random slope / delay: random intercept
+% glme_SubSl_DelIn = fitglme(dat,'RT ~ effector * choice * target_selected + (effector * choice * target_selected|subj) +                                   (1|num_delay)','Distribution','InverseGaussian');
+% % subject: random intercept / delay: random intercept
+% glme_SubIn_DelIn = fitglme(dat,'RT ~ effector * choice * target_selected   +                                 (1|subj) +                                   (1|num_delay)','Distribution','InverseGaussian');
+% 
+% 
 
 %% Stats RT having DELAY as RANDOM effect
-load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\stats.mat');
-
-%% Model 1: glme_SubSl_DelSl = fitglme(dat_cl,'RT ~ effector * choice * target_selected + (effector * choice * target_selected|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
-glme_SubSl_DelSl.anova
-glme_SubSl_DelSl.Rsquared
-
-%% Model 2.1: glme_SubIn_DelSl = fitglme(dat_cl,'RT ~ effector * choice * target_selected   +                                 (1|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
-glme_SubIn_DelSl.anova
-glme_SubIn_DelSl.Rsquared
-
-compare(glme_SubIn_DelSl,glme_SubSl_DelSl,'CheckNesting',true)
-%  The small p-value indicates that compare rejects the null hypothesis
-%  that the response vector was generated by the fixed-effects-only model FEglme, in favor of the alternative that the response vector was generated by the mixed-effects model glme.
-
-%% Model 2.2: glme_SubSl_DelIn = fitglme(dat_cl,'RT ~ effector * choice * target_selected + (effector * choice * target_selected|subj) +                                   (1|num_delay)','Distribution','InverseGaussian');
-glme_SubSl_DelIn.anova
-glme_SubSl_DelIn.Rsquared
-
-compare(glme_SubSl_DelIn,glme_SubSl_DelSl,'CheckNesting',true)
-
-%% Model 3: glme_SubIn_DelIn = fitglme(dat_cl,'RT ~ effector * choice * target_selected   +                                 (1|subj) +                                   (1|num_delay)','Distribution','InverseGaussian');
-glme_SubIn_DelIn.anova
-glme_SubIn_DelIn.Rsquared
-
-compare(glme_SubIn_DelIn,glme_SubSl_DelIn,'CheckNesting',true)
-
+% load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\stats.mat');
+% 
+% %% Model 1: glme_SubSl_DelSl = fitglme(dat_cl,'RT ~ effector * choice * target_selected + (effector * choice * target_selected|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
+% glme_SubSl_DelSl.anova
+% glme_SubSl_DelSl.Rsquared
+% 
+% %% Model 2.1: glme_SubIn_DelSl = fitglme(dat_cl,'RT ~ effector * choice * target_selected   +                                 (1|subj) + (effector * choice * target_selected|num_delay)','Distribution','InverseGaussian');
+% glme_SubIn_DelSl.anova
+% glme_SubIn_DelSl.Rsquared
+% 
+% compare(glme_SubIn_DelSl,glme_SubSl_DelSl,'CheckNesting',true)
+% %  The small p-value indicates that compare rejects the null hypothesis
+% %  that the response vector was generated by the fixed-effects-only model FEglme, in favor of the alternative that the response vector was generated by the mixed-effects model glme.
+% 
+% %% Model 2.2: glme_SubSl_DelIn = fitglme(dat_cl,'RT ~ effector * choice * target_selected + (effector * choice * target_selected|subj) +                                   (1|num_delay)','Distribution','InverseGaussian');
+% glme_SubSl_DelIn.anova
+% glme_SubSl_DelIn.Rsquared
+% 
+% compare(glme_SubSl_DelIn,glme_SubSl_DelSl,'CheckNesting',true)
+% 
+% %% Model 3: glme_SubIn_DelIn = fitglme(dat_cl,'RT ~ effector * choice * target_selected   +                                 (1|subj) +                                   (1|num_delay)','Distribution','InverseGaussian');
+% glme_SubIn_DelIn.anova
+% glme_SubIn_DelIn.Rsquared
+% 
+% compare(glme_SubIn_DelIn,glme_SubSl_DelIn,'CheckNesting',true)
+% 
 
 
 %% Reaction Time over time
@@ -502,7 +528,45 @@ gRTtime.set_title('reaction time over time');
 gRTtime.draw;
 
 
-%% CHOICE BIAS
+%% TRYOUT
+
+
+clear gTest;
+
+figure ('Position', [100 100 1800 1000]);
+gTest(1,1) = gramm('y',dat.RT,'column',dat.target_selected,'color',dat.subj,'row',dat.effector,'x',dat.choice,'subset',dat.delay == '12');
+gTest(1,1).stat_summary('geom','line','setylim',true);
+
+%gTest(1,1).set_order_options('x',{'3' '6' '9' '12' '15'},'color',rt_del_sub.order);
+%gTest(1,1).set_names('column','','x','delay','color','','y','RT');
+%gTest(1,1).set_title('Are subjects stable in their RT across delays? Ordered within delay 12');
+gTest(1,1).draw;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHOICE BIAS
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Choice Bias over Time
 
 %cb = (sum(dat.target_selected == 'right') - sum(dat.target_selected == 'left')) / (sum(dat.target_selected == 'right') + sum(dat.target_selected == 'left'));
@@ -618,21 +682,20 @@ cb_ges_all = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_sel
 
 clear gCBges
 figure ('Position', [100 100 900 600]);
-gCBges = gramm('x',cb_ges_all.effector,'y',cb_ges_all.choice_bias-50,'label',cb_ges_all.GroupCount,'group',cb_ges_all.subj);
-gCBges.geom_jitter();
-%gCBges.geom_bar();
+
+gCBges = gramm('x',cb_ges_all.effector,'y',cb_ges_all.choice_bias,'label',cb_ges_all.GroupCount,'color',cb_ges_all.effector,'group','');
+gCBges.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCBges.stat_summary('geom',{'bar','black_errorbar'});
 %gCBges.geom_label('VerticalAlignment','middle','HorizontalAlignment','center','BackgroundColor','w','Color','k');
-gCBges.geom_hline('yintercept',0,'style','k--');
-gCBges.set_names('x','','y','% left ------------ % right');
+gCBges.geom_hline('yintercept',50,'style','k--');
+gCBges.set_names('x','','y','% right choices');
 gCBges.set_title('mean Choice Bias overall');
 gCBges.set_order_options('x',{'reach' 'saccade'});
 gCBges.set_text_options('base_size',12);
-%gCBges.axe_property('Ylim',[-40 40])
-gCBges.set_color_options('chroma',0,'lightness',40);
 
-gCBges.update('color',cb_ges_all.effector,'group','');
-gCBges.stat_summary('geom',{'bar','black_errorbar'});
-gCBges.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCBges.update('color','','group',cb_ges_all.subj);
+gCBges.geom_jitter();
+gCBges.set_color_options('chroma',0,'lightness',40);
 
 gCBges.draw;
 
@@ -652,9 +715,10 @@ lcb_in.Rsquared
 
 %%
 cb_ges_all = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_selected_choice'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','choice_bias');
+
+% CB both right/ both left --> cat = same, otherwise different
 cb_ges_all.cb_right = cb_ges_all.choice_bias > 50; 
 cb_ges_all.cat = cell(length(cb_ges_all.subj),1);
-
 uni_su = unique(cb_ges_all.subj);
 for i = 1:length(uni_su)
    wh = cb_ges_all(cb_ges_all.subj == uni_su(i),:);
@@ -669,79 +733,129 @@ end
 
 clear gCBges
 figure ('Position', [10 10 1700 1100]);
-gCBges = gramm('x',cb_ges_all.effector,'y',(cb_ges_all.choice_bias-50),'color',cb_ges_all.effector);
+gCBges = gramm('x',cb_ges_all.effector,'y',(cb_ges_all.choice_bias),'color',cb_ges_all.effector);
 gCBges.facet_wrap(cb_ges_all.subj,'ncols',5);
 gCBges.geom_bar;
 gCBges.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
-gCBges.geom_hline('yintercept',0,'style','k--');
+gCBges.geom_hline('yintercept',50,'style','k--');
 gCBges.set_names('x','','y','% left ------------ % right','column','');
 gCBges.set_title('mean Choice Bias overall p. subject');
 gCBges.set_order_options('x',{'reach' 'saccade'});
 gCBges.set_text_options('base_size',12);
-gCBges.axe_property('Ylim',[-40 40],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gCBges.axe_property('Ylim',[0 100],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
 gCBges.draw;
 
 
 cb_ges_all.number_subj = repmat(1:(height(cb_ges_all))/2,1,2)';
-order = sortrows(cb_ges_all,{'effector','choice_bias'},{'descend','ascend'});
+order = sortrows(cb_ges_all,{'effector','choice_bias'},{'ascend','ascend'});
 
 
 clear gCBges2
 figure ('Position', [10 10 1500 700]);
-gCBges2 = gramm('x',(cb_ges_all.subj),'y',(cb_ges_all.choice_bias-50)*2,'row',cb_ges_all.effector,'color',cb_ges_all.effector);
+gCBdel = gramm('x',(cb_ges_all.subj),'y',(cb_ges_all.choice_bias),'row',cb_ges_all.effector,'color',cb_ges_all.effector);
 %gCBges2.facet_wrap(cb_ges_all.subj,'ncols',5);
-gCBges2.geom_bar;
-gCBges2.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
-gCBges2.geom_hline('yintercept',0,'style','k--');
-gCBges2.set_names('x','','y','% left ------------ % right','row','');
-gCBges2.set_title('mean Choice Bias p. subject ordered');
-gCBges2.set_order_options('x',order.number_subj(1:(height(cb_ges_all))/2),'row',[2 1]);
-gCBges2.set_text_options('base_size',12);
-%gCBges2.axe_property('Ylim',[-40 40],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
-gCBges2.draw;
+gCBdel.geom_point;
+gCBdel.stat_glm;
+gCBdel.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCBdel.geom_hline('yintercept',50,'style','k--');
+gCBdel.set_names('x','','y','% right choices','row','');
+gCBdel.set_title('mean Choice Bias p. subject ordered');
+gCBdel.set_order_options('x',order.number_subj(1:(height(cb_ges_all))/2),'row',[2 1]);
+gCBdel.set_text_options('base_size',12);
+gCBdel.axe_property('Ylim',[0 100],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gCBdel.draw;
 %%
 
-order_same = cb_ges_all(strcmp(order2.cat,'same'),:);
-order_different = cb_ges_all(strcmp(order2.cat,'different'),:);
+order_same = cb_ges_all(strcmp(cb_ges_all.cat,'same'),:);
+order_different = cb_ges_all(strcmp(cb_ges_all.cat,'different'),:);
 
-orderorder_same = sortrows(order_same,{'effector','choice_bias'},{'descend','ascend'});
-order_different = sortrows(order_different,{'effector','choice_bias'},{'descend','ascend'});
+order_same.number_subj = repmat(1:(height(order_same))/2,1,2)';
+order_different.number_subj = repmat(1:(height(order_different))/2,1,2)';
+
+order_same = sortrows(order_same,{'effector','choice_bias'},{'ascend','ascend'});
+order_different = sortrows(order_different,{'effector','choice_bias'},{'ascend','ascend'});
 
 
 
 
 clear gCBges3
 figure ('Position', [10 10 1500 700]);
-gCBges3(1,1) = gramm('x',(order2_same.subj),'y',(order2_same.choice_bias-50)*2,'row',order2_same.effector,'color',order2_same.effector,'subset',strcmp(order2_same.cat,'same'));
+gCBges3(1,1) = gramm('x',(order_same.subj),'y',(order_same.choice_bias),'row',order_same.effector,'color',order_same.effector,'subset',strcmp(order_same.cat,'same'));
 %gCBges3(1,1).facet_wrap(cb_ges_all.subj,'ncols',5);
-gCBges3(1,1).geom_bar;
+gCBges3(1,1).geom_point;
+gCBges3(1,1).stat_glm;
 gCBges3(1,1).set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
-gCBges3(1,1).geom_hline('yintercept',0,'style','k--');
-gCBges3(1,1).set_names('x','','y','% left ------------ % right','row','');
-gCBges3(1,1).set_title('different side');
-gCBges3(1,1).set_order_options('x',order2_same.number_subj(1:(height(order2_same))/2),'row',[2 1]);
+gCBges3(1,1).geom_hline('yintercept',50,'style','k--');
+gCBges3(1,1).set_names('x','','y','% right choices','row','');
+gCBges3(1,1).set_title('same side');
+gCBges3(1,1).set_order_options('x',order_same.number_subj(1:(height(order_same))/2),'row',[2 1]);
 gCBges3(1,1).set_text_options('base_size',12);
-%gCBges2.axe_property('Ylim',[-40 40],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gCBges3(1,1).axe_property('Ylim',[0 100],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
 
-gCBges3(1,2) = gramm('x',(order2_different.subj),'y',order2_different.choice_bias-50,'row',order2_different.effector,'color',order2_different.effector,'subset',strcmp(order2_different.cat,'different'));
+gCBges3(1,2) = gramm('x',(order_different.subj),'y',(order_different.choice_bias),'row',order_different.effector,'color',order_different.effector,'subset',strcmp(order_different.cat,'different'));
 %gCBges3(1,2).facet_wrap(cb_ges_all.subj,'ncols',5);
-gCBges3(1,2).geom_bar;
+gCBges3(1,2).geom_point;
+gCBges3(1,2).stat_glm;
 gCBges3(1,2).set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
-gCBges3(1,2).geom_hline('yintercept',0,'style','k--');
-gCBges3(1,2).set_names('x','','y','% left ------------ % right','row','');
-gCBges3(1,2).set_title('same side');
-gCBges3(1,2).set_order_options('x',order2_different.number_subj(1:(height(order2_different))/2),'row',[2 1]);
+gCBges3(1,2).geom_hline('yintercept',50,'style','k--');
+gCBges3(1,2).set_names('x','','y','% right choices','row','');
+gCBges3(1,2).set_title('different side');
+gCBges3(1,2).set_order_options('x',order_different.number_subj(1:(height(order_different))/2),'row',[2 1]);
 gCBges3(1,2).set_text_options('base_size',12);
-gCBges3(1,2).axe_property('Ylim',[-40 40],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gCBges3(1,2).axe_property('Ylim',[0 100],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
 
 gCBges3.set_title('mean Choice Bias p. subject ordered');
 gCBges3.draw;
 
+%% absolut choice bias
+% cb_ges_all.abs_choice_bias = (cb_ges_all.choice_bias);
+% cb_ges_all.abs_choice_bias(~cb_ges_all.cb_right) = 100 - cb_ges_all.choice_bias(~cb_ges_all.cb_right);
+
+cb_ges_all.delta_cb = cb_ges_all.choice_bias - (100 - cb_ges_all.choice_bias); % percent right minus percent left
+cb_ges_all.abs_delta_cb = abs(cb_ges_all.delta_cb);
+order2 = sortrows(cb_ges_all,{'effector','abs_delta_cb'},{'ascend','ascend'});
+
+
+clear gCBges2
+figure ('Position', [10 10 1500 700]);
+gCBdel = gramm('x',(cb_ges_all.subj),'y',(cb_ges_all.abs_delta_cb),'row',cb_ges_all.effector,'color',cb_ges_all.effector);
+%gCBges2.facet_wrap(cb_ges_all.subj,'ncols',5);
+gCBdel.geom_bar;
+gCBdel.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCBdel.geom_hline('yintercept',0,'style','k--');
+gCBdel.set_names('x','','y','% choice bias in either direction','row','');
+gCBdel.set_title('MAGNITUDE of Choice Bias p. subject ordered');
+gCBdel.set_order_options('x',order2.number_subj(1:(height(cb_ges_all))/2),'row',[2 1]);
+gCBdel.set_text_options('base_size',12);
+gCBdel.axe_property('Ylim',[0 100],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gCBdel.draw;
 
 %% Choice Bias per delay
 
 cb_del = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_selected_choice'},'GroupingVariable', {'success','effector', 'delay','subj'},'OutputVariableNames','choice_bias');
 
+cb_del.cb_right = cb_del.choice_bias > 50; 
+cb_del.cat = cell(length(cb_del.subj),1);
+
+uni_su = unique(cb_del.subj);
+uni_del = unique(cb_del.delay);
+
+for i = 1:length(uni_su)
+    for k = 1:length(uni_del)
+        
+        wh = cb_del(cb_del.subj == uni_su(i) &  cb_del.delay == uni_del(k),:);
+        if wh.cb_right(1) == wh.cb_right(2)
+            cb_del.cat(cb_del.subj == uni_su(i) &  cb_del.delay == uni_del(k)) = {'same'};
+        else
+            cb_del.cat(cb_del.subj == uni_su(i) &  cb_del.delay == uni_del(k)) = {'different'};
+            
+        end
+        
+    end
+end
+cb_del.cat = categorical(cb_del.cat);
+
+%%
 figure ('Position', [100 100 900 700]);
 gCBdel = gramm('x',cb_del.delay,'row',cb_del.effector,'y',cb_del.choice_bias,'color',cb_del.effector,'subset',cb_del.success);
 gCBdel.stat_summary('geom',{'point','line', 'errorbar'});
@@ -758,7 +872,7 @@ gCBdel.draw;
 % errorbars are 95% standard errors of the mean
 
 figure ('Position', [100 100 1600 1000]);
-gCBdel = gramm('x',cb_del.delay,'y',cb_del.choice_bias,'color',cb_del.effector,'subset',cb_del.success);
+gCBdel = gramm('x',cb_del.delay,'y',cb_del.choice_bias,'color',cb_del.effector);
 gCBdel.geom_line();
 gCBdel.geom_point();
 gCBdel.geom_hline('yintercept',50,'style','k--');
@@ -772,6 +886,108 @@ gCBdel.set_text_options('base_size',12);
 gCBdel.facet_wrap(cb_del.subj,'ncols',5);
 gCBdel.draw;
 
+%% TRYOUT
+%%
+
+cb_del.number = zeros(height(cb_del),1);
+
+uni_del = unique(cb_del.delay);
+uni_eff = unique(cb_del.effector);
+
+for i = 1:length(uni_eff)
+    for k = 1:length(uni_del)
+        wh = cb_del(cb_del.effector == uni_eff(i) & cb_del.delay == uni_del(k),:);
+        cb_del.number(cb_del.effector == uni_eff(i) & cb_del.delay == uni_del(k)) = [1:height(wh)]';
+    end
+end
+
+order3 = sortrows(cb_del,{'effector','delay','choice_bias'},{'ascend','ascend','ascend'});
+
+
+what_order = {'saccade','3'};
+what_order = order3.number(order3.effector == what_order{1} & order3.delay == what_order{2});
+
+clear gCBges2
+figure ('Position', [10 10 1500 700]);
+gCBdel = gramm('x',(cb_del.subj),'y',(cb_del.choice_bias),'row',cb_del.effector,'color',cb_del.effector,'column',cb_del.delay);
+gCBdel.geom_point;
+gCBdel.stat_glm();
+gCBdel.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCBdel.geom_hline('yintercept',50,'style','k--');
+gCBdel.set_names('x','','y','% right choices','row','','column','');
+gCBdel.set_title('Choice Bias p. delay');
+gCBdel.set_order_options('x',what_order,'row',[2 1],'column',{'3' '6' '9' '12' '15'});
+gCBdel.set_text_options('base_size',12);
+gCBdel.axe_property('Ylim',[0 100],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gCBdel.draw;
+
+%%
+
+cb_del.number = zeros(height(order3),1);
+
+uni_del = unique(cb_del.delay);
+uni_eff = unique(cb_del.effector);
+uni_cat = unique(cb_del.cat);
+
+for i = 1:length(uni_eff)
+    for k = 1:length(uni_del)
+        for m = 1:length(uni_cat)
+            wh = cb_del(cb_del.effector == uni_eff(i) & cb_del.delay == uni_del(k) & cb_del.cat == uni_cat(m),:);
+            cb_del.number(cb_del.effector == uni_eff(i) & cb_del.delay == uni_del(k) & cb_del.cat == uni_cat(m)) = [1:height(wh)]';
+        end
+    end
+end
+
+order4 = sortrows(cb_del,{'cat' 'effector','delay','choice_bias'},{'descend' 'ascend','ascend','ascend'});
+
+
+
+what_order = {'same' 'saccade','12'};
+what_order = order4.number(order4.cat == what_order{1} & order4.effector == what_order{2} & order4.delay == what_order{3});
+
+
+clear gCBges2
+figure ('Position', [10 10 1500 700]);
+gCBdel = gramm('x',(cb_del.subj),'y',(cb_del.choice_bias),'row',cb_del.cat,'color',cb_del.effector,'column',cb_del.delay);
+gCBdel.geom_point;
+gCBdel.stat_glm();
+gCBdel.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCBdel.geom_hline('yintercept',0,'style','k--');
+gCBdel.set_names('x','','y','% right choices','row','','column','');
+gCBdel.set_title('Choice Bias p. delay');
+gCBdel.set_order_options('x',what_order,'row',[2 1],'column',{'3' '6' '9' '12' '15'});
+gCBdel.set_text_options('base_size',12);
+gCBdel.axe_property('Ylim',[0 100],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gCBdel.draw;
+%%
+
+
+clear gCBges2
+figure ('Position', [10 10 1500 700]);
+gCBdel(1,1) = gramm('x',(cb_del.subj),'y',(cb_del.choice_bias),'row',cb_del.cat,'color',cb_del.effector,'column',cb_del.delay,'subset',cb_del.cat =='same');
+gCBdel(1,1).geom_point;
+gCBdel(1,1).stat_glm();
+gCBdel(1,1).set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCBdel(1,1).geom_hline('yintercept',0,'style','k--');
+gCBdel(1,1).set_names('x','','y','% right choices','row','','column','');
+gCBdel(1,1).set_title('same');
+gCBdel(1,1).set_order_options('x',what_order,'row',[2 1],'column',{'3' '6' '9' '12' '15'});
+gCBdel(1,1).set_text_options('base_size',12);
+
+gCBdel(2,1) = gramm('x',(cb_del.subj),'y',(cb_del.choice_bias),'row',cb_del.effector,'color',cb_del.effector,'column',cb_del.delay,'subset',cb_del.cat =='different');
+gCBdel(2,1).geom_point;
+gCBdel(2,1).stat_glm();
+gCBdel(2,1).set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCBdel(2,1).geom_hline('yintercept',0,'style','k--');
+gCBdel(2,1).set_names('x','','y','% right choices','row','','column','');
+gCBdel(2,1).set_title('different');
+gCBdel(2,1).set_order_options('x',what_order,'row',[2 1],'column',{'3' '6' '9' '12' '15'});
+gCBdel(2,1).set_text_options('base_size',12);
+gCBdel.axe_property('Ylim',[0 100],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gCBdel.draw;
+
+
+
 
 
 %% CHOICE BIAS VS. REACTION TIME
@@ -783,7 +999,7 @@ func_RT_rl = @(RT,r,l,u) mean(RT(r & ~u)) - mean(RT(l & ~u));
 dRT = rowfun(func_RT_rl,dat,'InputVariables',{'RT' 'right_selected_choice' 'left_selected_choice' 'unrealRT'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','dRT');
 
 figure ('Position', [100 100 900 600]);
-gCBRT = gramm('x',cb_ges_all.choice_bias,'y',dRT.dRT,'color',cb_ges_all.effector);
+gCBRT = gramm('x',cb_ges_all.choice_bias,'y',dRT.dRT,'color',cb_ges_all.effector)%,'column',cb_ges_all.cat);
 gCBRT.stat_glm();
 gCBRT.geom_hline('yintercept',0,'style','k--');
 gCBRT.set_names('x','% right choices','row','','y','f(x) = meanRT(right) - meanRT(left)');
@@ -806,11 +1022,11 @@ gCBRT.draw();
 dRT_del = rowfun(func_RT_rl,dat,'InputVariables',{'RT' 'right_selected_choice' 'left_selected_choice' 'unrealRT'},'GroupingVariable', {'success' 'effector','subj','delay'},'OutputVariableNames','dRT');
 dRT_del = dRT_del(dRT_del.success,:);
 
-cbRT_del = cb_del(cb_del.success,:);
+
 
 figure ('Position', [100 100 900 600]);
-gCBRT_del = gramm('x',cbRT_del.choice_bias,'y',dRT_del.dRT,'color',cbRT_del.effector);
-gCBRT_del.facet_wrap(cbRT_del.delay,'ncols',3);
+gCBRT_del = gramm('x',cb_del.choice_bias,'y',dRT_del.dRT,'color',cb_del.effector);
+gCBRT_del.facet_wrap(cb_del.delay,'ncols',3);
 gCBRT_del.stat_glm();
 gCBRT_del.geom_point();
 gCBRT_del.no_legend();
@@ -826,7 +1042,7 @@ gCBRT_del.draw();
 
 
 figure ('Position', [100 100 900 600]);
-gCBRT_del2 = gramm('x',cbRT_del.choice_bias,'y',dRT_del.dRT,'color',cbRT_del.effector);
+gCBRT_del2 = gramm('x',cb_del.choice_bias,'y',dRT_del.dRT,'color',cb_del.effector,'row',cb_del.cat);
 %gCBRT_del2.facet_wrap(cbRT_del.delay,'ncols',3);
 gCBRT_del2.stat_glm();
 gCBRT_del2.geom_hline('yintercept',0,'style','k--');
@@ -837,22 +1053,22 @@ gCBRT_del2.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1
 gCBRT_del2.set_text_options('base_size',12);
 gCBRT_del2.set_order_options('marker',{'3' '6' '9' '12' '15'});
 
-gCBRT_del2.update('marker',cbRT_del.delay);
+gCBRT_del2.update('marker',cb_del.delay);
 gCBRT_del2.geom_point();
 gCBRT_del2.draw();
 
 %% stats: lmecb = fitlme(cb_ges_all,'dRT ~ choice_bias * effector + (1|subj)');
 
-cb_ges_all.dRT = dRT.dRT;
-
-lmecb = fitlme(cb_ges_all,'dRT ~ choice_bias * effector + (effector|subj)');
-lmecb2 = fitlme(cb_ges_all,'dRT ~ choice_bias * effector + (1|subj)');
-
-compare(lmecb2,lmecb)
-
-lmecb2
-lmecb2.anova
-lmecb2.Rsquared
+% cb_ges_all.dRT = dRT.dRT;
+% 
+% lmecb = fitlme(cb_ges_all,'dRT ~ choice_bias * effector + (effector|subj)');
+% lmecb2 = fitlme(cb_ges_all,'dRT ~ choice_bias * effector + (1|subj)');
+% 
+% compare(lmecb2,lmecb)
+% 
+% lmecb2
+% lmecb2.anova
+% lmecb2.Rsquared
 
 close all;
 return;
@@ -934,7 +1150,7 @@ gErrDel.draw;
 % gErrTime.draw;
 
 
-
+return;
 
 %% **************************** STATS group wise **************************************
 
@@ -982,6 +1198,162 @@ compare(glme_SubEFFE_DelSl2,glme_SubEFFE_DelSl3)
 
 
 %load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\stats.mat');
+
+%%
+
+figure;
+t = gramm('x',dat.choice,'y',dat.RT,'column',dat.delay,'group',dat.subj,'row',dat.effector,'color',dat.subj);
+t.stat_summary('setylim',false,'geom','line');
+t.set_order_options('column',{'3' '6' '9' '12' '15'});
+t.axe_property('Ylim',[0.3 0.5]);
+t.draw();
+
+%%
+clear t
+figure;
+t(1,1) = gramm('x',dat.choice,'y',dat.RT,'group',dat.delay,'color',dat.delay,'subset',dat.effector == 'saccade' & dat.delay ~= '3');
+t(1,1).facet_wrap(dat.subj,'ncols',5);
+t(1,1).stat_summary('setylim',false,'geom','area');
+t(1,1).set_order_options('color',{'3' '6' '9' '12' '15'});
+t(1,1).axe_property('Ylim',[0.3 0.5]);
+t(1,1).set_names('x','','y','RT','color','','column','');
+t(1,1).set_title('saccades');
+
+t(1,2) = gramm('x',dat.choice,'y',dat.RT,'group',dat.delay,'color',dat.delay,'subset',dat.effector == 'reach' & dat.delay ~= '3');
+t(1,2).facet_wrap(dat.subj,'ncols',5);
+t(1,2).stat_summary('setylim',false,'geom','area');
+t(1,2).set_order_options('color',{'3' '6' '9' '12' '15'});
+t(1,2).axe_property('Ylim',[0.3 0.5]);
+t(1,2).set_names('x','','y','RT','color','','column','');
+t(1,2).set_title('reaches');
+t.draw();
+
+%%
+
+clear t
+figure;
+t(1,1) = gramm('x',dat.target_selected,'y',dat.RT,'color',dat.choice)%,'subset',dat.effector == 'reach');
+t(1,1).facet_wrap(dat.delay,'ncols',5);
+t(1,1).stat_summary('setylim',false,'geom','area');
+t(1,1).set_order_options('column',{'3' '6' '9' '12' '15'});
+t(1,1).axe_property('Ylim',[0.3 0.5]);
+t(1,1).set_names('x','','y','RT','color','','column','');
+t(1,1).set_title('saccades');
+t.draw;
+
+%%
+
+clear t
+figure;
+t(1,1) = gramm('x',rt_del_con.delay,'y',rt_del_con.RT,'color',rt_del_con.choice,'row',rt_del_con.effector,'linestyle',rt_del_con.target_selected)%,'subset',dat.effector == 'reach');
+%t(1,1).facet_wrap(dat.subj,'ncols',5);
+t(1,1).stat_summary('setylim',false,'geom','lines');
+%t(1,1).set_order_options('color',{'3' '6' '9' '12' '15'});
+t(1,1).axe_property('Ylim',[0.3 0.5]);
+t(1,1).set_order_options('x',{'3' '6' '9' '12' '15'});
+t(1,1).set_names('x','','y','RT','color','','column','');
+%t(1,1).set_title('saccades');
+t.draw;
+
+%% create RT_diff = choice - instructed per subject and condition(incl delay)
+uni_del = unique(dat.delay);
+uni_eff = unique(dat.effector);
+uni_tsel = unique(dat.target_selected);
+uni_choi = unique(dat.choice);
+uni_su = unique(dat.subj);
+RT_diff = table();
+r = 1;
+threshold_clean = 8; % smaller than (not smaller equal!)
+
+for s = 1:length(uni_su)
+    for d = 1:length(uni_del)
+        for e  = 1:length(uni_eff)
+            for t = 1:length(uni_tsel)
+                
+                aw = dat.subj == uni_su(s) &...
+                    dat.delay == uni_del(d) &...
+                    dat.effector == uni_eff(e) &...
+                    dat.target_selected == uni_tsel(t);
+                
+                
+                RT_diff.value(r) = mean(dat.RT(aw & dat.choice == 'choice')) - mean(dat.RT(aw & dat.choice == 'instructed'));
+                RT_diff.value_clean(r) = RT_diff.value(r);
+                
+                if sum(aw & dat.choice == 'choice') < threshold_clean | sum(aw & dat.choice == 'instructed') < threshold_clean
+                    RT_diff.value_clean(r) = NaN;
+                end
+                
+                RT_diff.subj(r) =  uni_su(s);
+                RT_diff.delay(r) = uni_del(d);
+                RT_diff.effector(r) = uni_eff(e);
+                RT_diff.target_selected(r) = uni_tsel(t);
+                
+                r = r +1;
+
+            end
+        end
+    end
+end
+%% Diff RT
+
+clear gCI
+figure;
+gCI(1,1) = gramm('x',RT_diff.delay, 'y',RT_diff.value,'color',RT_diff.target_selected,'column',RT_diff.effector,'group',RT_diff.subj);
+%gCI(1,1) .facet_wrap(RT_diff.subj,'ncols',5);
+gCI(1,1).geom_jitter('dodge',0.3);
+gCI(1,1).set_color_options('lightness',80,'chroma',10);
+gCI(1,1).set_order_options('x',{'3' '6' '9' '12' '15'});
+gCI(1,1).axe_property('Ylim',[-0.15 0.15]);
+gCI(1,1).geom_hline('yintercept',0,'style','k--');
+
+gCI(1,1).update('group','');
+%gCI(1,1).stat_summary('geom',{'point' 'errorbar'},'dodge',0.3);
+gCI(1,1).stat_glm();
+gCI(1,1).set_color_options('lightness',50,'chroma',100);
+
+gCI(2,1)= gramm('x',RT_diff.delay, 'y',RT_diff.value_clean,'color',RT_diff.target_selected,'column',RT_diff.effector,'group',RT_diff.subj);
+%gCI(2,1).facet_wrap(RT_diff.subj,'ncols',5);
+gCI(2,1).geom_jitter('dodge',0.3);
+gCI(2,1).set_color_options('lightness',80,'chroma',10);
+gCI(2,1).set_order_options('x',{'3' '6' '9' '12' '15'});
+gCI(2,1).axe_property('Ylim',[-0.15 0.15]);
+gCI(2,1).geom_hline('yintercept',0,'style','k--');
+
+gCI(2,1).update('group','');
+%gCI(2,1).stat_summary('geom',{'line' 'errorbar'},'dodge',0.3);
+gCI(2,1).set_color_options('lightness',50,'chroma',100);
+gCI(2,1).stat_glm();
+gCI.set_title(['Difference choice minus instructed with and without n < ' num2str(threshold_clean)]);
+gCI.draw;
+
+
+%%
+clear gCI
+figure;
+gCI = gramm('x',RT_diff.delay, 'y',RT_diff.value,'color',RT_diff.target_selected);
+%gCI.facet_wrap(RT_diff.subj,'ncols',5);
+gCI.stat_summary('geom',{'line' 'errorbar'},'dodge',0.3);
+
+%gCI.set_order_options('x',{'3' '6' '9' '12' '15'});
+gCI.axe_property('Ylim',[-0.05 0.05]);
+gCI.geom_hline('yintercept',0,'style','k--');
+
+gCI.draw;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
