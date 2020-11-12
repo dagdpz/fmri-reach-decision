@@ -1,10 +1,10 @@
 function frd_quantative_outlier_plots
 
 
-
+if 0
 pdfs = findfiles('Y:\MRI\Human\fMRI-reach-decision\Experiment\MNI','*_QA.pdf','mindepth=2');
-
-
+append_pdfs('Y:\MRI\Human\fMRI-reach-decision\Experiment\MNI\all_quality_assessment_plots_combined.pdf',pdfs);
+end
 %%
 
 path = findfiles('Y:\MRI\Human\fMRI-reach-decision\Experiment\MNI','*_outlier_volumes.mat','mindepth=2');
@@ -26,9 +26,19 @@ for i = 1:height(outl)
     outl.subj(i) = s(7);
     outl.session(i) = s(8);
     
-    fi = load(outl.path{i});
-    % DVARS
+    if i > 1
+        if strcmp(outl.subj(i),outl.subj(i-1))
+           outl.run(i) = outl.run(i-1) + 1; 
+        else 
+            outl.run(i) = 1;
+        end
+    else
+        outl.run(i) = 1;
+    end
     
+    fi = load(outl.path{i});
+    
+    %% DVARS
     
     % taken from ne_DVARS_outlier_detection
     Idx     =   find(fi.fq.DVARS_Stat.pvals<0.05./(fi.fq.DVARS_Stat.dim(2)-1));
@@ -45,6 +55,8 @@ for i = 1:height(outl)
     outl.DVARS20(i) = length(fi.outlier_volumes);
     outl.DVARS10(i) = length(add_neighboring_volumes(outliers_10,[1 1],800));
     outl.DVARS30(i) = length(add_neighboring_volumes(outliers_30,[1 1],800));
+    
+    outl.DVARS_max(i) = max(fi.fq.DVARS_Stat.DeltapDvar);
 
     %% FD
     %outl.FD(i,:) = [fi.fq.FD'];
@@ -58,7 +70,7 @@ for i = 1:height(outl)
     outl.FD10(i) = length(add_neighboring_volumes(FD10,[1 1],800));
     outl.FD15(i) = length(add_neighboring_volumes(FD15,[1 1],800));
        
-    
+    outl.FD_max(i) = max(fi.fq.FD);
 end
 
 %%
@@ -76,7 +88,7 @@ G.FD_perc_15 = round( G.sum_FD15/(800*15)*100,2);
 
 %% DVARS 
 
-figure;
+figure('Position',[0 0 1900 1400]);
 gDVARS = gramm('x',outl.subj,'y',outl.DVARS20);
 gDVARS.geom_bar();
 gDVARS.axe_property('Ygrid','on','GridColor',[0.5 0.5 0.5]);
@@ -86,7 +98,7 @@ gDVARS.draw;
 
 %% DVARS number
 
-figure;
+figure('Position',[0 0 1900 1400]);
 gDVARS_cutoff = gramm('x',G.subj,'y',G.DVARS_perc_10);
 gDVARS_cutoff.geom_bar();
 gDVARS_cutoff.set_color_options('map',[0 1 0]);
@@ -106,17 +118,29 @@ gDVARS_cutoff.set_names('x','','y','percentage of all volumes');
 gDVARS_cutoff.axe_property('Ygrid','on','GridColor',[0.5 0.5 0.5]);
 gDVARS_cutoff.draw;
 
-
-
+%% DVARS max
+figure('Position',[0 0 1900 1400]);
+gDVARS_max = gramm('x',outl.subj,'y',outl.DVARS_max,'color',outl.run);
+gDVARS_max.stat_summary('geom','bar');
+gDVARS_max.axe_property('YTick',[0:20:1000],'Ylim',[0 1000],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gDVARS_max.set_title('max DVARS per run (EVBO max = 2000)');
+gDVARS_max.draw;
 
 %% FD
-figure;
+figure('Position',[0 0 1900 1400]);
 gFD = gramm('x',outl.subj,'y',outl.FD05);
 gFD.geom_bar();
+gFD.set_color_options('map',[0 1 0]);
 gFD.axe_property('Ygrid','on','GridColor',[0.5 0.5 0.5]);
 gFD.set_title(['Amount of Outliers, FD > 0.5']);
 gFD.draw;
 
+figure('Position',[0 0 1900 1400]);
+gFD = gramm('x',outl.subj,'y',outl.FD15);
+gFD.geom_bar();
+gFD.axe_property('Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gFD.set_title(['Amount of Outliers, FD > 1.5']);
+gFD.draw;
 %% FD number
 
 figure('Position',[0 0 1900 1400]);
@@ -139,7 +163,14 @@ gFD_cutoff.set_names('x','','y','percentage of all volumes');
 gFD_cutoff.axe_property('Ygrid','on','GridColor',[0.5 0.5 0.5]);
 gFD_cutoff.draw;
 
-%%
+%% max FD
+figure('Position',[0 0 1900 1400]);
+gDVARS_max = gramm('x',outl.subj,'y',outl.FD_max,'color',outl.run);
+gDVARS_max.stat_summary('geom','bar');
+gDVARS_max.axe_property('YTick',[0:0.5:14],'Ylim',[0 14],'Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gDVARS_max.set_title('max FD per run');
+gDVARS_max.geom_hline('yintercept',1.5,'style','k--');
+gDVARS_max.draw;
 
 
 i
