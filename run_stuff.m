@@ -1,0 +1,4 @@
+function run_stuff
+
+frd_pipeline2_automized
+nemni_pl3_prt_sdm_nifti
