@@ -36,58 +36,58 @@ save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline','prot', '
 
 
 
-%% NO OUTLIER PREDS
- %% glm cue centered
-for i = 1:length(prot)
-    
-    % no outlier preds
-    ne_pl_multisession_3TUMG_part2(...
-        [runpath filesep prot(i).name],...              % basedir
-        {prot(i).session().date},...                    % session_list
-        '',...                                          % dataset_path
-        [prot(i).name '_combined_glm_cue'],...   % dataset_name (How to call the file) '_combined_no_outliers_glm_cue'
-        '*forglm_cue.avg',...                               % avg_name '*no_outliers.avg' '*forglm_cue.avg'
-        'Human_reach_decision',...                      % session_settings_id, (see ne_pl_session_settings.m)
-        {'all'},...                                     % proc_steps_array
-        'sdm_pattern',...                               % varargin
-            '*MCparams.sdm' ,...                        % '*MCparams.sdm'  '*outlier_preds.sdm'
-        'vtc_pattern',...  
-            '*_tf.vtc',...
-        'model',...
-            'mat2prt_reach_decision_vardelay_forglm');
-  
-%     % including outlier preds
+% %% NO OUTLIER PREDS
+%  %% glm cue centered
+% for i = 1:length(prot)
+%     
+%     % no outlier preds
 %     ne_pl_multisession_3TUMG_part2(...
 %         [runpath filesep prot(i).name],...              % basedir
 %         {prot(i).session().date},...                    % session_list
 %         '',...                                          % dataset_path
-%         [prot(i).name '_combined_no_outliers_glm_cue'],...   % dataset_name (How to call the file) '_combined_no_outliers_glm_cue'
-%         '*no_outliers.avg',...                           % avg_name '*no_outliers.avg' '*forglm_cue.avg'
+%         [prot(i).name '_combined_glm_cue'],...   % dataset_name (How to call the file) '_combined_no_outliers_glm_cue'
+%         '*forglm_cue.avg',...                               % avg_name '*no_outliers.avg' '*forglm_cue.avg'
 %         'Human_reach_decision',...                      % session_settings_id, (see ne_pl_session_settings.m)
 %         {'all'},...                                     % proc_steps_array
 %         'sdm_pattern',...                               % varargin
-%              '*outlier_preds.sdm' ,...                        % '*MCparams.sdm'  '*outlier_preds.sdm'
+%             '*MCparams.sdm' ,...                        % '*MCparams.sdm'  '*outlier_preds.sdm'
 %         'vtc_pattern',...  
 %             '*_tf.vtc',...
 %         'model',...
 %             'mat2prt_reach_decision_vardelay_forglm');
-        
-        
-        
-    
-    %% take care of memory
-    save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline','prot', 'runpath','i')
-    %memory
-    %inmem
-    
-    clear all
-    
-    load('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline')
-    %memory
-    %inmem
-    
-    
-end
+%   
+% %     % including outlier preds
+% %     ne_pl_multisession_3TUMG_part2(...
+% %         [runpath filesep prot(i).name],...              % basedir
+% %         {prot(i).session().date},...                    % session_list
+% %         '',...                                          % dataset_path
+% %         [prot(i).name '_combined_no_outliers_glm_cue'],...   % dataset_name (How to call the file) '_combined_no_outliers_glm_cue'
+% %         '*no_outliers.avg',...                           % avg_name '*no_outliers.avg' '*forglm_cue.avg'
+% %         'Human_reach_decision',...                      % session_settings_id, (see ne_pl_session_settings.m)
+% %         {'all'},...                                     % proc_steps_array
+% %         'sdm_pattern',...                               % varargin
+% %              '*outlier_preds.sdm' ,...                        % '*MCparams.sdm'  '*outlier_preds.sdm'
+% %         'vtc_pattern',...  
+% %             '*_tf.vtc',...
+% %         'model',...
+% %             'mat2prt_reach_decision_vardelay_forglm');
+%         
+%         
+%         
+%     
+%     %% take care of memory
+%     save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline','prot', 'runpath','i')
+%     %memory
+%     %inmem
+%     
+%     clear all
+%     
+%     load('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline')
+%     %memory
+%     %inmem
+%     
+%     
+% end
 
 %% avg's
 center = {'cue', 'mov'};
@@ -144,58 +144,58 @@ for i = 1:length(prot)
 end
 
 
-%% WITH OUTLIER PREDS
-%%  %% glm cue centered
-for i = 1:length(prot)
-%     
-%     % no outlier preds
+% %% WITH OUTLIER PREDS
+% %%  %% glm cue centered
+% for i = 1:length(prot)
+% %     
+% %     % no outlier preds
+% %     ne_pl_multisession_3TUMG_part2(...
+% %         [runpath filesep prot(i).name],...              % basedir
+% %         {prot(i).session().date},...                    % session_list
+% %         '',...                                          % dataset_path
+% %         [prot(i).name '_combined_glm_cue'],...   % dataset_name (How to call the file) '_combined_no_outliers_glm_cue'
+% %         '*forglm_cue.avg',...                               % avg_name '*no_outliers.avg' '*forglm_cue.avg'
+% %         'Human_reach_decision',...                      % session_settings_id, (see ne_pl_session_settings.m)
+% %         {'all'},...                                     % proc_steps_array
+% %         'sdm_pattern',...                               % varargin
+% %             '*MCparams.sdm' ,...                        % '*MCparams.sdm'  '*outlier_preds.sdm'
+% %         'vtc_pattern',...  
+% %             '*_tf.vtc',...
+% %         'model',...
+% %             'mat2prt_reach_decision_vardelay_forglm');
+%   
+%     % including outlier preds
 %     ne_pl_multisession_3TUMG_part2(...
 %         [runpath filesep prot(i).name],...              % basedir
 %         {prot(i).session().date},...                    % session_list
 %         '',...                                          % dataset_path
-%         [prot(i).name '_combined_glm_cue'],...   % dataset_name (How to call the file) '_combined_no_outliers_glm_cue'
-%         '*forglm_cue.avg',...                               % avg_name '*no_outliers.avg' '*forglm_cue.avg'
+%         [prot(i).name '_combined_no_outliers_glm_cue'],...   % dataset_name (How to call the file) '_combined_no_outliers_glm_cue'
+%         '*no_outliers.avg',...                           % avg_name '*no_outliers.avg' '*forglm_cue.avg'
 %         'Human_reach_decision',...                      % session_settings_id, (see ne_pl_session_settings.m)
 %         {'all'},...                                     % proc_steps_array
 %         'sdm_pattern',...                               % varargin
-%             '*MCparams.sdm' ,...                        % '*MCparams.sdm'  '*outlier_preds.sdm'
+%              '*outlier_preds.sdm' ,...                        % '*MCparams.sdm'  '*outlier_preds.sdm'
 %         'vtc_pattern',...  
 %             '*_tf.vtc',...
 %         'model',...
 %             'mat2prt_reach_decision_vardelay_forglm');
-  
-    % including outlier preds
-    ne_pl_multisession_3TUMG_part2(...
-        [runpath filesep prot(i).name],...              % basedir
-        {prot(i).session().date},...                    % session_list
-        '',...                                          % dataset_path
-        [prot(i).name '_combined_no_outliers_glm_cue'],...   % dataset_name (How to call the file) '_combined_no_outliers_glm_cue'
-        '*no_outliers.avg',...                           % avg_name '*no_outliers.avg' '*forglm_cue.avg'
-        'Human_reach_decision',...                      % session_settings_id, (see ne_pl_session_settings.m)
-        {'all'},...                                     % proc_steps_array
-        'sdm_pattern',...                               % varargin
-             '*outlier_preds.sdm' ,...                        % '*MCparams.sdm'  '*outlier_preds.sdm'
-        'vtc_pattern',...  
-            '*_tf.vtc',...
-        'model',...
-            'mat2prt_reach_decision_vardelay_forglm');
-        
-        
-        
-    
-    %% take care of memory
-    save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline','prot', 'runpath','i')
-    %memory
-    %inmem
-    
-    clear all
-    
-    load('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline')
-    %memory
-    %inmem
-    
-    
-end
+%         
+%         
+%         
+%     
+%     %% take care of memory
+%     save('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline','prot', 'runpath','i')
+%     %memory
+%     %inmem
+%     
+%     clear all
+%     
+%     load('Y:\MRI\Human\fMRI-reach-decision\Experiment\buffer_for_pipeline')
+%     %memory
+%     %inmem
+%     
+%     
+% end
 
 %% avg's
 center = {'cue', 'mov'};
