@@ -4,8 +4,8 @@
 
 random_dat = rand(12,4);
 
-dat_course = reshape(1:24,6,4);
-% dat_course =
+dat_coarse = reshape(1:24,6,4);
+% dat_coarse =
 %      1     7    13    19
 %      2     8    14    20
 %      3     9    15    21
@@ -13,7 +13,7 @@ dat_course = reshape(1:24,6,4);
 %      5    11    17    23
 %      6    12    18    24
 
-dat_fine = 1:0.2:24.8; % inventing 4 additional data points (24.2, 24.4, 24.6, 24.8)
+dat_fine = 1:0.2:24.8; % inventing 4 additional data points (24.2, 24.4, 24.6, 24.8) --> but means are different
 dat_fine = reshape(dat_fine,[],4);
 
 % dat_fine =
@@ -27,7 +27,7 @@ dat_fine = reshape(dat_fine,[],4);
 %     ...       ...      ...       ...
 %     6.8000   12.8000   18.8000   24.8000
 
-dat_fine2 = 0.6:0.2:24.4;   % inventing data points before and after (0.6, 0.8, 24.2, 24.6) --> bin_means are exactly the same as in course data
+dat_fine2 = 0.6:0.2:24.4;   % inventing data points before and after (0.6, 0.8, 24.2, 24.6) --> bin_means are exactly the same as in coarse data
 dat_fine2 = reshape(dat_fine2,[],4);
 
 % dat_fine2 =
@@ -48,29 +48,29 @@ dat_even_finer = reshape(dat_even_finer,[],4);
 %     ...       ...      ...       ...
 %     6.4800   12.4800   18.4800   24.4800
 
-%%
-dat = dat_course; % time x trials
+%% simple 
+dat = dat_coarse; % time x trials
 
 row_mean = mean(dat,2);
 row_std = (std(dat'))';
-row_se = row_std/sqrt(size(dat,2));
+row_se = row_std/sqrt(numel(dat));
 
-disp('dat_course');
+disp('dat_coarse');
 table(row_mean,row_std,row_se)
 
 %% downsampling to binsize 
 
-% dat = dat_course; % sanity check
-% name = 'dat_course';
-% binsize = 1; % dat_course
+% dat = dat_coarse; % sanity check
+% name = 'dat_coarse';
+% binsize = 1; % dat_coarse
 
-% dat = dat_fine2; 
-% name = 'dat_fine2';
-% binsize = 5; % dat_fine2
+dat = dat_fine2; 
+name = 'dat_fine2';
+binsize = 5; % dat_fine2
 
- dat = dat_even_finer;
- name = 'dat_even_finer';
- binsize = 25; % dat_even_finer
+%  dat = dat_even_finer;
+%  name = 'dat_even_finer';
+%  binsize = 25; % dat_even_finer
 
 %%
 % calculation
