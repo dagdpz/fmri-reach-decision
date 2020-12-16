@@ -53,20 +53,20 @@ dat = dat_coarse; % time x trials
 
 row_mean = mean(dat,2);
 row_std = (std(dat'))';
-row_se = row_std/sqrt(numel(dat));
+row_se = row_std./sqrt(size(dat,2));
 
 disp('dat_coarse');
 table(row_mean,row_std,row_se)
 
 %% downsampling to binsize 
 
-% dat = dat_coarse; % sanity check
-% name = 'dat_coarse';
-% binsize = 1; % dat_coarse
+dat = dat_coarse; % sanity check, if calculation is right
+name = 'dat_coarse';
+binsize = 1; % dat_coarse
 
-dat = dat_fine2; 
-name = 'dat_fine2';
-binsize = 5; % dat_fine2
+% dat = dat_fine2; 
+% name = 'dat_fine2';
+% binsize = 5; % dat_fine2
 
 %  dat = dat_even_finer;
 %  name = 'dat_even_finer';
@@ -81,7 +81,7 @@ ds_row_se = [];
 for i = 0:(size(dat,1)/binsize)-1
     part_dat = dat((1+i*binsize):(binsize+i*binsize),:);
     
-    ds_row_mean(i+1) = mean(part_dat,'all');
+    ds_row_mean(i+1) = mean(part_dat(:));
     ds_row_std(i+1) = std(part_dat(:));
     ds_row_se(i+1) = ds_row_std(i+1) / sqrt(numel(part_dat)); 
     
