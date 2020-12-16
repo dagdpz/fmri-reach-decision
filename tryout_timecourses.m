@@ -213,5 +213,7 @@ runpath = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\MNI\ANEL\mat2prt_reach_de
 %%
  y=[1,2,3,4,5,6,7,8,9,10,11];
  out = nanmean(reshape([y(:); nan(mod(-numel(y),4),1)],4,[]));
+%% difference function 
 
-
+cond_diff = {'choi', 'instr'; 'left', 'right';'reach' 'sac'};
+era_file = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\MNI\ANEL\mat2prt_reach_decision_vardelay_foravg\ANEL_era_cue_12_no_outliers.mat';...
