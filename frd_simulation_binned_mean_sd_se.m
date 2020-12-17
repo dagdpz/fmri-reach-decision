@@ -1,8 +1,14 @@
 %% Simulation of binned mean, sd, se depending on interpolation
 
+% WRONG assumption here. I have to average within a trial and then
+% calculate the SD AND SE across trials. Therefore, SD and SE stay the
+% same. 
+
+
+%%
 % dat = time x trials;
 
-random_dat = rand(12,4);
+% random_dat = rand(12,4);
 
 dat_coarse = reshape(1:24,6,4);
 % dat_coarse =
@@ -60,17 +66,17 @@ table(row_mean,row_std,row_se)
 
 %% downsampling to binsize 
 
-dat = dat_coarse; % sanity check, if calculation is right
-name = 'dat_coarse';
-binsize = 1; % dat_coarse
+% dat = dat_coarse; % sanity check, if calculation is right
+% name = 'dat_coarse';
+% binsize = 1; % dat_coarse
 
-% dat = dat_fine2; 
-% name = 'dat_fine2';
-% binsize = 5; % dat_fine2
+dat = dat_fine2; 
+name = 'dat_fine2';
+binsize = 5; % dat_fine2
 
-%  dat = dat_even_finer;
-%  name = 'dat_even_finer';
-%  binsize = 25; % dat_even_finer
+ dat = dat_even_finer;
+ name = 'dat_even_finer';
+ binsize = 25; % dat_even_finer
 
 %%
 % calculation
