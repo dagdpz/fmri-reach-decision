@@ -27,6 +27,40 @@ dat.trial_type_del = categorical(strcat(cellstr(dat.effector),'_' ,cellstr(dat.c
 
 %save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\current_dat_file.mat','dat','weirdos');
 
+%% CHOICE BIAS STATS
+
+dat.right_selected_choice = (dat.target_selected == 'right') & (dat.choice == 'choice') & dat.success;
+dat.left_selected_choice = (dat.target_selected  == 'left') & (dat.choice == 'choice') & dat.success;
+
+func = @(r,l) 100*( (sum(r)) / (sum(r|l)) );
+cb = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_selected_choice'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','choice_bias');
+
+cb.choice_bias_diff = cb.choice_bias - 50; % compared to 0.5
+
+cb.cb_name = cell(length(cb.choice_bias),1);
+cb.cb_name(cb.choice_bias >= 50) = {'right'};
+cb.cb_name(cb.choice_bias < 50) = {'left'};
+
+
+cb.side = cell(length(cb.subj),1);
+uni_su = unique(cb.subj);
+for i = 1:length(uni_su)
+   wh = cb(cb.subj == uni_su(i),:);
+   if strcmp(wh.cb_name{1},wh.cb_name{2})
+       cb.side(cb.subj == uni_su(i)) = {'same'};
+   else
+       cb.side(cb.subj == uni_su(i)) = {'different'};
+   end
+
+end
+
+cb.cb_name = categorical(cb.cb_name);
+cb.side = categorical(cb.side);
+% 
+% 
+% %%writetable(cb,'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\choice_bias.csv')
+% %%save('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\choice_bias.mat','cb')
+
 %% Sanity Check: state RT vs. trajectory RT
 % problematic RTs are excluded (N = 142, remaining: N = 4014)
 % * no RT detected
@@ -680,6 +714,7 @@ gCBtimeR2.draw;
 
 cb_ges_all = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_selected_choice'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','choice_bias');
 
+
 clear gCBges
 figure ('Position', [100 100 900 600]);
 
@@ -994,6 +1029,7 @@ gCBdel.draw;
 %%  Choice Bias vs. Reaction Time
 % errorbars are 95% standard errors of the mean
 % markers are subjects
+cb_ges_all = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_selected_choice'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','choice_bias');
 
 func_RT_rl = @(RT,r,l,u) mean(RT(r & ~u)) - mean(RT(l & ~u));
 dRT = rowfun(func_RT_rl,dat,'InputVariables',{'RT' 'right_selected_choice' 'left_selected_choice' 'unrealRT'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','dRT');
@@ -1008,7 +1044,7 @@ gCBRT.set_title('Choice Bias vs. deltaRT');
 gCBRT.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1);
 gCBRT.set_text_options('base_size',12);
 
-gCBRT.update('marker',cb_ges_all.subj);
+%gCBRT.update('marker',cb_ges_all.subj);
 gCBRT.geom_point();
 gCBRT.no_legend();
 gCBRT.draw();
@@ -1341,19 +1377,170 @@ gCI.geom_hline('yintercept',0,'style','k--');
 gCI.draw;
 
 
+%% EXPORT SHIT
+%% 
+rt_del_con = rowfun(@mean,dat,'InputVariables',{'RT'},'GroupingVariable', {'effector','choice','target_selected','delay','subj','success','unrealRT'},'OutputVariableNames','RT');
+
+figure ('Position', [100 100 500 550]);
+gRTdelcon = gramm('y',rt_del_con.RT,'x',rt_del_con.delay,'row',rt_del_con.effector,'column',rt_del_con.target_selected,'color',rt_del_con.choice,'subset', rt_del_con.success & ~rt_del_con.unrealRT);
+%gRTdelcon.stat_summary('geom',{'line' 'errorbar','point'},'setylim',true,'dodge',0.2);
+gRTdelcon.stat_summary('geom',{'area','point'},'setylim',true);
+%gRTdelcon.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+
+gRTdelcon.set_color_options('map',[0.9765, 0.4510, 0.0157; 0.0863, 0.6000, 0.7804],'n_color',2,'n_lightness',1);
+gRTdelcon.set_order_options('x',{'3' '6' '9' '12' '15'});
+gRTdelcon.set_names('column','','x','delay','color','delay');
+gRTdelcon.set_title('mean per delay');
+gRTdelcon.set_text_options('base_size',11);
+gRTdelcon.set_names('column','','row','','x','delay in s','color','','y','RT in s','linestyle','');
+gRTdelcon.axe_property('Ygrid','on');
+gRTdelcon.set_text_options('base_size', 12,'facet_scaling',0.9,'title_scaling',0.9,'big_title_scaling',0.9,'legend_scaling',0.8);
+gRTdelcon.set_line_options('styles',{'-' ':'},'base_size',3);
+gRTdelcon.set_point_options('base_size',5);
+gRTdelcon.set_layout_options('legend_position',[0.7 0.695 0.1 0.15]);
+
+gRTdelcon.set_title('Reaction Time');
+gRTdelcon.draw();
+
+if 0
+    gRTdelcon.export('file_name','reaction_time',...
+                 'export_path', 'Y:\Personal\Peter\writing up',...
+                 'file_type','pdf');
+end
 
 
 
 
+%%
+
+lme = fitlme(cb_ges_all,'choice_bias ~ effector +(1|subj)')
+lme2 = fitlme(cb_ges_all,'choice_bias ~ effector +(effector|subj)')
+
+compare(lme,lme2,'CheckNesting',true)
+
+figure;
+lme
+
+%% ttest CHOICE BIAS
+cb_ges_all.cb_around_zero = cb_ges_all.choice_bias - 50; 
+% reach + saccade
+[h,p,ci,stats] = ttest(cb_ges_all.cb_around_zero(cb_ges_all.effector == 'reach'))
+[h,p,ci,stats] = ttest(cb_ges_all.cb_around_zero(cb_ges_all.effector == 'saccade'))
+
+% reach vs. saccade
+[h,p,ci,stats] = ttest(cb_ges_all.cb_around_zero(cb_ges_all.effector == 'reach'),cb_ges_all.cb_around_zero(cb_ges_all.effector == 'saccade'))
+
+%% CB BAR
+
+% cb_ges_all = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_selected_choice'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','choice_bias');
+% 
+% clear gCBges
+% figure ('Position', [100 100 400 300]);
+% 
+% gCBges = gramm('x',cb_ges_all.effector,'y',cb_ges_all.choice_bias,'label',cb_ges_all.GroupCount,'color',cb_ges_all.effector,'group','');
+% gCBges.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+% %gCBges.stat_summary('geom',{'point' 'errorbar'},'width',1);
+% gCBges.stat_summary('geom',{'bar','black_errorbar'},'width',1);
+% %gCBges.geom_label('VerticalAlignment','middle','HorizontalAlignment','center','BackgroundColor','w','Color','k');
+% gCBges.geom_hline('yintercept',50,'style','k--');
+% gCBges.set_names('x','','y','% right choices');
+% gCBges.set_title('Choice Bias');
+% gCBges.set_order_options('x',{'reach' 'saccade'});
+% gCBges.set_text_options('base_size', 14,'facet_scaling',0.9,'title_scaling',0.9,'big_title_scaling',0.9,'legend_scaling',0.8);
+% gCBges.axe_property('Ygrid','on');
+% gCBges.set_line_options('base_size',2.5);
+% 
+% % gCBges.update('color','','group',cb_ges_all.subj);
+% % gCBges.geom_jitter();
+% % gCBges.set_point_options('base_size',6);
+% % gCBges.set_color_options('chroma',0,'lightness',50);
+% 
+% gCBges.draw;
+%% CB lines + star wars fighters
+clear gCBges
+figure ('Position', [100 100 400 300]);
+
+gCBges = gramm('x',cb_ges_all.effector,'y',cb_ges_all.choice_bias,'label',cb_ges_all.GroupCount,'color','','group',cb_ges_all.subj);
+gCBges.set_color_options('chroma',0,'lightness',80);
+gCBges.geom_line();
+%gCBges.stat_summary('geom',{'point' 'errorbar'},'width',1);
+%gCBges.geom_label('VerticalAlignment','middle','HorizontalAlignment','center','BackgroundColor','w','Color','k');
+gCBges.geom_hline('yintercept',50,'style','k--');
+gCBges.set_names('x','','y','% right choices');
+gCBges.set_title('Choice Bias');
+gCBges.set_order_options('x',{'reach' 'saccade'});
+gCBges.set_text_options('base_size', 12,'facet_scaling',0.9,'title_scaling',0.9,'big_title_scaling',0.9,'legend_scaling',0.8);
+gCBges.axe_property('Ygrid','on');
+gCBges.set_line_options('base_size',1.5);
+gCBges.axe_property('YLim',[0 100]);
 
 
+gCBges.update('color',cb_ges_all.effector,'group','');
 
+gCBges.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1,'legend','merge');
+gCBges.stat_summary('geom',{'point','errorbar'},'width',1);
+gCBges.set_point_options('base_size',9);
+gCBges.set_line_options('base_size',2);
 
+gCBges.draw;
 
+if 1
+    gCBges.export('file_name','choice_bias',...
+                 'export_path', 'Y:\Personal\Peter\writing up',...
+                 'file_type','pdf');
+end
+%% 
 
+cb_ges_all = rowfun(func,dat,'InputVariables',{'right_selected_choice' 'left_selected_choice'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','choice_bias');
 
+func_RT_rl = @(RT,r,l,u) mean(RT(r & ~u)) - mean(RT(l & ~u));
+dRT = rowfun(func_RT_rl,dat,'InputVariables',{'RT' 'right_selected_choice' 'left_selected_choice' 'unrealRT'},'GroupingVariable', {'effector','subj'},'OutputVariableNames','dRT');
 
+figure ('Position', [100 100 400 300]);
+gCBRT = gramm('x',cb_ges_all.choice_bias,'y',dRT.dRT,'color',cb_ges_all.effector)%,'column',cb_ges_all.cat);
+gCBRT.stat_glm();
+gCBRT.geom_hline('yintercept',0,'style','k:');
+gCBRT.geom_vline('xintercept',50,'style','k:');
 
+gCBRT.set_names('x','% right choices','row','','y','RT(right) - RT(left)');
+gCBRT.axe_property('Xlim',[0 100])
+gCBRT.set_title('Choice Bias vs. dRT');
+gCBRT.set_color_options('map',[ 0.1020, 0.5882, 0.2549; 0.8431, 0.0980, 0.1098],'n_color',2,'n_lightness',1);
+gCBRT.set_text_options('base_size',12);
 
+gCBRT.geom_point();
+gCBRT.no_legend();
 
+gCBRT.set_text_options('base_size', 12,'facet_scaling',0.9,'title_scaling',0.9,'big_title_scaling',0.9,'legend_scaling',0.8);
+gCBRT.set_line_options('base_size',2);
+gCBRT.set_point_options('base_size',6);
+
+gCBRT.draw();
+
+if 1
+    gCBRT.export('file_name','CB_vs_dRT',...
+                 'export_path', 'Y:\Personal\Peter\Talk IMPRS',...
+                 'file_type','png');
+end
+
+%%
+figure ('Position', [100 100 600 400],'Name','Proportion of different delays');
+gAmount = gramm('y',dat.success,'x',dat.delay,'row',dat.effector,'column',dat.target_selected,'color',dat.choice,'subset',dat.target_selected ~= 'none' & dat.success);
+gAmount.stat_bin('normalization','probability');
+gAmount.set_color_options('map',[0.9765    0.4510    0.0157; 0.0863    0.6000    0.7804],'n_color',2,'n_lightness',1);
+gAmount.set_names('x','delay','color','','column','','row','');
+gAmount.axe_property('Ygrid','on','GridColor',[0.5 0.5 0.5]);
+gAmount.set_title('Proportion of delays');
+gAmount.set_text_options('base_size',12);
+gAmount.set_order_options('x',{'3' '6' '9' '12' '15'});
+gAmount.set_text_options('base_size', 12,'facet_scaling',0.9,'title_scaling',0.9,'big_title_scaling',0.9,'legend_scaling',0.8);
+gAmount.set_line_options('base_size',2);
+gAmount.set_point_options('base_size',6);
+gAmount.draw; 
+
+if 1
+    gAmount.export('file_name','Proportion of delays',...
+                 'export_path', 'Y:\Personal\Peter\Talk IMPRS',...
+                 'file_type','png');
+end
 

@@ -1,5 +1,10 @@
 function frd_quantative_outlier_plots
 
+% these plots are not exactly valid for number of trials which go into time
+% courses, because those trials exceeding the scanner recording time are
+% still counted
+
+
 app_pdfs = 0;
 app_pdfs2 = 0;
 which_threshold = 0;

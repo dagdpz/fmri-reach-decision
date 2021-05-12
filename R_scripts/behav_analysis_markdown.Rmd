@@ -1,0 +1,197 @@
+---
+title: "behavioral analysis fmri_reach_decision"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readr)
+library(lme4)
+library(lmerTest)
+library(ggplot2)
+
+RTdata <- read_csv("Y:/MRI/Human/fMRI-reach-decision/Experiment/behavioral_data/current_dat_file.csv")
+RTdata$subj = factor(RTdata$subj)
+RTdata$effector = factor(RTdata$effector)
+RTdata$choice = factor(RTdata$choice)
+RTdata$target_selected = factor(RTdata$target_selected)
+RTdata$delay = factor(RTdata$delay)
+
+
+Alldata = RTdata
+
+# clean data
+RTdata <- RTdata[RTdata$success == 1,]
+RTdata <- RTdata[!(RTdata$RT == -99),]
+RTdata <- RTdata[!(RTdata$RT > 0.8) ,]
+RTdata <- RTdata[(RTdata$RT >= 0.2) ,]
+```
+
+## Reaction Time
+
+(excluded: RT == -99 | RT > 0.8 | (RT < 0.2 )
+
+```{r histogram, echo=FALSE}
+g_mRT <- ggplot(RTdata, aes(x = RT))
+g_mRT + geom_histogram(bins = 100, fill = "white", color = "black")
+```
+
+## linear mixed effect model
+
+```{r}
+
+#mRT_full <- lmer(RT ~ effector*choice*target_selected + (effector*choice*target_selected|subj) + (delay|subj), data = RTdata, REML = FALSE)
+#gRT_full <- glmer(RT ~ effector*choice*target_selected + (effector*choice*target_selected|subj) + (delay|subj), data = RTdata,family = inverse.gaussian)
+
+################### CONTINUE HERE ###########
+#save(mRT_full, file = "mRT_full.rda")
+#save(gRT_full, file = "gRT_full.rda")
+
+load("mRT_full.rda")
+load("gRT_full.rda")
+
+```
+
+
+```{r}
+RTdata$fitted_mRT_full <- fitted(mRT_full)
+RTdata$fitted_gRT_full <- fitted(gRT_full)
+
+mRT_1  <- lmer(RT ~ effector*choice*target_selected +         (1|subj), data = RTdata, REML = FALSE)
+kRT_1  <- lmer(RT ~ effector*choice*target_selected +          (effector|subj) + (1|delay), data = RTdata, REML = FALSE)
+mRT_5c_cnt  <- lmer(RT ~ effector*choice*target_selected + (delay|subj), data = RTdata, REML = FALSE,control=lmerControl(optimizer="bobyqa"))
+
+
+mRT_1_delay  <- lmer(RT ~ delay*effector*choice*target_selected +         (1|subj), data = RTdata, REML = FALSE)
+
+
+
+newDat <- simulate(mRT_1,method = "ML")
+RTdata$sim_mRT_full <- newDat$sim_1
+
+newDat <- simulate(kRT_1,method = "ML")
+RTdata$sim_gRT_full <- newDat$sim_1
+
+g_mRT <- ggplot(RTdata)
+g_mRT + geom_density(aes(x = RT), color = "black") + geom_density(aes(x = sim_mRT_full), color = "red") + geom_density(aes(x = sim_gRT_full), color = "blue") + xlim(0.2,0.8) + facet_grid(effector~delay)
+
+
+
+```
+
+```{r}
+summary(mRT_full)
+
+```
+
+```{r}
+summary(gRT_full)
+```
+
+```{r}
+#gRT_full <- glmer(RT ~ effector*choice*target_selected + (effector*choice*target_selected|subj) + (delay|subj), data = RTdata,family = inverse.gaussian)
+mRT_0  <- lmer(RT ~ effector*choice*target_selected + (1|delay)       +    (1|subj), data = RTdata, REML = FALSE)
+mRT_02  <- lmer(RT ~ delay*effector*choice*target_selected +     +    (1|subj), data = RTdata, REML = FALSE)
+
+mRT_0_reach  <- lmer(RT ~ choice*target_selected + (1|delay)       +    (1|subj), data = RTdata[RTdata$effector == 'reach',], REML = FALSE)
+mRT_0_sac  <- lmer(RT ~ choice*target_selected + (1|delay)       +    (1|subj), data = RTdata[RTdata$effector == 'saccade',], REML = FALSE)
+
+
+# I(num_delay^2)
+mRT_0  <- lmer(RT ~ num_delay*effector*choice*target_selected   +    (1|subj), data = RTdata, REML = FALSE)
+
+
+mRT_0_reach  <- lmer(RT ~ num_delay*choice*target_selected  +  (1|subj), data = RTdata[RTdata$effector == 'reach',], REML = FALSE)
+mRT_0_sac  <- lmer(RT ~ num_delay*choice*target_selected +  (1|subj), data = RTdata[RTdata$effector == 'saccade',], REML = FALSE)
+
+
+
+
+mRT_1  <- lmer(RT ~ effector*choice*target_selected +            (num_delay|subj), data = RTdata, REML = FALSE)
+mRT_2a <- lmer(RT ~ effector*choice*target_selected +                           (delay|subj), data = RTdata,  REML = FALSE)
+mRT_2b <- lmer(RT ~ effector*choice*target_selected + (effector*choice*target_selected|subj), data = RTdata, REML = FALSE)
+mRT_2c <- lmer(RT ~ effector*choice*target_selected +                  (effector*delay|subj), data = RTdata, REML = FALSE)
+
+mRT_3a <- lmer(RT ~ effector*choice*target_selected + (0 + effector*choice*target_selected|subj) + (delay|subj), data = RTdata, REML = FALSE)
+mRT_3b <- lmer(RT ~ effector*choice*target_selected + (    effector*choice*target_selected|subj) + (0 + delay|subj), data = RTdata, REML = FALSE)
+
+mRT_4  <- lmer(RT ~ effector*choice*target_selected + (effector + choice + target_selected|subj) + (delay|subj), data = RTdata, REML = FALSE)
+mRT_5a <- lmer(RT ~ effector*choice*target_selected + (effector * choice + target_selected|subj) + (delay|subj), data = RTdata, REML = FALSE)
+mRT_5b <- lmer(RT ~ effector*choice*target_selected + (effector + choice * target_selected|subj) + (delay|subj), data = RTdata, REML = FALSE)
+mRT_5c <- lmer(RT ~ effector*choice*target_selected + (effector * target_selected + choice|subj) + (delay|subj), data = RTdata, REML = FALSE)
+
+
+anova(mRT_1,mRT_2a)
+anova(mRT_1,mRT_2b)
+anova(mRT_2a,mRT_full)
+anova(mRT_2b,mRT_full)
+
+anova(mRT_3a,mRT_full) # not significant
+anova(mRT_3b,mRT_full) # not significant
+
+anova(mRT_5a,mRT_full)
+anova(mRT_5b,mRT_full)
+anova(mRT_5c,mRT_full) # not significant
+
+anova(mRT_3a,mRT_5c) # not significant
+anova(mRT_3b,mRT_5c) # not significant
+
+mRT_3a5c <- lmer(RT ~ effector*choice*target_selected + (0+ effector * target_selected + choice|subj) + (delay|subj), data = RTdata, REML = FALSE)
+
+anova(mRT_5c,mRT_3a)# not significant
+anova(mRT_3a5c,mRT_5c) # not significant
+
+mRT_45c <- lmer(RT ~ effector*choice*target_selected + (0+ effector + target_selected + choice|subj) + (delay|subj), data = RTdata, REML = FALSE)
+
+
+anova(mRT_45c, mRT_4) 
+
+anova(mRT_45c,mRT_3a5c) 
+
+
+mRT_6 <- lmer(RT ~ effector*choice*target_selected + 
+                (effector|subj) + (target_selected|subj) + (choice|subj) + 
+                (effector:target_selected|subj)+ (effector:choice|subj)+ (target_selected:choice|subj)+ 
+                (effector:target_selected:choice|subj)+ 
+                (delay|subj), data = RTdata, REML = FALSE)
+
+
+
+```
+
+```{r}
+kRT_1  <- lmer(RT ~ effector*choice*target_selected +                          +  (delay|subj), data = RTdata, REML = FALSE)
+kRT_2a <- lmer(RT ~ effector*choice*target_selected +                           (delay|subj), data = RTdata,  REML = FALSE)
+kRT_2b <- lmer(RT ~ effector*choice*target_selected + (effector*choice*target_selected|subj), data = RTdata, REML = FALSE)
+kRT_2c <- lmer(RT ~ effector*choice*target_selected +                  (effector*delay|subj), data = RTdata, REML = FALSE)
+
+kRT_3a <- lmer(RT ~ effector*choice*target_selected + (0 + effector*choice*target_selected|subj) + (1|delay/subj), data = RTdata, REML = FALSE)
+kRT_3b <- lmer(RT ~ effector*choice*target_selected + (    effector*choice*target_selected|subj) + (0 + delay|subj), data = RTdata, REML = FALSE)
+
+kRT_4  <- lmer(RT ~ effector*choice*target_selected + (effector + choice + target_selected|subj) +   (1|delay), data = RTdata, REML = FALSE)
+kRT_5a <- lmer(RT ~ effector*choice*target_selected + (effector * choice + target_selected|subj) + (delay|subj), data = RTdata, REML = FALSE)
+kRT_5b <- lmer(RT ~ effector*choice*target_selected + (effector + choice * target_selected|subj) + (delay|subj), data = RTdata, REML = FALSE)
+kRT_5c <- lmer(RT ~ effector*choice*target_selected + (effector * target_selected + choice|subj) + (delay|subj), data = RTdata, REML = FALSE)
+
+
+```
+
+
+```{r}
+#gRT_full <- glmer(RT ~ effector*choice*target_selected + (effector*choice*target_selected|subj) + (delay|subj), data = RTdata,family = inverse.gaussian)
+
+gRT_1 <- glmer(RT ~ effector*choice*target_selected + (1|subj), data = RTdata, family = inverse.gaussian)
+gRT_2a <- glmer(RT ~ effector*choice*target_selected + (delay|subj), data = RTdata,  family = inverse.gaussian)
+gRT_2b <- glmer(RT ~ effector*choice*target_selected + (effector*choice*target_selected|subj), data = RTdata, family = inverse.gaussian)
+
+gRT_3a <- glmer(RT ~ effector*choice*target_selected + (0 + effector*choice*target_selected|subj) + (delay|subj), data = RTdata, family = inverse.gaussian)
+gRT_3b <- glmer(RT ~ effector*choice*target_selected + (effector*choice*target_selected|subj) + (0 + delay|subj), data = RTdata, family = inverse.gaussian)
+
+gRT_4 <- glmer(RT ~ effector*choice*target_selected + (effector+choice+target_selected|subj) + (delay|subj), data = RTdata, family = inverse.gaussian)
+gRT_5a <- glmer(RT ~ effector*choice*target_selected + (effector * choice + target_selected|subj) + (delay|subj), data = RTdata, family = inverse.gaussian)
+gRT_5b <- glmer(RT ~ effector*choice*target_selected + (effector + choice * target_selected|subj) + (delay|subj), data = RTdata, family = inverse.gaussian)
+gRT_5c <- glmer(RT ~ effector*choice*target_selected + (effector * target_selected + choice|subj) + (delay|subj), data = RTdata, family = inverse.gaussian)
+```
+
+
