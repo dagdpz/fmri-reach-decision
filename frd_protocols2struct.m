@@ -5,9 +5,9 @@ function prot = frd_protocols2struct(runpathwithfilename)
 % when importing via ui: only session and scannernr1/-2 are numbers, the
 % rest is text AND replace missing with NaN --> in table
 
-if nargin < 1
-    runpathwithfilename = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.csv';
-end
+% if nargin < 1
+%     runpathwithfilename = 'Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.csv';
+% end
 
 
 
