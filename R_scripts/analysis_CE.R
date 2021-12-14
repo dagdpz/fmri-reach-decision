@@ -23,29 +23,62 @@ CEdata$z.num_delay=as.vector(scale(CEdata$num_delay)) # z-transformation
 CEdata$effector_rlvl = relevel(CEdata$effector, ref='sac')
 CEdata$period_rlvl = relevel(CEdata$period, ref='late')
 
+# delay -1 0 1
+CEdata$z_delay <- as.numeric(CEdata$delay)
+CEdata$z_delay <- CEdata$z_delay -2
+
+# t1 t2 t3 t4
 CEdata$per_2 <- CEdata$num_delay 
 idx = CEdata$period == 'early'
 CEdata[idx,"per_2"] <- 4
 CEdata$per_2 <- factor(CEdata$per_2)
-
 CEdata$subj_per2<-as.factor(paste(CEdata$per_2,CEdata$subj,sep="_"))
 
 ######## TEST THINGS
 detach(name="package:lmerTest")
 library(lme4)
 
+
+ts <- lmer(diff ~ effector*per_2 + (effector*per_2|subj), 
+           data = CEdata,subset = (voi_number == 160),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
+
+ts2 <- lmer(diff ~ effector*per_2*z_delay + (effector*per_2|subj), 
+           data = CEdata,subset = (voi_number == 160),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
+
+
+
+
+
 test <- lmer(diff ~ effector*period*num_delay + (effector+period+num_delay|subj_period), 
              data = CEdata,subset = (voi_number == 10),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
 
-test2 <- lmer(diff ~ period_rlvl+num_delay+effector + (effector+period+num_delay|subj_period), 
-             data = CEdata,subset = (voi_number == 11),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
+
+testn <- lmer(diff ~ effector*period*delay + (effector+period+delay|subj_period), 
+             data = CEdata,subset = (voi_number == 10),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
+
+
+#tesu <- lmer(diff ~ effector*period*num_delay + (effector+period+num_delay|period) + (effector+period+num_delay|subj), 
+#             data = CEdata,subset = (voi_number == 10),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
+
+
+#test2 <- lmer(diff ~ period_rlvl+num_delay+effector + (effector+period+num_delay|subj_period), 
+#             data = CEdata,subset = (voi_number == 11),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
 
 
 test_step <- step(test, reduce.random = FALSE, keep = c("effector","period","num_delay"),
                  control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
 
+testn_step <- step(testn, reduce.random = FALSE, keep = c("effector","period","delay"),
+                  control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1000000)))
+
+
 test_final <- get_model(test_step)
+anova(test_final)
 summary(test_final)
+
+testn_final <- get_model(testn_step)
+anova(testn_final)
+summary(testn_final)
 
 
 test_estis <- boot.lmer(test, discard.warnings=T, nboots=1000, para=T, resol=3,
