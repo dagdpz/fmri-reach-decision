@@ -33,6 +33,6 @@ figure;
 plot(p_table.voi(p_table.eff == 'reach'),p_table.p(p_table.eff == 'reach'),'*',...
     p_table.voi(p_table.eff == 'sac'),p_table.p(p_table.eff == 'sac'),'*')
 title('P VALUES of early vs. late period (averaged left/right, averaged 9/12/15)');
-yline(0.05,'k--');
+line([0 25],[0.05 0.05],'Color',[0 0 0],'LineStyle',':');
 legend('reach','sac');
 
