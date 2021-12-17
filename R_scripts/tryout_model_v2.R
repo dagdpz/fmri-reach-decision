@@ -79,17 +79,24 @@ CEnew = rbind(CEnew,CEdata)
 ###### stats
 
 
-ts1 <- lmer(diff ~ effector*per_2*z_delay + (effector*per_2|subj), 
+ts1 <- lmer(diff ~ effector*period*z_delay + (effector+period+z_delay|subj_period), 
            data = CEdata,subset = (voi_number == 10),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
 
 
-ts2 <- lmer(diff ~ effector*per_2*z_delay + (effector*per_2|subj), 
+ts2 <- lmer(diff ~ effector*per_2+z_delay + (effector+per_2+z_delay|subj), 
             data = CEnew,subset = (voi_number == 10),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
+
+ts2.1 <- lmer(diff ~ effector*per_2*z_delay + (effector+per_2+z_delay|subj), 
+            data = CEnew,subset = (voi_number == 10),REML = FALSE,control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
+
 
 anova(ts1)
 anova(ts2)
+anova(ts2.1)
 
-ts1_step <- step(ts1, reduce.random = FALSE, keep = c("effector","per_2","z_delay"),
+
+
+ts1_step <- step(ts1, reduce.random = FALSE, keep = c("effector","period","z_delay"),
                   control=lmerControl(optimizer="bobyqa", optCtrl=list(maxfun=100000)))
 
 ts2_step <- step(ts2, reduce.random = FALSE, keep = c("effector","per_2","z_delay"),
