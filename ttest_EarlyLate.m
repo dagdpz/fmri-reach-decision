@@ -2,6 +2,8 @@
 
 load('Y:\MRI\Human\fMRI-reach-decision\Experiment\MNI\stats\Exp_era_period_diff_choi_instr.mat');
 
+tt_no_del = rowfun(@nanmean,tt,'InputVariables',{'diff'},'GroupingVariable', {'subj','voi','cond','period'},'OutputVariableNames','diff');
+
 
 %%
 uni_voi = unique(tt_no_del.voi);
