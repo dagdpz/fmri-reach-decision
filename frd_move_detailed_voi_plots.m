@@ -1,4 +1,4 @@
-function makeithappen
+function frd_move_detailed_voi_plots
 
 if 0
     load('Y:\MRI\Human\fMRI-reach-decision\Experiment\behavioral_data\protocols_v2.mat');

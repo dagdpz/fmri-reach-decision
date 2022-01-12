@@ -1,4 +1,4 @@
-function plot_peak_instructed
+function frd_plot_peak_instructed
 %% Plots peak instructed plots stats
 
 export = 0;
